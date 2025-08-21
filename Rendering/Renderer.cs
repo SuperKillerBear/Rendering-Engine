@@ -23,7 +23,8 @@ namespace RenderingEngine.Rendering
             this.shaderProgram = shaderProgram;
             uModelLocation = gl.GetUniformLocation(shaderProgram, "uModel");
 
-
+            gl.Enable(GLEnum.DepthTest);
+            gl.UseProgram(shaderProgram);
             //ASSIGN OBJECTS
             dynObjs = new DynamicObject[] { new Triangle(gl) };
         }

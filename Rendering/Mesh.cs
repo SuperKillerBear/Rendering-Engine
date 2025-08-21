@@ -64,7 +64,9 @@ namespace RenderingEngine.Rendering
                             GLEnum.StaticDraw);
                     }
                 }
-            }            
+            }
+
+            gl.BindVertexArray(0);
         }
 
 
