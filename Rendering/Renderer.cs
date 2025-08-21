@@ -39,6 +39,16 @@ namespace RenderingEngine.Rendering
         {
             var meshGroups = dynObjs.GroupBy(obj => obj.Mesh);
 
+            // Orthographic projection example
+            Matrix4X4<float> projection = Matrix4X4.CreateOrthographic(2f, 2f, 0.1f, 10f);
+            Matrix4X4<float> view = Matrix4X4.CreateTranslation(0, 0, -2f); // move camera back
+
+            int uViewLocation = gl.GetUniformLocation(shaderProgram, "uView");
+            int uProjectionLocation = gl.GetUniformLocation(shaderProgram, "uProjection");
+
+            
+
+
             foreach (var group in meshGroups)
             {
                 var mesh = group.Key;
@@ -55,11 +65,12 @@ namespace RenderingEngine.Rendering
                     unsafe
                     {
                         gl.UniformMatrix4(uModelLocation, 1, false, (float*)&model);
-                    
+                        gl.UniformMatrix4(uViewLocation, 1, false, (float*)&view);
+                        gl.UniformMatrix4(uProjectionLocation, 1, false, (float*)&projection);
 
                         if (mesh.IndexCount > 0)
                         {
-                            //Sharing Vetices so more Efficient
+                            //Sharing Vertices so more Efficient
                             gl.DrawElements(PrimitiveType.Triangles, (uint)mesh.IndexCount, DrawElementsType.UnsignedInt, null);
                         }
                         else

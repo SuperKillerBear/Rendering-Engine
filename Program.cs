@@ -50,6 +50,7 @@ namespace RenderingEngine
                 frameStopwatch.Start();
 
                 //DO RENDERING
+                renderer.Clear();
                 renderer.Draw();
 
 
