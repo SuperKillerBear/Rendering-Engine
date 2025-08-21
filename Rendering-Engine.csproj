@@ -21,10 +21,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="bin\Debug\net8.0\Shaders\simple.frag">
+    <Folder Include="bin\Debug\net8.0\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Shaders\simple.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="bin\Debug\net8.0\Shaders\simple.vert">
+    <None Update="Shaders\simple.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
