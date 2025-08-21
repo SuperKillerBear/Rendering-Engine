@@ -1,5 +1,5 @@
 ﻿using RenderingEngine.Rendering;
-using RenderingEngine.Meshs;
+using RenderingEngine.Meshes;
 using Silk.NET.OpenGL;
 
 namespace RenderingEngine.Objects

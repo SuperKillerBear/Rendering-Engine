@@ -1,7 +1,7 @@
 ﻿using RenderingEngine.Objects;
+using RenderingEngine.RawObjData;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static Silk.NET.Core.Native.WinString;
@@ -15,7 +15,7 @@ namespace RenderingEngine.Rendering
         private int uModelLocation;
 
         //TEMPORARY
-        private DynamicObject[] dynObjs; 
+        public static DynamicObject[] dynObjs; 
 
         public Renderer(GL gl, uint shaderProgram)
         {
@@ -23,26 +23,56 @@ namespace RenderingEngine.Rendering
             this.shaderProgram = shaderProgram;
             uModelLocation = gl.GetUniformLocation(shaderProgram, "uModel");
 
-            gl.Enable(GLEnum.DepthTest);
+            //gl.Enable(GLEnum.DepthTest); //Causes issues currently
+            //gl.DepthFunc(GLEnum.Less);
+
+            //Cull Backfaces to boost preformance
+            gl.Enable(GLEnum.CullFace);
+            gl.CullFace(GLEnum.Back);
+
             gl.UseProgram(shaderProgram);
+
+            //Try Obj Parser
+
+            string pasted = "\"C:\\Users\\ItsDaGrizz\\Desktop\\Rendering-Engine\\RawObjData\\Cube.obj\"";
+            string fullpath = pasted.Trim();
+
+            var (vertsList, indsList) = ImportHandler.LoadObjFile(fullpath);
+            float[] verts = vertsList.ToArray();
+            uint[] inds = indsList.ToArray();
+            var mesh = new Mesh(gl, verts, inds);
+            var loaded = new LoadedDynamicObject(gl, mesh);
+
+
             //ASSIGN OBJECTS
-            dynObjs = new DynamicObject[] { new Triangle(gl) };
+            dynObjs = new DynamicObject[] { loaded };
+
+            //TODO: Write obj converter or if too hard, find easier blender export file type converter
         }
 
         public void Clear()
         {
-            gl.Clear((uint)ClearBufferMask.ColorBufferBit);
+            gl.Clear((uint)ClearBufferMask.ColorBufferBit | (uint) ClearBufferMask.DepthBufferBit);
+            
         }
 
-        //shader.SetMatrix("model", obj.ModelMatrix);
+        
 
         public void Draw()
         {
+            
+
             var meshGroups = dynObjs.GroupBy(obj => obj.Mesh);
 
             // Orthographic projection example
             Matrix4X4<float> projection = Matrix4X4.CreateOrthographic(2f, 2f, 0.1f, 10f);
-            Matrix4X4<float> view = Matrix4X4.CreateTranslation(0, 0, -2f); // move camera back
+
+            //TODO: Make Only Calc on Update
+            Matrix4X4<float> view = 
+                Matrix4X4.CreateTranslation(InputHandler.Position) *
+                Matrix4X4.CreateRotationX(InputHandler.Rotation.X) *
+                Matrix4X4.CreateRotationY(InputHandler.Rotation.Y) *
+                Matrix4X4.CreateRotationZ(InputHandler.Rotation.Z);
 
             int uViewLocation = gl.GetUniformLocation(shaderProgram, "uView");
             int uProjectionLocation = gl.GetUniformLocation(shaderProgram, "uProjection");

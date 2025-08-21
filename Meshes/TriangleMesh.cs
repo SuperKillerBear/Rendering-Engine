@@ -1,7 +1,7 @@
 ﻿using RenderingEngine.Rendering;
 using Silk.NET.OpenGL;
 
-namespace RenderingEngine.Meshs
+namespace RenderingEngine.Meshes
 {
     public class TriangleMesh : Mesh
     {

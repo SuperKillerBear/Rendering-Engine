@@ -10,9 +10,10 @@ namespace RenderingEngine
 {
     class Program
     {
-        private static bool running = true;
+        public static bool running = true;
         private static int FPSFrameCount = 0;
         private static Stopwatch frameStopwatch = new Stopwatch();
+        private static Stopwatch deltaTimeStopwatch = new Stopwatch();
 
         private IntPtr window;
         private IntPtr glContext;
@@ -35,19 +36,22 @@ namespace RenderingEngine
             // Create Renderer
             Renderer renderer = new Renderer(gl, shader.ProgramID);
 
-            // Create Object to Render
-            
+            double lastTime = deltaTimeStopwatch.Elapsed.TotalSeconds;
 
             while (running)
-            {
-                // Handle SDL events
-                while (SDL.SDL_PollEvent(out SDL.SDL_Event e) != 0)
-                {
-                    if (e.type == SDL.SDL_EventType.SDL_QUIT)
-                        running = false;
-                }
+            {                
+                //Handle SDL Events
+                InputHandler.HandleEvents();
 
                 frameStopwatch.Start();
+                deltaTimeStopwatch.Start();
+
+                double currentTime = deltaTimeStopwatch.Elapsed.TotalSeconds;
+                double deltaTime = currentTime - lastTime;
+                lastTime = currentTime;
+
+                //Rotate Funny Triangle
+                Renderer.dynObjs[0].Rotation.Y += (float)(2 * Math.PI * 0.25f * deltaTime);
 
                 //DO RENDERING
                 renderer.Clear();

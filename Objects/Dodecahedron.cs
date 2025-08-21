@@ -1,4 +1,5 @@
 ﻿using RenderingEngine.Meshes;
+using RenderingEngine.Objects;
 using Silk.NET.OpenGL;
 using System;
 using System.Collections.Generic;
@@ -8,14 +9,13 @@ using System.Threading.Tasks;
 
 namespace RenderingEngine.Objects
 {
-    public class Quad : DynamicObject
+    public class Dodecahedron : DynamicObject
     {
-        public Quad(GL gl)
-            : base(new QuadMesh(gl))
+        public Dodecahedron(GL gl)
+            : base(new DodecahedronMesh(gl))
         {
             //Any Additional Things here
         }
-
 
     }
 }

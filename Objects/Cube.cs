@@ -8,14 +8,12 @@ using System.Threading.Tasks;
 
 namespace RenderingEngine.Objects
 {
-    public class Quad : DynamicObject
+    public class Cube : DynamicObject
     {
-        public Quad(GL gl)
-            : base(new QuadMesh(gl))
+        public Cube(GL gl)
+            : base(new CubeMesh(gl))
         {
             //Any Additional Things here
         }
-
-
     }
 }
