@@ -19,6 +19,8 @@ namespace RenderingEngine
         private IntPtr glContext;
         private GL gl;
 
+        public static int ScreenWidth = 800, ScreenHeight = 600;
+
         static void Main(string[] args)
         {
             var app = new Program();
@@ -40,8 +42,7 @@ namespace RenderingEngine
 
             while (running)
             {                
-                //Handle SDL Events
-                InputHandler.HandleEvents();
+                
 
                 frameStopwatch.Start();
                 deltaTimeStopwatch.Start();
@@ -50,8 +51,12 @@ namespace RenderingEngine
                 double deltaTime = currentTime - lastTime;
                 lastTime = currentTime;
 
-                //Rotate Funny Triangle
-                Renderer.dynObjs[0].Rotation.Y += (float)(2 * Math.PI * 0.25f * deltaTime);
+                //Handle SDL Events
+                InputHandler.HandleEvents();
+                InputHandler.UpdateCamera(deltaTime);
+
+                //Rotate Funny Object
+                //Renderer.dynObjs[0].Rotation.Y += (float)(2 * Math.PI * 0.25f * deltaTime);
 
                 //DO RENDERING
                 renderer.Clear();
@@ -85,7 +90,7 @@ namespace RenderingEngine
                 "3D Renderer",
                 SDL.SDL_WINDOWPOS_CENTERED,
                 SDL.SDL_WINDOWPOS_CENTERED,
-                800, 600,
+                ScreenWidth, ScreenHeight,
                 SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN
             );
 
@@ -93,7 +98,7 @@ namespace RenderingEngine
             SDL.SDL_GL_SetSwapInterval(0);
 
             gl = GL.GetApi(procName => SDL.SDL_GL_GetProcAddress(procName));
-            gl.Viewport(0, 0, 800, 600);
+            gl.Viewport(0, 0, (uint)ScreenWidth, (uint) ScreenHeight);            
             gl.ClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         }
 

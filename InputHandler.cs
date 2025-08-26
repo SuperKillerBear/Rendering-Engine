@@ -12,45 +12,78 @@ namespace RenderingEngine
 {
     public static class InputHandler
     {
-        public static int FOV = 80;
-        public static Vector3D<float> Position = Vector3D<float>.Zero;
-        public static Vector3D<float> Rotation = Vector3D<float>.Zero;
-        private const float moveSpeed = 0.05f;
+        static int accumMouseRelX, accumMouseRelY;
+
+        // persistent key state
+        static bool w, a, s, d, up, down, sprint;
 
         public static void HandleEvents()
         {
-            
+
+
             while (SDL.SDL_PollEvent(out SDL.SDL_Event e) != 0)
             {
                 if (e.type == SDL.SDL_EventType.SDL_QUIT)
                     RenderingEngine.Program.running = false;
-
+                
+                if (e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
+                {
+                    // accumulate this frame’s motion
+                    accumMouseRelX += e.motion.xrel;
+                    accumMouseRelY += e.motion.yrel;
+                }
+                
                 if (e.type == SDL.SDL_EventType.SDL_KEYDOWN)
                 {
                     switch (e.key.keysym.sym)
                     {
-                        case SDL.SDL_Keycode.SDLK_w:
-                            Console.WriteLine($"W pressed, Pos: {Position}");
-                            Position.Z -= moveSpeed;
-                            break;
-                        case SDL.SDL_Keycode.SDLK_a:
-                            Console.WriteLine($"A pressed, Pos: {Position}");
-                            Position.X += moveSpeed;
-                            break;
-                        case SDL.SDL_Keycode.SDLK_s:
-                            Console.WriteLine($"S pressed, Pos: {Position}");
-                            Position.Z += moveSpeed;
-                            break;
-                        case SDL.SDL_Keycode.SDLK_d:
-                            Console.WriteLine($"D pressed, Pos: {Position}");
-                            Position.X -= moveSpeed;
-                            break;
+                        case SDL.SDL_Keycode.SDLK_w: w = true; break;
+                        case SDL.SDL_Keycode.SDLK_a: a = true; break;
+                        case SDL.SDL_Keycode.SDLK_s: s = true; break;
+                        case SDL.SDL_Keycode.SDLK_d: d = true; break;
+                        case SDL.SDL_Keycode.SDLK_SPACE: up = true; break;
+                        case SDL.SDL_Keycode.SDLK_LCTRL: down = true; break;
+                        case SDL.SDL_Keycode.SDLK_LSHIFT: sprint = true; break;
                         case SDL.SDL_Keycode.SDLK_ESCAPE:
                             Program.running = false;
                             break;
                     }
                 }
+                else if (e.type == SDL.SDL_EventType.SDL_KEYUP)
+                {
+                    switch (e.key.keysym.sym)
+                    {
+                        case SDL.SDL_Keycode.SDLK_w: w = false; break;
+                        case SDL.SDL_Keycode.SDLK_a: a = false; break;
+                        case SDL.SDL_Keycode.SDLK_s: s = false; break;
+                        case SDL.SDL_Keycode.SDLK_d: d = false; break;
+                        case SDL.SDL_Keycode.SDLK_SPACE: up = false; break;
+                        case SDL.SDL_Keycode.SDLK_LCTRL: down = false; break;
+                        case SDL.SDL_Keycode.SDLK_LSHIFT: sprint = false; break;
+                    }
+                }
+
             }
         }
+
+        // Call once per frame *after* HandleEvents
+        public static void UpdateCamera(double deltaTime)
+        {
+            // mouse: yaw = +xrel, pitch = -yrel (typical FPS controls)
+            Camera.CalcLookVector(relPitch: accumMouseRelY, relYaw: accumMouseRelX);
+
+            // reset deltas for next frame
+            accumMouseRelX = 0;
+            accumMouseRelY = 0;
+
+            // build per-axis intentions (nullable as Camera Class expects)
+            bool? x = a == d ? (bool?)null : (d ? false : true);
+            bool? y = down == up ? (bool?)null : (up ? true : false);
+            bool? z = s == w ? (bool?)null : (w ? true : false);
+
+            Camera.CalcMoveVector(x, y, z);
+            Camera.Move(deltaTime, sprint);
+        }
+
     }
 }

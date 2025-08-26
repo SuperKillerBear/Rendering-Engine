@@ -31,5 +31,19 @@ namespace RenderingEngine.Utilities
             if (len <= 1e-9f) return new Vector3D<float>(0f, 0f, 0f);
             return new Vector3D<float>(v.X / len, v.Y / len, v.Z / len);
         }
+
+        public static Vector3D<float> ScaleVec(Vector3D<float> vec, float factor)
+        {
+            return new Vector3D<float>(
+                vec.X * factor,
+                vec.Y * factor,
+                vec.Z * factor
+                );
+        }
+
+
+
+
+
     }
 }

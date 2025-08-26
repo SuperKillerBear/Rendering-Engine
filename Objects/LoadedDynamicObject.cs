@@ -13,10 +13,12 @@ namespace RenderingEngine.Objects
     {
         private readonly GL _gl;
 
-        public LoadedDynamicObject(GL gl, Mesh mesh)
+        public LoadedDynamicObject(GL gl, Mesh mesh, Vector3D<float> scale)
             : base(mesh)   // calls the base constructor that accepts Mesh
         {
             _gl = gl;
+
+            Scale = scale;
             // any extra initialization
         }
     }

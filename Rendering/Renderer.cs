@@ -1,5 +1,6 @@
 ﻿using RenderingEngine.Objects;
 using RenderingEngine.RawObjData;
+using SDL2;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using System.Reflection;
@@ -23,31 +24,38 @@ namespace RenderingEngine.Rendering
             this.shaderProgram = shaderProgram;
             uModelLocation = gl.GetUniformLocation(shaderProgram, "uModel");
 
-            //gl.Enable(GLEnum.DepthTest); //Causes issues currently
-            //gl.DepthFunc(GLEnum.Less);
+            //Enable Depth Testing
+            gl.Enable(GLEnum.DepthTest);
+            gl.DepthFunc(GLEnum.Less);
 
             //Cull Backfaces to boost preformance
             gl.Enable(GLEnum.CullFace);
             gl.CullFace(GLEnum.Back);
 
+            //Enable Shader Program
             gl.UseProgram(shaderProgram);
+
+            //Enable Rel Mouse Movement
+            SDL.SDL_SetRelativeMouseMode(SDL.SDL_bool.SDL_TRUE); // lock & get xrel/yrel
+
 
             //Try Obj Parser
 
-            string pasted = "\"C:\\Users\\ItsDaGrizz\\Desktop\\Rendering-Engine\\RawObjData\\Cube.obj\"";
+            string pasted = @"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\RawObjData\RobinHoodBay";
             string fullpath = pasted.Trim();
 
+            
             var (vertsList, indsList) = ImportHandler.LoadObjFile(fullpath);
             float[] verts = vertsList.ToArray();
             uint[] inds = indsList.ToArray();
             var mesh = new Mesh(gl, verts, inds);
-            var loaded = new LoadedDynamicObject(gl, mesh);
-
+            var loaded = new LoadedDynamicObject(gl, mesh, new Vector3D<float>(1.5f));
+            
 
             //ASSIGN OBJECTS
             dynObjs = new DynamicObject[] { loaded };
-
-            //TODO: Write obj converter or if too hard, find easier blender export file type converter
+            //dynObjs = new DynamicObject[] { new Cube(gl) };
+            
         }
 
         public void Clear()
@@ -65,14 +73,21 @@ namespace RenderingEngine.Rendering
             var meshGroups = dynObjs.GroupBy(obj => obj.Mesh);
 
             // Orthographic projection example
-            Matrix4X4<float> projection = Matrix4X4.CreateOrthographic(2f, 2f, 0.1f, 10f);
+            //Matrix4X4<float> projection = Matrix4X4.CreateOrthographic(2f, 2f, 0.1f, 10f);
+            Matrix4X4<float> projection =
+                Matrix4X4.CreatePerspectiveFieldOfView(
+                    fieldOfView: Camera.FOV, // 60°
+                    aspectRatio: Program.ScreenHeight / (float) Program.ScreenWidth,
+                    nearPlaneDistance: 0.1f,
+                    farPlaneDistance: 100f
+                );
 
             //TODO: Make Only Calc on Update
-            Matrix4X4<float> view = 
-                Matrix4X4.CreateTranslation(InputHandler.Position) *
-                Matrix4X4.CreateRotationX(InputHandler.Rotation.X) *
-                Matrix4X4.CreateRotationY(InputHandler.Rotation.Y) *
-                Matrix4X4.CreateRotationZ(InputHandler.Rotation.Z);
+            Matrix4X4<float> view =
+                Matrix4X4.CreateLookAt(Camera.Position,
+                Camera.Position + Camera.Forward,
+                Camera.Up);
+                
 
             int uViewLocation = gl.GetUniformLocation(shaderProgram, "uView");
             int uProjectionLocation = gl.GetUniformLocation(shaderProgram, "uProjection");

@@ -9,7 +9,7 @@ namespace RenderingEngine.Meshes
             : base(gl,
                 vertices: new float[]
                 {
-                    // Straight up just fucking wron ._.
+                    // Straight up just fucking wrong ._.
                     0.0f,  0.5f,  0.0f,   1f, 0f, 0f,
                    -0.5f,  0.0f,  0.5f,   1f, 0f, 0f,
                     0.5f,  0.0f,  0.5f,   1f, 0f, 0f,

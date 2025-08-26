@@ -13,9 +13,10 @@ namespace RenderingEngine.RawObjData
     {
         private static Dictionary<string, Vector3D<float>> materialMap = new();
 
-        public static (List<float> vertices, List<uint> indices) LoadObjFile(string path,
-    Dictionary<string, (float r, float g, float b)>? materialColours = null)
+        public static (List<float> vertices, List<uint> indices) LoadObjFile(string path)
         {
+            //TODO: Add failsafe for 
+
             // Raw per-file arrays
             var positions = new List<Vector3D<float>>();     // v
             var uvs = new List<Vector2D<float>>();           // vt (may be unused)
@@ -29,17 +30,11 @@ namespace RenderingEngine.RawObjData
             var indexMap = new Dictionary<(int p, int t, int n, string mat), uint>();
 
             // Material color map (string -> rgb)
-            var matMap = new Dictionary<string, Vector3D<float>>(materialMap); // copy existing map if you loaded earlier
-            if (materialColours != null)
-            {
-                // allow user-supplied overrides
-                foreach (var kv in materialColours) matMap[kv.Key] = new Vector3D<float>(kv.Value.r, kv.Value.g, kv.Value.b);
-            }
+            LoadMaterials(path);
 
             string currentMaterial = "default";
 
-            // Helper local funcs:
-            static float ParseF(string s) => float.Parse(s, CultureInfo.InvariantCulture);
+            
 
             static int ParseObjIndex(string token, int listCount)
             {
@@ -52,7 +47,7 @@ namespace RenderingEngine.RawObjData
             }
 
             // Read OBJ
-            foreach (var rawLine in File.ReadLines($"{path}"))
+            foreach (var rawLine in File.ReadLines($"{path}.obj"))
             {
                 var line = rawLine.Trim();
                 if (line.Length == 0 || line[0] == '#') continue;
@@ -81,11 +76,13 @@ namespace RenderingEngine.RawObjData
                         {
                             currentMaterial = parts[1];
                             // ensure material exists in map (auto-generate if necessary)
-                            if (!matMap.ContainsKey(currentMaterial))
+                            if (!materialMap.ContainsKey(currentMaterial))
                             {
-                                var c = GenerateColorForString(currentMaterial);
-                                matMap[currentMaterial] = new Vector3D<float>(c.r, c.g, c.b);
+                                Console.WriteLine($"ColourMap Doesnt Contain Colour for Key: {currentMaterial}");
+                                materialMap[currentMaterial] = new Vector3D<float>(1f, 0f, 1f);
                             }
+                            else { Console.WriteLine($"Colour Loaded key: {currentMaterial}, RGB: {materialMap[currentMaterial]}"); }
+                            
                         }
                         break;
 
@@ -119,9 +116,9 @@ namespace RenderingEngine.RawObjData
                             // For now we keep order as-is (Blender usually exports correct winding).
 
                             // Add or reuse vertex a,b,c
-                            AddVertex(a.p, a.t, a.n, currentMaterial, positions, uvs, normals, matMap, indexMap, outFloats, outIndices);
-                            AddVertex(b.p, b.t, b.n, currentMaterial, positions, uvs, normals, matMap, indexMap, outFloats, outIndices);
-                            AddVertex(c.p, c.t, c.n, currentMaterial, positions, uvs, normals, matMap, indexMap, outFloats, outIndices);
+                            AddVertex(a.p, a.t, a.n, currentMaterial, positions, uvs, normals, indexMap, outFloats, outIndices);
+                            AddVertex(b.p, b.t, b.n, currentMaterial, positions, uvs, normals, indexMap, outFloats, outIndices);
+                            AddVertex(c.p, c.t, c.n, currentMaterial, positions, uvs, normals, indexMap, outFloats, outIndices);
                         }
                         break;
 
@@ -137,8 +134,7 @@ namespace RenderingEngine.RawObjData
             static void AddVertex(int pIdx, int tIdx, int nIdx, string mat,
                 List<Vector3D<float>> positions,
                 List<Vector2D<float>> uvs,
-                List<Vector3D<float>> normals,
-                Dictionary<string, Vector3D<float>> matMap,
+                List<Vector3D<float>> normals,                
                 Dictionary<(int p, int t, int n, string mat), uint> indexMap,
                 List<float> outFloats,
                 List<uint> outIndices)
@@ -149,8 +145,8 @@ namespace RenderingEngine.RawObjData
                     // position
                     Vector3D<float> pos = (pIdx >= 0 && pIdx < positions.Count) ? positions[pIdx] : new Vector3D<float>(0f, 0f, 0f);
 
-                    // choose color from material map (fallback to white)
-                    Vector3D<float> col = matMap.TryGetValue(mat, out var mc) ? mc : new Vector3D<float>(1f, 1f, 1f);
+                    // choose color from material map (fallback to Pink)
+                    Vector3D<float> col = materialMap.TryGetValue(mat, out var mc) ? mc : new Vector3D<float>(1f, 0f, 1f);
 
                     // append interleaved vertex: x,y,z, r,g,b
                     outFloats.Add(pos.X);
@@ -166,26 +162,53 @@ namespace RenderingEngine.RawObjData
                 outIndices.Add(index);
             }
 
-            // If you don't already have this, include a deterministic generator
-            static (float r, float g, float b) GenerateColorForString(string s)
-            {
-                unchecked
-                {
-                    int h = 23;
-                    foreach (char c in s) h = h * 31 + c;
-                    uint u = (uint)h;
-                    float r = 0.2f + ((u & 0xFF) / 255f) * 0.7f;
-                    float g = 0.2f + (((u >> 8) & 0xFF) / 255f) * 0.7f;
-                    float b = 0.2f + (((u >> 16) & 0xFF) / 255f) * 0.7f;
-                    return (r, g, b);
-                }
-            }
         }
 
 
+        static void LoadMaterials(string path)
+        {
+            string currentMaterial = "";
+
+            foreach (var rawLine in File.ReadLines($"{path}.mtl"))
+            {
+                var line = rawLine.Trim();
+
+                if (line.Length == 0 || line[0] == '#') continue;
+
+                var parts = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length == 0) continue;
 
 
+                switch (parts[0])
+                {
+                    case "newmtl":
+                        //New Material
+                        if (parts.Length < 2) continue;
+                        currentMaterial = parts[1];
+                        break;
+                    case "Kd":
+                        //Ambient Colour of Material
+                        if (currentMaterial == "" || parts.Length < 4) continue;
 
+                        Console.WriteLine($"1: {parts[1]}, 2: {parts[2]}, 3: {parts[3]}");
+
+                        Vector3D<float> colour = new Vector3D<float>(
+                            ParseF(parts[1]),
+                            ParseF(parts[2]),
+                            ParseF(parts[3])
+                            );
+
+                        materialMap[currentMaterial] = colour;
+                        break;
+                }
+
+
+            }
+        }
+
+        // Helper local funcs:
+        static float ParseF(string s) => float.Parse(s, CultureInfo.InvariantCulture);
 
         /*
         //Create Dictionary to be able to reference Materials

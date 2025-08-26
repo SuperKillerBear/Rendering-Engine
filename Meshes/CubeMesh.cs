@@ -40,10 +40,15 @@ namespace RenderingEngine.Meshes
                     -0.5f,  0.5f, -0.5f,   1.00f, 0.50f, 0.40f, // TL - coral
 
                     // Bottom face (y = -0.5) - BL, BR, TR, TL
-                    -0.5f, -0.5f, -0.5f,   0.60f, 0.30f, 0.10f, // BL - brown
-                     0.5f, -0.5f, -0.5f,   0.80f, 0.60f, 0.40f, // BR - tan
-                     0.5f, -0.5f,  0.5f,   0.96f, 0.96f, 0.86f, // TR - beige
-                    -0.5f, -0.5f,  0.5f,   0.50f, 0.50f, 0.50f  // TL - gray
+                    //-0.5f, -0.5f, -0.5f,   0.60f, 0.30f, 0.10f, // BL - brown
+                    // 0.5f, -0.5f, -0.5f,   0.80f, 0.60f, 0.40f, // BR - tan
+                    // 0.5f, -0.5f,  0.5f,   0.96f, 0.96f, 0.86f, // TR - beige
+                    //-0.5f, -0.5f,  0.5f,   0.50f, 0.50f, 0.50f  // TL - gray
+
+                    -0.5f, -0.5f, -0.5f,   0f, 0f, 0f, 
+                     0.5f, -0.5f, -0.5f,   0f, 0f, 0f, 
+                     0.5f, -0.5f,  0.5f,   0f, 0f, 0f, 
+                    -0.5f, -0.5f,  0.5f,   0f, 0f, 0f  
                 },
                 indices: new uint[]
                 {
