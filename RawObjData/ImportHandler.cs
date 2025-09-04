@@ -169,7 +169,7 @@ namespace RenderingEngine.RawObjData
         {
             string currentMaterial = "";
 
-            foreach (var rawLine in File.ReadLines($"{path}.mtl"))
+            foreach (var rawLine in   File.ReadLines($"{path}.mtl"))
             {
                 var line = rawLine.Trim();
 
