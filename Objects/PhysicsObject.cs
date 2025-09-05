@@ -40,7 +40,7 @@ namespace RenderingEngine.Objects
 
             //TODO: Collision Checks, etc
             if (Position.Y <= 0 && Velocity.Y < 0)
-            {
+        {
                 Velocity.Y *= (float) -restitution;
             }
             
@@ -51,7 +51,7 @@ namespace RenderingEngine.Objects
             //Update Position Accordingly
             Position += Velocity * dt;            
             
-
+            
             //Clear Forces at the end
             ForceAccum = Vector3D<float>.Zero;
         }
