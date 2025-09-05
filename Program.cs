@@ -55,8 +55,7 @@ namespace RenderingEngine
                 InputHandler.HandleEvents();
                 InputHandler.UpdateCamera(deltaTime);
 
-                //Rotate Funny Object
-                //Renderer.dynObjs[0].Rotation.Y += (float)(2 * Math.PI * 0.25f * deltaTime);
+                PhysicsObjectsHandler.TickObjs(deltaTime);
 
                 //DO RENDERING
                 renderer.Clear();

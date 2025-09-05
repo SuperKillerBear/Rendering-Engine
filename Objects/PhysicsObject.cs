@@ -26,6 +26,8 @@ namespace RenderingEngine.Objects
         {
             massInv = 1 / mass;
             Acceleration.Y = -g;
+
+            PhysicsObjectsHandler.AddObj(this);
         }
 
 
