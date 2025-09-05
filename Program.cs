@@ -41,8 +41,7 @@ namespace RenderingEngine
             double lastTime = deltaTimeStopwatch.Elapsed.TotalSeconds;
 
             while (running)
-            {                
-                
+            {
 
                 frameStopwatch.Start();
                 deltaTimeStopwatch.Start();
@@ -55,8 +54,7 @@ namespace RenderingEngine
                 InputHandler.HandleEvents();
                 InputHandler.UpdateCamera(deltaTime);
 
-                //Rotate Funny Object
-                //Renderer.dynObjs[0].Rotation.Y += (float)(2 * Math.PI * 0.25f * deltaTime);
+                PhysicsObjectsHandler.TickObjects(deltaTime);
 
                 //DO RENDERING
                 renderer.Clear();
@@ -66,6 +64,7 @@ namespace RenderingEngine
                 SDL.SDL_GL_SwapWindow(window);
 
                 FPSFrameCount++;
+
                 if (frameStopwatch.ElapsedMilliseconds >= 1000)
                 {
                     Console.WriteLine($"FPS: {FPSFrameCount}");
