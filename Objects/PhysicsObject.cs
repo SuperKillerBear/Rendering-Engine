@@ -14,7 +14,7 @@ namespace RenderingEngine.Objects
         public float mass = 10;
         public float massInv;
 
-        public float restitution = 1f;
+        public float restitution = 0.92f;
         private float g = 9.81f;
 
         public Vector3D<float> ForceAccum = Vector3D<float>.Zero;

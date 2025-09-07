@@ -42,8 +42,8 @@ namespace RenderingEngine.Rendering
 
             //Try Obj Parser
 
-            string pasted = @"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\RawObjData\RobinHoodBay";
-            string fullpath = pasted.Trim();
+            //string pasted = @"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\RawObjData\RobinHoodBay";
+            //string fullpath = pasted.Trim();
 
 
             //var (vertsList, indsList) = ImportHandler.LoadObjFile(fullpath);
