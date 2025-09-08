@@ -9,44 +9,48 @@ namespace RenderingEngine
 {
     public static class PhysicsObjectsHandler
     {
-        private static int BufferSize = 15; //Change Later
-        public static int pointer = 0;
-        public static PhysicsObject?[] PhyObjBuffer = new PhysicsObject[BufferSize];
+        private static int bufferSize = 15;
+        private static PhysicsObject?[] PhysObjBuffer = new PhysicsObject[bufferSize];
 
+        private static int pointer = 0;
         public static int AddObj(PhysicsObject obj)
         {
-            //Return -1 if Buffer Full
-            if (pointer == PhyObjBuffer.Length) { return -1; }
-
-            PhyObjBuffer[pointer] = obj;
+            if (pointer >= bufferSize - 1) 
+            { 
+                Console.WriteLine("Physics Obj Buffer Full, Cant add new object!");  
+                return -1; 
+            }
             
+            PhysObjBuffer[pointer] = obj;
+
             pointer++;
 
             return (pointer - 1);
-
         }
 
         public static void RemoveObj(int id)
         {
-            //TODO
+            PhysicsObject? obj = PhysObjBuffer[id];
+
+            if (obj != null)
+            {
+                PhysObjBuffer[id] = null;
+            }
+            else { Console.WriteLine($"Object id {id.ToString()} is already null!"); }
         }
 
-        public static void TickObjects(double deltaTime)
+
+        public static void TickObjs(double deltaTime)
         {
-            //Assumes no gaps in buffer
-            for (int i = 0; i <= pointer; i++)
+            for (int i = 0; i < pointer; i++)
             {
-                PhysicsObject? obj = PhyObjBuffer[i];
+                PhysicsObject? obj = PhysObjBuffer[i];
                 if (obj != null)
                 {
-                    obj.TickPhysics(deltaTime); 
-                };
-
-
-               
+                    obj.TickPhysics(deltaTime);
+                }
             }
         }
-
 
 
     }

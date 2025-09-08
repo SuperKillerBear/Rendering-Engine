@@ -1,4 +1,5 @@
-﻿using RenderingEngine.Objects;
+﻿using RenderingEngine.Meshes;
+using RenderingEngine.Objects;
 using RenderingEngine.RawObjData;
 using SDL2;
 using Silk.NET.Maths;
@@ -29,8 +30,8 @@ namespace RenderingEngine.Rendering
             gl.DepthFunc(GLEnum.Less);
 
             //Cull Backfaces to boost preformance
-            //gl.Enable(GLEnum.CullFace);
-            //gl.CullFace(GLEnum.Back);
+            gl.Enable(GLEnum.CullFace);
+            gl.CullFace(GLEnum.Back);
 
             //Enable Shader Program
             gl.UseProgram(shaderProgram);
@@ -44,23 +45,26 @@ namespace RenderingEngine.Rendering
             //string pasted = @"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\RawObjData\RobinHoodBay";
             //string fullpath = pasted.Trim();
 
-            
+
             //var (vertsList, indsList) = ImportHandler.LoadObjFile(fullpath);
             //float[] verts = vertsList.ToArray();
             //uint[] inds = indsList.ToArray();
             //var mesh = new Mesh(gl, verts, inds);
             //var loaded = new LoadedDynamicObject(gl, mesh, new Vector3D<float>(1.5f));
-            
 
+            //Create Floor Quad
+            var floor = new Quad(gl);
+            floor.Rotation.X = (float) Math.PI / 2;
+            floor.Scale = new Vector3D<float>(5);
+            floor.Position.Y = -0.5f;
+
+            //Physics Object
+            var cube = new PhysicsObject(new CubeMesh(gl));
+            cube.Position.Y = 4.5f;
+            
             //ASSIGN OBJECTS
             //dynObjs = new DynamicObject[] { loaded };
-
-            Quad floor = new Quad(gl);
-            floor.Position.Y = -0.5001f;
-            floor.Rotation.X = (float) Math.PI / -2;
-            floor.Scale = new Vector3D<float>(5);            
-
-            dynObjs = new DynamicObject[] { new Cube(gl), floor };
+            dynObjs = [floor, cube];
             
         }
 
@@ -74,6 +78,7 @@ namespace RenderingEngine.Rendering
 
         public void Draw()
         {
+            
 
             var meshGroups = dynObjs.GroupBy(obj => obj.Mesh);
 

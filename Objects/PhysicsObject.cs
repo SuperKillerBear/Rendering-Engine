@@ -1,9 +1,9 @@
 ﻿using RenderingEngine.Rendering;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,35 +11,49 @@ namespace RenderingEngine.Objects
 {
     public class PhysicsObject : DynamicObject
     {
-        public float Mass = 1;
-        private float MassInv;
-        public Vector3D<float> Velocity;
-        public Vector3D<float> Acceleration;
-        public Vector3D<float> Forces;
+        public float mass = 10;
+        public float massInv;
 
-        private int bufferID;
+        public float restitution = 0.92f;
+        private float g = 9.81f;
 
-        public PhysicsObject(Mesh mesh)
-            : base(mesh) 
+        public Vector3D<float> ForceAccum = Vector3D<float>.Zero;
+        public Vector3D<float> Acceleration = Vector3D<float>.Zero;
+        public Vector3D<float> Velocity = Vector3D<float>.Zero;
+
+        public PhysicsObject(Mesh mesh) :
+            base(mesh)
         {
-            bufferID = PhysicsObjectsHandler.AddObj(this);
-            MassInv = 1 / Mass;
+            massInv = 1 / mass;
+            Acceleration.Y = -g;
+
+            PhysicsObjectsHandler.AddObj(this);
         }
 
 
-        public void TickPhysics(double DeltaTime)
+        public void TickPhysics(double deltaTime)
         {
-            float dt = (float) DeltaTime;
-            Acceleration += Forces * MassInv;
+            float dt = (float) deltaTime;
 
-            Velocity += Acceleration * dt;
+            //Apply Gravity
+            ForceAccum.Y -= g * mass;
 
-            Position += Velocity * dt;
-        }
-
-        public void Destroy()
+            //TODO: Collision Checks, etc
+            if (Position.Y <= 0 && Velocity.Y < 0)
         {
-            PhysicsObjectsHandler.RemoveObj(bufferID);
+                Velocity.Y *= (float) -restitution;
+            }
+            
+
+            //Apply Force to Velocity   F = MA
+            Velocity += ForceAccum * massInv * dt;
+
+            //Update Position Accordingly
+            Position += Velocity * dt;            
+            
+            
+            //Clear Forces at the end
+            ForceAccum = Vector3D<float>.Zero;
         }
     }
 }
