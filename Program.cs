@@ -1,6 +1,7 @@
 ﻿using RenderingEngine.Objects;
 using RenderingEngine.Rendering;
 using SDL2;
+using Silk.NET.Core.Native;
 using Silk.NET.OpenGL;
 using System;
 using System.Diagnostics;
@@ -80,8 +81,8 @@ namespace RenderingEngine
         {
             SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
 
-            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 3);
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 4); //3
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 6); //3
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK,
                 (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_CORE);
 
@@ -99,6 +100,14 @@ namespace RenderingEngine
             gl = GL.GetApi(procName => SDL.SDL_GL_GetProcAddress(procName));
             gl.Viewport(0, 0, (uint)ScreenWidth, (uint) ScreenHeight);            
             gl.ClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+
+            Console.WriteLine($"OpenGL Version: {gl.GetStringS(GLEnum.Version)}");
+
+            if (!hasExtension(gl, "GL_ARB_bindless_texture")) {
+                Cleanup();
+            }
+            
+
         }
 
         private void Cleanup()
@@ -108,6 +117,30 @@ namespace RenderingEngine
                 SDL.SDL_GL_DeleteContext(glContext);
                 SDL.SDL_DestroyWindow(window);
                 SDL.SDL_Quit();
+            }
+        }
+
+        private bool hasExtension(GL gl, string name)
+        {
+            gl.GetInteger(GLEnum.NumExtensions, out int numExt);
+
+            unsafe
+            {
+                for (uint i = 0; i < numExt; i++)
+                {
+                    string? ext = SilkMarshal.PtrToString((nint)gl.GetString(GLEnum.Extensions, i));                    
+                    if (ext != null) 
+                    { 
+                        if (ext == name)
+                        {
+                            Console.WriteLine($"Checked Has Extension: {name}");
+                            return true;
+                        }
+                    }
+
+                }
+                Console.WriteLine($"Does NOT have Extension: {name}");
+                return false;
             }
         }
     }
