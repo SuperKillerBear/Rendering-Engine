@@ -32,7 +32,7 @@ namespace RenderingEngine.Rendering
                 fixed (Vertex* v = &vertices[0])
                 {
                     gl.BufferData(GLEnum.ArrayBuffer,
-                        (nuint)(vertices.Length * sizeof(float)),
+                        (nuint)(vertices.Length * Marshal.SizeOf<Vertex>()),
                         v,
                         GLEnum.StaticDraw);
                 }
