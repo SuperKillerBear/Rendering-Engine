@@ -20,7 +20,7 @@ namespace RenderingEngine
         private IntPtr glContext;
         private GL gl;
 
-        public static int ScreenWidth = 800, ScreenHeight = 600;
+        public static int ScreenWidth = 1200, ScreenHeight = 1200;
 
         static void Main(string[] args)
         {

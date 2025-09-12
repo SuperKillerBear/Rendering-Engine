@@ -1,4 +1,5 @@
 ﻿using Silk.NET.OpenGL;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks.Dataflow;
 
 namespace RenderingEngine.Rendering
@@ -15,12 +16,14 @@ namespace RenderingEngine.Rendering
         public Mesh(GL gl, float[] vertices, uint[] indices = null)
         {
             this.gl = gl;
+                        
 
-            //
-            //TODO, Make Attribute Length Constant Between files to have update ie not "6"
-            //
+            int FloatsPerVertex<T>() where T : struct
+            {
+                return Marshal.SizeOf<T>() / sizeof(float);
+            }
 
-            VertexCount = vertices.Length / 6; // 3 pos + 3 colour
+            VertexCount = vertices.Length / FloatsPerVertex<Vertex>(); // 3 pos + 3 colour + 2 uv = 8
 
             VAO = gl.GenVertexArray();
             gl.BindVertexArray(VAO);
@@ -37,15 +40,23 @@ namespace RenderingEngine.Rendering
                         v,
                         GLEnum.StaticDraw);
                 }
-            
+                
+                //Total Size of all Vertex Data
+                uint stride = 8 * sizeof(float);
 
-            // Position
-            gl.VertexAttribPointer(0, 3, GLEnum.Float, false, 6 * sizeof(float), (void*)0);
-            gl.EnableVertexAttribArray(0);
+                //TODO: Update Object Parser + Mesh Data of all classes
 
-            // Color
-            gl.VertexAttribPointer(1, 3, GLEnum.Float, false, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-            gl.EnableVertexAttribArray(1);
+                // Position
+                gl.VertexAttribPointer(0, 3, GLEnum.Float, false, stride, (void*) 0);
+                gl.EnableVertexAttribArray(0);
+
+                // Color
+                gl.VertexAttribPointer(1, 3, GLEnum.Float, false, stride, (void*)(3 * sizeof(float)));
+                gl.EnableVertexAttribArray(1);
+
+                //UV Coords
+                gl.VertexAttribPointer(2, 2, GLEnum.Float, false, stride, (void*)(6 * sizeof(float)));
+                gl.EnableVertexAttribArray(2);
             }
 
             if (indices != null)
