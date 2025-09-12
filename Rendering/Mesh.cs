@@ -13,17 +13,13 @@ namespace RenderingEngine.Rendering
         public int VertexCount { get; private set; }
         public int IndexCount { get; private set; }
 
-        public Mesh(GL gl, float[] vertices, uint[] indices = null)
+        public Mesh(GL gl, Vertex[] vertices, uint[] indices = null)
         {
             this.gl = gl;
-                        
 
-            int FloatsPerVertex<T>() where T : struct
-            {
-                return Marshal.SizeOf<T>() / sizeof(float);
-            }
 
-            VertexCount = vertices.Length / FloatsPerVertex<Vertex>(); // 3 pos + 3 colour + 2 uv = 8
+
+            VertexCount = vertices.Length; // 3 pos + 3 colour + 2 uv = 8
 
             VAO = gl.GenVertexArray();
             gl.BindVertexArray(VAO);
@@ -33,7 +29,7 @@ namespace RenderingEngine.Rendering
 
             unsafe
             {
-                fixed (float* v = &vertices[0])
+                fixed (Vertex* v = &vertices[0])
                 {
                     gl.BufferData(GLEnum.ArrayBuffer,
                         (nuint)(vertices.Length * sizeof(float)),
@@ -42,7 +38,7 @@ namespace RenderingEngine.Rendering
                 }
                 
                 //Total Size of all Vertex Data
-                uint stride = 8 * sizeof(float);
+                uint stride = (uint) Marshal.SizeOf<Vertex>();
 
                 //TODO: Update Object Parser + Mesh Data of all classes
 

@@ -15,6 +15,13 @@ namespace RenderingEngine.Rendering
         public Vector3D<float> colour;
         public Vector2D<float> uv;
 
+        
+        public Vertex(Vector3D<float> xyz, Vector3D<float> rgb, Vector2D<float> UV)
+        {
+            pos = xyz;
+            colour = rgb;
+            uv = UV;
+        }
 
     }
 }

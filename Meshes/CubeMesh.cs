@@ -1,5 +1,7 @@
 ﻿using RenderingEngine.Rendering;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
+using System.Numerics;
 
 namespace RenderingEngine.Meshes
 {
@@ -7,49 +9,45 @@ namespace RenderingEngine.Meshes
     {
         public CubeMesh(GL gl)
             : base(gl,
-                vertices: new float[]
+                vertices: new Vertex[]
                 {
-                    // Front face (z = +0.5)  - vertices order: BL, BR, TR, TL
-                    -0.5f, -0.5f,  0.5f,   1.00f, 0.00f, 0.00f, // BL - red
-                     0.5f, -0.5f,  0.5f,   1.00f, 0.50f, 0.00f, // BR - orange
-                     0.5f,  0.5f,  0.5f,   1.00f, 1.00f, 0.00f, // TR - yellow
-                    -0.5f,  0.5f,  0.5f,   1.00f, 0.20f, 0.60f, // TL - pink
+                    // Front face (z = +0.5)
+                    new Vertex(new Vector3D<float>(-0.5f, -0.5f,  0.5f), new Vector3D<float>(1.00f, 0.00f, 0.00f), new Vector2D<float>(0f,0f)), // BL - red
+                    new Vertex(new Vector3D<float>( 0.5f, -0.5f,  0.5f), new Vector3D<float>(1.00f, 0.50f, 0.00f), new Vector2D<float>(0f,0f)), // BR - orange
+                    new Vertex(new Vector3D<float>( 0.5f,  0.5f,  0.5f), new Vector3D<float>(1.00f, 1.00f, 0.00f), new Vector2D<float>(0f,0f)), // TR - yellow
+                    new Vertex(new Vector3D<float>(-0.5f,  0.5f,  0.5f), new Vector3D<float>(1.00f, 0.20f, 0.60f), new Vector2D<float>(0f,0f)), // TL - pink
 
-                    // Back face (z = -0.5)  - BL, BR, TR, TL  (viewed from outside -z)
-                     0.5f, -0.5f, -0.5f,   0.00f, 1.00f, 0.00f, // BL - green
-                    -0.5f, -0.5f, -0.5f,   0.50f, 1.00f, 0.00f, // BR - lime
-                    -0.5f,  0.5f, -0.5f,   0.20f, 0.60f, 0.10f, // TR - olive
-                     0.5f,  0.5f, -0.5f,   0.00f, 0.60f, 0.60f, // TL - teal
+                    // Back face (z = -0.5)
+                    new Vertex(new Vector3D<float>( 0.5f, -0.5f, -0.5f), new Vector3D<float>(0.00f, 1.00f, 0.00f), new Vector2D<float>(0f,0f)), // BL - green
+                    new Vertex(new Vector3D<float>(-0.5f, -0.5f, -0.5f), new Vector3D<float>(0.50f, 1.00f, 0.00f), new Vector2D<float>(0f,0f)), // BR - lime
+                    new Vertex(new Vector3D<float>(-0.5f,  0.5f, -0.5f), new Vector3D<float>(0.20f, 0.60f, 0.10f), new Vector2D<float>(0f,0f)), // TR - olive
+                    new Vertex(new Vector3D<float>( 0.5f,  0.5f, -0.5f), new Vector3D<float>(0.00f, 0.60f, 0.60f), new Vector2D<float>(0f,0f)), // TL - teal
 
-                    // Left face (x = -0.5) - BL, BR, TR, TL
-                    -0.5f, -0.5f, -0.5f,   0.00f, 0.00f, 1.00f, // BL - blue
-                    -0.5f, -0.5f,  0.5f,   0.00f, 0.00f, 0.50f, // BR - navy
-                    -0.5f,  0.5f,  0.5f,   0.30f, 0.70f, 1.00f, // TR - sky
-                    -0.5f,  0.5f, -0.5f,   0.00f, 1.00f, 1.00f, // TL - cyan
+                    // Left face
+                    new Vertex(new Vector3D<float>(-0.5f, -0.5f, -0.5f), new Vector3D<float>(0.00f, 0.00f, 1.00f), new Vector2D<float>(0f,0f)), // BL - blue
+                    new Vertex(new Vector3D<float>(-0.5f, -0.5f,  0.5f), new Vector3D<float>(0.00f, 0.00f, 0.50f), new Vector2D<float>(0f,0f)), // BR - navy
+                    new Vertex(new Vector3D<float>(-0.5f,  0.5f,  0.5f), new Vector3D<float>(0.30f, 0.70f, 1.00f), new Vector2D<float>(0f,0f)), // TR - sky
+                    new Vertex(new Vector3D<float>(-0.5f,  0.5f, -0.5f), new Vector3D<float>(0.00f, 1.00f, 1.00f), new Vector2D<float>(0f,0f)), // TL - cyan
 
-                    // Right face (x = +0.5) - BL, BR, TR, TL
-                     0.5f, -0.5f,  0.5f,   1.00f, 0.00f, 1.00f, // BL - magenta
-                     0.5f, -0.5f, -0.5f,   0.60f, 0.00f, 0.60f, // BR - purple
-                     0.5f,  0.5f, -0.5f,   0.70f, 0.30f, 1.00f, // TR - violet
-                     0.5f,  0.5f,  0.5f,   1.00f, 0.60f, 0.80f, // TL - light pink
+                    // Right face
+                    new Vertex(new Vector3D<float>( 0.5f, -0.5f,  0.5f), new Vector3D<float>(1.00f, 0.00f, 1.00f), new Vector2D<float>(0f,0f)), // BL - magenta
+                    new Vertex(new Vector3D<float>( 0.5f, -0.5f, -0.5f), new Vector3D<float>(0.60f, 0.00f, 0.60f), new Vector2D<float>(0f,0f)), // BR - purple
+                    new Vertex(new Vector3D<float>( 0.5f,  0.5f, -0.5f), new Vector3D<float>(0.70f, 0.30f, 1.00f), new Vector2D<float>(0f,0f)), // TR - violet
+                    new Vertex(new Vector3D<float>( 0.5f,  0.5f,  0.5f), new Vector3D<float>(1.00f, 0.60f, 0.80f), new Vector2D<float>(0f,0f)), // TL - light pink
 
-                    // Top face (y = +0.5) - BL, BR, TR, TL
-                    -0.5f,  0.5f,  0.5f,   1.00f, 0.84f, 0.00f, // BL - gold
-                     0.5f,  0.5f,  0.5f,   1.00f, 1.00f, 0.60f, // BR - light yellow
-                     0.5f,  0.5f, -0.5f,   1.00f, 0.40f, 0.40f, // TR - salmon
-                    -0.5f,  0.5f, -0.5f,   1.00f, 0.50f, 0.40f, // TL - coral
+                    // Top face
+                    new Vertex(new Vector3D<float>(-0.5f,  0.5f,  0.5f), new Vector3D<float>(1.00f, 0.84f, 0.00f), new Vector2D<float>(0f,0f)), // BL - gold
+                    new Vertex(new Vector3D<float>( 0.5f,  0.5f,  0.5f), new Vector3D<float>(1.00f, 1.00f, 0.60f), new Vector2D<float>(0f,0f)), // BR - light yellow
+                    new Vertex(new Vector3D<float>( 0.5f,  0.5f, -0.5f), new Vector3D<float>(1.00f, 0.40f, 0.40f), new Vector2D<float>(0f,0f)), // TR - salmon
+                    new Vertex(new Vector3D<float>(-0.5f,  0.5f, -0.5f), new Vector3D<float>(1.00f, 0.50f, 0.40f), new Vector2D<float>(0f,0f)), // TL - coral
 
-                    // Bottom face (y = -0.5) - BL, BR, TR, TL
-                    //-0.5f, -0.5f, -0.5f,   0.60f, 0.30f, 0.10f, // BL - brown
-                    // 0.5f, -0.5f, -0.5f,   0.80f, 0.60f, 0.40f, // BR - tan
-                    // 0.5f, -0.5f,  0.5f,   0.96f, 0.96f, 0.86f, // TR - beige
-                    //-0.5f, -0.5f,  0.5f,   0.50f, 0.50f, 0.50f  // TL - gray
-
-                    -0.5f, -0.5f, -0.5f,   0f, 0f, 0f, 
-                     0.5f, -0.5f, -0.5f,   0f, 0f, 0f, 
-                     0.5f, -0.5f,  0.5f,   0f, 0f, 0f, 
-                    -0.5f, -0.5f,  0.5f,   0f, 0f, 0f  
+                    // Bottom face
+                    new Vertex(new Vector3D<float>(-0.5f, -0.5f, -0.5f), new Vector3D<float>(0f, 0f, 0f), new Vector2D<float>(0f,0f)),
+                    new Vertex(new Vector3D<float>( 0.5f, -0.5f, -0.5f), new Vector3D<float>(0f, 0f, 0f), new Vector2D<float>(0f,0f)),
+                    new Vertex(new Vector3D<float>( 0.5f, -0.5f,  0.5f), new Vector3D<float>(0f, 0f, 0f), new Vector2D<float>(0f,0f)),
+                    new Vertex(new Vector3D<float>(-0.5f, -0.5f,  0.5f), new Vector3D<float>(0f, 0f, 0f), new Vector2D<float>(0f,0f))
                 },
+
                 indices: new uint[]
                 {
                     // For each face: two triangles (BL,BR,TR) (BL,TR,TL)
@@ -73,7 +71,7 @@ namespace RenderingEngine.Meshes
                    20,21,22, 20,22,23
                 })
         {
-            // Optional: any extra initialization (none required)
+            // Optional: any extra initialization
         }
     }
 }
