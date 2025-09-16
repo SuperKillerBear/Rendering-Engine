@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace RenderingEngine.Rendering
 {
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Vertex
     {
         public Vector3D<float> pos;
         public Vector3D<float> colour;
         public Vector2D<float> uv;
 
-        
+
         public Vertex(Vector3D<float> xyz, Vector3D<float> rgb, Vector2D<float> UV)
         {
             pos = xyz;

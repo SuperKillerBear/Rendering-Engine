@@ -7,12 +7,17 @@ using Silk.NET.OpenGL;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static Silk.NET.Core.Native.WinString;
+using Silk.NET.OpenGL.Extensions.ImGui;
+using ImGuiNET;
+
 
 namespace RenderingEngine.Rendering
 {
     public class Renderer
     {
         private GL gl;
+        private ImGuiController _imgui;
+
         private uint shaderProgram;
         private int uModelLocation;
 
@@ -38,6 +43,10 @@ namespace RenderingEngine.Rendering
 
             //Enable Rel Mouse Movement
             SDL.SDL_SetRelativeMouseMode(SDL.SDL_bool.SDL_TRUE); // lock & get xrel/yrel
+
+            //Build ImGui Controller
+            //_imgui = new ImGuiController(gl, Program.ScreenWidth, Program.ScreenHeight);
+
 
 
             //Try Obj Parser
@@ -87,7 +96,7 @@ namespace RenderingEngine.Rendering
             Matrix4X4<float> projection =
                 Matrix4X4.CreatePerspectiveFieldOfView(
                     fieldOfView: Camera.FOV, // 60°
-                    aspectRatio: Program.ScreenHeight / (float) Program.ScreenWidth,
+                    aspectRatio: Program.aspectRatio,
                     nearPlaneDistance: 0.1f,
                     farPlaneDistance: 100f
                 );

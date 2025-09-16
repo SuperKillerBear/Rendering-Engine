@@ -4,6 +4,7 @@ using SDL2;
 using Silk.NET.Core.Native;
 using Silk.NET.OpenGL;
 using System;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Dynamic;
 
@@ -21,6 +22,8 @@ namespace RenderingEngine
         private GL gl;
 
         public static int ScreenWidth = 1200, ScreenHeight = 1200;
+        public static bool fullscreen = true;
+        public static float aspectRatio;
 
         static void Main(string[] args)
         {
@@ -55,13 +58,14 @@ namespace RenderingEngine
                 //Handle SDL Events
                 InputHandler.HandleEvents();
                 InputHandler.UpdateCamera(deltaTime);
-
+                
                 PhysicsObjectsHandler.TickObjs(deltaTime);
 
                 //DO RENDERING
                 renderer.Clear();
                 renderer.Draw();
 
+                                
 
                 SDL.SDL_GL_SwapWindow(window);
 
@@ -72,6 +76,7 @@ namespace RenderingEngine
                     FPSFrameCount = 0;
                     frameStopwatch.Restart();
                 }
+
             }
 
             Cleanup();
@@ -81,18 +86,42 @@ namespace RenderingEngine
         {
             SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
 
-            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 4); //3
-            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 6); //3
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3); //3
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 3); //3
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK,
                 (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_CORE);
 
-            window = SDL.SDL_CreateWindow(
+            SDL.SDL_DisplayMode displayMode = new SDL.SDL_DisplayMode();
+            SDL.SDL_GetCurrentDisplayMode(0, out displayMode);            
+            displayMode.format = SDL.SDL_PIXELFORMAT_RGBA8888;
+            displayMode.driverdata = IntPtr.Zero;
+
+            if (fullscreen) 
+            {
+                ScreenWidth = displayMode.w;
+                ScreenHeight = displayMode.h;
+
+                window = SDL.SDL_CreateWindow(
+                "3D Renderer",
+                SDL.SDL_WINDOWPOS_CENTERED,
+                SDL.SDL_WINDOWPOS_CENTERED,
+                ScreenWidth, ScreenHeight,
+                SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN
+            );
+            }
+            else
+            {
+                window = SDL.SDL_CreateWindow(
                 "3D Renderer",
                 SDL.SDL_WINDOWPOS_CENTERED,
                 SDL.SDL_WINDOWPOS_CENTERED,
                 ScreenWidth, ScreenHeight,
                 SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN
             );
+            }
+
+            aspectRatio = (float) ScreenWidth / ScreenHeight;
+
 
             glContext = SDL.SDL_GL_CreateContext(window);
             SDL.SDL_GL_SetSwapInterval(0);
