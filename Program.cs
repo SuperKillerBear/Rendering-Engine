@@ -2,7 +2,10 @@
 using RenderingEngine.Rendering;
 using SDL2;
 using Silk.NET.Core.Native;
+using Silk.NET.Input;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
+using Silk.NET.Windowing;
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -17,13 +20,15 @@ namespace RenderingEngine
         private static Stopwatch frameStopwatch = new Stopwatch();
         private static Stopwatch deltaTimeStopwatch = new Stopwatch();
 
-        private IntPtr window;
-        private IntPtr glContext;
+        private IWindow window;
+        private IInputContext input;
         private GL gl;
 
         public static int ScreenWidth = 1200, ScreenHeight = 1200;
         public static bool fullscreen = true;
         public static float aspectRatio;
+
+
 
         static void Main(string[] args)
         {
@@ -43,6 +48,8 @@ namespace RenderingEngine
             Renderer renderer = new Renderer(gl, shader.ProgramID);
 
             double lastTime = deltaTimeStopwatch.Elapsed.TotalSeconds;
+
+            window.Run();
 
             while (running)
             {                
@@ -65,9 +72,9 @@ namespace RenderingEngine
                 renderer.Clear();
                 renderer.Draw();
 
-                                
+                
 
-                SDL.SDL_GL_SwapWindow(window);
+                //SDL.SDL_GL_SwapWindow(window);
 
                 FPSFrameCount++;
                 if (frameStopwatch.ElapsedMilliseconds >= 1000)
@@ -84,6 +91,26 @@ namespace RenderingEngine
 
         private void Initialize()
         {
+            var options = WindowOptions.Default;
+            options.Size = new Vector2D<int>(ScreenWidth, ScreenHeight);
+            options.Title = "Doomy";
+            options.API = new GraphicsAPI(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Default, new APIVersion(4, 6));
+            options.FramesPerSecond = 0;
+            options.UpdatesPerSecond = 0;
+            options.VSync = false;
+            options.WindowBorder = fullscreen ? WindowBorder.Hidden : WindowBorder.Resizable;
+            options.WindowState = fullscreen ? WindowState.Fullscreen : WindowState.Normal;
+
+            window = Window.Create(options);
+
+            window.Load += OnLoad;
+            window.Update += OnUpdate;
+            window.Render += OnRender;
+            window.Resize += OnResize;
+
+            aspectRatio = (float)ScreenWidth / ScreenHeight;
+
+            /*
             SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
 
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3); //3
@@ -119,13 +146,16 @@ namespace RenderingEngine
                 SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN
             );
             }
-
-            aspectRatio = (float) ScreenWidth / ScreenHeight;
+            
+            
 
 
             glContext = SDL.SDL_GL_CreateContext(window);
+            
             SDL.SDL_GL_SetSwapInterval(0);
 
+
+            */
             gl = GL.GetApi(procName => SDL.SDL_GL_GetProcAddress(procName));
             gl.Viewport(0, 0, (uint)ScreenWidth, (uint) ScreenHeight);            
             gl.ClearColor(0.1f, 0.2f, 0.3f, 1.0f);
@@ -139,6 +169,12 @@ namespace RenderingEngine
 
         }
 
+        private void OnLoad()
+        {
+            gl = GL.GetApi(window);
+
+            
+        }
         private void Cleanup()
         {
             if (window != IntPtr.Zero)
