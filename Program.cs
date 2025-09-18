@@ -10,6 +10,7 @@ using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Dynamic;
+using static Silk.NET.Core.Native.WinString;
 
 namespace RenderingEngine
 {
@@ -20,16 +21,16 @@ namespace RenderingEngine
         private static Stopwatch frameStopwatch = new Stopwatch();
         private static Stopwatch deltaTimeStopwatch = new Stopwatch();
 
-        private IWindow window;
-        private IInputContext input;
+        public static IWindow window;
         private GL gl;
 
         public static int ScreenWidth = 1200, ScreenHeight = 1200;
         public static bool fullscreen = true;
         public static float aspectRatio;
 
-
-
+        // Create Shader Program
+        private RenderingEngine.Rendering.Shader shader;
+        private static Renderer renderer;
         static void Main(string[] args)
         {
             var app = new Program();
@@ -40,12 +41,7 @@ namespace RenderingEngine
         {
             Initialize();
 
-            // Create Shader Program
-            RenderingEngine.Rendering.Shader shader = new RenderingEngine.Rendering.Shader(gl, "Shaders/simple.vert", "Shaders/simple.frag");
             
-            
-            // Create Renderer
-            Renderer renderer = new Renderer(gl, shader.ProgramID);
 
             double lastTime = deltaTimeStopwatch.Elapsed.TotalSeconds;
 
@@ -91,6 +87,19 @@ namespace RenderingEngine
 
         private void Initialize()
         {
+            gl = GL.GetApi(procName => SDL.SDL_GL_GetProcAddress(procName));
+            gl.Viewport(0, 0, (uint)ScreenWidth, (uint)ScreenHeight);
+            gl.ClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+
+            Console.WriteLine($"OpenGL Version: {gl.GetStringS(GLEnum.Version)}");
+
+            // Create Shader Program
+            shader = new RenderingEngine.Rendering.Shader(gl, "Shaders/simple.vert", "Shaders/simple.frag");
+            // Create Renderer
+            renderer = new Renderer(gl, shader.ProgramID);
+
+
+
             var options = WindowOptions.Default;
             options.Size = new Vector2D<int>(ScreenWidth, ScreenHeight);
             options.Title = "Doomy";
@@ -108,8 +117,17 @@ namespace RenderingEngine
             window.Render += OnRender;
             window.Resize += OnResize;
 
-            aspectRatio = (float)ScreenWidth / ScreenHeight;
+            aspectRatio = (float) ScreenWidth / ScreenHeight;
 
+            if (!hasExtension(gl, "GL_ARB_bindless_texture"))
+            {
+                Console.WriteLine("Bindless Textures Not Supported...");
+                window.Close();
+            }
+
+
+            frameStopwatch.Start();
+            deltaTimeStopwatch.Start();
             /*
             SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
 
@@ -156,33 +174,47 @@ namespace RenderingEngine
 
 
             */
-            gl = GL.GetApi(procName => SDL.SDL_GL_GetProcAddress(procName));
-            gl.Viewport(0, 0, (uint)ScreenWidth, (uint) ScreenHeight);            
-            gl.ClearColor(0.1f, 0.2f, 0.3f, 1.0f);
-
-            Console.WriteLine($"OpenGL Version: {gl.GetStringS(GLEnum.Version)}");
-
-            if (!hasExtension(gl, "GL_ARB_bindless_texture")) {
-                Cleanup();
-            }
+            
+                        
             
 
         }
 
         private void OnLoad()
-        {
-            gl = GL.GetApi(window);
-
+        {            
+            
             
         }
+
+        private void OnUpdate()
+        {
+
+        }
+
+        private void OnRender(double deltaTime)
+        {
+            gl.Clear((uint)(GLEnum.ColorBufferBit | GLEnum.DepthBufferBit));
+
+            // Create Renderer
+            Renderer renderer = new Renderer(gl, shader.ProgramID);
+
+        }
+
+        private void OnResize()
+        {
+
+        }
+
         private void Cleanup()
         {
+            /*
             if (window != IntPtr.Zero)
             {
                 SDL.SDL_GL_DeleteContext(glContext);
                 SDL.SDL_DestroyWindow(window);
                 SDL.SDL_Quit();
             }
+            */
         }
 
         private bool hasExtension(GL gl, string name)

@@ -7,15 +7,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Silk.NET.Windowing;
+using Silk.NET.Input;
 
 namespace RenderingEngine
 {
     public static class InputHandler
     {
+        //static IInputContext input = Program.window.CreateInput();
+
         static int accumMouseRelX, accumMouseRelY;
 
         // persistent key state
         static bool w, a, s, d, up, down, sprint;
+
+        
 
         public static void HandleEvents()
         {
