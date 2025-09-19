@@ -1,7 +1,6 @@
 ﻿using RenderingEngine.Meshes;
 using RenderingEngine.Objects;
 using RenderingEngine.RawObjData;
-using SDL2;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using System.Reflection;
@@ -15,8 +14,7 @@ namespace RenderingEngine.Rendering
 {
     public class Renderer
     {
-        private GL gl;
-        private ImGuiController _imgui;
+        private GL gl;        
 
         private uint shaderProgram;
         private int uModelLocation;
@@ -42,7 +40,7 @@ namespace RenderingEngine.Rendering
             gl.UseProgram(shaderProgram);
 
             //Enable Rel Mouse Movement
-            SDL.SDL_SetRelativeMouseMode(SDL.SDL_bool.SDL_TRUE); // lock & get xrel/yrel
+            //SDL.SDL_SetRelativeMouseMode(SDL.SDL_bool.SDL_TRUE); // lock & get xrel/yrel
 
             //Build ImGui Controller
             //_imgui = new ImGuiController(gl, Program.ScreenWidth, Program.ScreenHeight);

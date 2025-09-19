@@ -1,5 +1,4 @@
 ﻿using RenderingEngine;
-using SDL2;
 using Silk.NET.OpenGL;
 using Silk.NET.Maths;
 using System;
@@ -21,7 +20,42 @@ namespace RenderingEngine
         // persistent key state
         static bool w, a, s, d, up, down, sprint;
 
-        
+        private static IKeyboard? keyboard;
+        private static IMouse? mouse;
+
+        public static void RegisterDevices(IInputContext inputContext, IView window)
+        {
+            keyboard = inputContext.Keyboards.Count > 0 ? inputContext.Keyboards[0] : null;
+            mouse = inputContext.Mice.Count > 0 ? inputContext.Mice[0] : null;
+
+            if (keyboard != null)
+            {
+                keyboard.KeyDown += OnKeyDown;
+                keyboard.KeyUp += OnKeyUp;
+            }
+
+            if (mouse != null)
+            {
+                mouse.MouseMove += OnMouseMove;
+            }
+        }
+
+
+        private void OnKeyDown(IKeyboard kb, Key key, int code)
+        {
+            switch(key)
+            {
+                case Key.W: w = true; break;
+                case Key.A: a = true; break;
+                case Key.S: s = true; break;
+                case Key.D: d = true; break;
+                case Key.Space: up = true; break;
+                case Key.ControlLeft: down = true; break;
+                case Key.ShiftLeft: sprint = true; break;
+                case Key.Escape: Program.Cleanup(); break;
+            }
+        }
+
 
         public static void HandleEvents()
         {
