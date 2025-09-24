@@ -41,6 +41,11 @@ namespace RenderingEngine
         private HierarchyPanel hierarchyPanel;
         private InspectorPanel inspectorPanel;
 
+
+        // Create Chunk Size
+        public static int chunkSize = 8;
+
+
         static void Main(string[] args)
         {
             var app = new Program();

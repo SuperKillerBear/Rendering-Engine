@@ -41,7 +41,7 @@ namespace RenderingEngine.Objects
             ForceAccum.Y -= g * mass;
 
             //TODO: Collision Checks, etc
-            if (Position.Y <= 0 && Velocity.Y < 0)
+            if (Position.Y <= 0.5 * Scale.Y && Velocity.Y < 0)
         {
                 Velocity.Y *= (float) -restitution;
             }
@@ -56,6 +56,8 @@ namespace RenderingEngine.Objects
             
             //Clear Forces at the end
             ForceAccum = Vector3D<float>.Zero;
+
+            this.CalcChunks();
         }
     }
 }

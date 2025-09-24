@@ -55,7 +55,8 @@ namespace RenderingEngine
 
         private static void OnKeyDown(IKeyboard kb, Key key, int code)
         {
-            switch(key)
+            if (Camera.enableGUI) return;
+            switch (key)
             {
                 case Key.W: w = true; break;
                 case Key.A: a = true; break;

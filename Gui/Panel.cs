@@ -62,10 +62,11 @@ namespace RenderingEngine.Gui
             if (selectedObject == null) return;
             ImGuiNET.ImGui.Begin("Inspector");
 
-            ImGuiNET.ImGui.Text($"Name: {selectedObject.name}");
+            ImGuiNET.ImGui.InputText("Name", ref selectedObject.name, 32);
             this.InputVector3D("Position", ref selectedObject.Position);
-            ImGuiNET.ImGui.Text($"Rotation: {selectedObject.Rotation}");
-            ImGuiNET.ImGui.Text($"Scale: {selectedObject.Scale}");
+            this.InputVector3D("Rotation", ref selectedObject.Rotation);
+            this.InputVector3D("Scale", ref selectedObject.Scale);
+            ImGui.Text($"Chunks: {string.Join(", ", selectedObject.chunks.Select(c => $"({c.X}, {c.Y})"))}");
 
             ImGuiNET.ImGui.End();
         }
