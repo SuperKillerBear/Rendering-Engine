@@ -8,14 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Silk.NET.Windowing;
 using Silk.NET.Input;
+using System.Numerics;
 
 namespace RenderingEngine
 {
     public static class InputHandler
     {
-        //static IInputContext input = Program.window.CreateInput();
-
-        static int accumMouseRelX, accumMouseRelY;
+        private static Vector2 lastPos = Vector2.Zero;
+        static float accumMouseRelX, accumMouseRelY;
 
         // persistent key state
         static bool w, a, s, d, up, down, sprint;
@@ -27,6 +27,7 @@ namespace RenderingEngine
         {
             keyboard = inputContext.Keyboards.Count > 0 ? inputContext.Keyboards[0] : null;
             mouse = inputContext.Mice.Count > 0 ? inputContext.Mice[0] : null;
+            mouse.Cursor.CursorMode = Camera.enableGUI ? CursorMode.Normal : CursorMode.Raw;
 
             if (keyboard != null)
             {
@@ -41,7 +42,18 @@ namespace RenderingEngine
         }
 
 
-        private void OnKeyDown(IKeyboard kb, Key key, int code)
+        private static void OnMouseMove(IMouse m, Vector2 vector)
+        {
+            var delta = lastPos - vector;
+
+            // accumulate this frame’s motion
+            accumMouseRelX += delta.X;
+            accumMouseRelY += delta.Y;
+
+            lastPos = vector;
+        }
+
+        private static void OnKeyDown(IKeyboard kb, Key key, int code)
         {
             switch(key)
             {
@@ -56,65 +68,36 @@ namespace RenderingEngine
             }
         }
 
-
-        public static void HandleEvents()
+        private static void OnKeyUp(IKeyboard kb, Key key, int code)
         {
-
-
-            while (SDL.SDL_PollEvent(out SDL.SDL_Event e) != 0)
+            switch (key)
             {
-                if (e.type == SDL.SDL_EventType.SDL_QUIT)
-                    RenderingEngine.Program.running = false;
-                
-                if (e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
-                {
-                    // accumulate this frame’s motion
-                    accumMouseRelX += e.motion.xrel;
-                    accumMouseRelY += e.motion.yrel;
-                }
-                
-                if (e.type == SDL.SDL_EventType.SDL_KEYDOWN)
-                {
-                    switch (e.key.keysym.sym)
-                    {
-                        case SDL.SDL_Keycode.SDLK_w: w = true; break;
-                        case SDL.SDL_Keycode.SDLK_a: a = true; break;
-                        case SDL.SDL_Keycode.SDLK_s: s = true; break;
-                        case SDL.SDL_Keycode.SDLK_d: d = true; break;
-                        case SDL.SDL_Keycode.SDLK_SPACE: up = true; break;
-                        case SDL.SDL_Keycode.SDLK_LCTRL: down = true; break;
-                        case SDL.SDL_Keycode.SDLK_LSHIFT: sprint = true; break;
-                        case SDL.SDL_Keycode.SDLK_ESCAPE:
-                            Program.running = false;
-                            break;
-                    }
-                }
-                else if (e.type == SDL.SDL_EventType.SDL_KEYUP)
-                {
-                    switch (e.key.keysym.sym)
-                    {
-                        case SDL.SDL_Keycode.SDLK_w: w = false; break;
-                        case SDL.SDL_Keycode.SDLK_a: a = false; break;
-                        case SDL.SDL_Keycode.SDLK_s: s = false; break;
-                        case SDL.SDL_Keycode.SDLK_d: d = false; break;
-                        case SDL.SDL_Keycode.SDLK_SPACE: up = false; break;
-                        case SDL.SDL_Keycode.SDLK_LCTRL: down = false; break;
-                        case SDL.SDL_Keycode.SDLK_LSHIFT: sprint = false; break;
-                    }
-                }
-
+                case Key.W: w = false; break;
+                case Key.A: a = false; break;
+                case Key.S: s = false; break;
+                case Key.D: d = false; break;
+                case Key.Space: up = false; break;
+                case Key.ControlLeft: down = false; break;
+                case Key.ShiftLeft: sprint = false; break;
+                case Key.E: 
+                    Camera.enableGUI = !Camera.enableGUI;
+                    mouse.Cursor.CursorMode = Camera.enableGUI ? CursorMode.Normal : CursorMode.Raw;
+                    break;
             }
         }
+
 
         // Call once per frame *after* HandleEvents
         public static void UpdateCamera(double deltaTime)
         {
-            // mouse: yaw = +xrel, pitch = -yrel (typical FPS controls)
-            Camera.CalcLookVector(relPitch: accumMouseRelY, relYaw: accumMouseRelX);
+            if (!Camera.enableGUI) Camera.CalcLookVector(relPitch: -accumMouseRelY, relYaw: -accumMouseRelX);
+            
 
             // reset deltas for next frame
             accumMouseRelX = 0;
             accumMouseRelY = 0;
+
+
 
             // build per-axis intentions (nullable as Camera Class expects)
             bool? x = a == d ? (bool?)null : (d ? false : true);

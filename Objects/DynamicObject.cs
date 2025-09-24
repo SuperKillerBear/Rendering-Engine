@@ -20,6 +20,8 @@ namespace RenderingEngine.Objects
         public Vector3D<float> Rotation;
         public Vector3D<float> Scale = Vector3D<float>.One;
 
+        public string name = "Dynamic Object";
+
         
         public Mesh Mesh { get; set; }
 

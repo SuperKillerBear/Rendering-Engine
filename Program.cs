@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using RenderingEngine.Gui;
 using RenderingEngine.Objects;
 using RenderingEngine.Rendering;
 using SDL2;
@@ -36,6 +37,9 @@ namespace RenderingEngine
         public static ImGuiController _imgui;
         public static IInputContext input;
 
+        // Create Gui Panels
+        private HierarchyPanel hierarchyPanel;
+        private InspectorPanel inspectorPanel;
 
         static void Main(string[] args)
         {
@@ -68,12 +72,12 @@ namespace RenderingEngine
             window.Update += OnUpdate;
             window.Render += OnRender;            
             //window.Resize += OnResize;
-       
+            
         }
 
         private void OnLoad()
         {
-            gl = window.CreateOpenGL();
+            gl = GL.GetApi(window);
             
             gl.Viewport(0, 0, (uint)ScreenWidth, (uint)ScreenHeight);
             gl.ClearColor(0.1f, 0.2f, 0.3f, 1.0f);
@@ -92,22 +96,22 @@ namespace RenderingEngine
 
             InputHandler.RegisterDevices(input, window);
 
+            SetupGui();
 
             aspectRatio = (float)ScreenWidth / ScreenHeight;
 
             if (!hasExtension(gl, "GL_ARB_bindless_texture"))
             {
                 Console.WriteLine("Bindless Textures Not Supported...");
-                window.Close();
+                Cleanup();
             }
             else Console.WriteLine("Bindless Textures ARE Supported...");
 
-            frameStopwatch.Start();            
+            frameStopwatch.Start();
         }
 
         private void OnUpdate(double deltaTime)
         {
-            InputHandler.HandleEvents();
             InputHandler.UpdateCamera(deltaTime);
 
             PhysicsObjectsHandler.TickObjs(deltaTime);
@@ -121,20 +125,40 @@ namespace RenderingEngine
             }
         }
 
+        private void SetupGui()
+        {
+            inspectorPanel = new InspectorPanel();
+            hierarchyPanel = new HierarchyPanel(Renderer.dynObjs, inspectorPanel);
+            
+        }
+
         private void OnRender(double deltaTime)
         {
+            _imgui.Update((float)deltaTime);
+
             gl.Clear((uint)(GLEnum.ColorBufferBit | GLEnum.DepthBufferBit));
             
             //DO RENDERING
             renderer.Clear();
-            renderer.Draw();            
+            renderer.Draw();
+
+            //Show Functions of ImGUI
+            if (Camera.enableGUI)
+            {
+                hierarchyPanel.Draw();
+                inspectorPanel.Draw();
+            }
+            
+
+            _imgui.Render();
         }
 
         
 
-        public void Cleanup()
+        public static void Cleanup()
         {
-            window.Dispose();                      
+            //_imgui.Dispose(); //Throws Error, Not Neccisary?
+            window.Close();
         }
 
         private bool hasExtension(GL gl, string name)

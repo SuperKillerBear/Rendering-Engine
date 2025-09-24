@@ -14,6 +14,7 @@ namespace RenderingEngine.Objects
             : base(new CubeMesh(gl))
         {
             //Any Additional Things here
+            this.name = "Cube";
         }
     }
 }

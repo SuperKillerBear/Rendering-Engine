@@ -23,10 +23,14 @@ namespace RenderingEngine
 
         private static float Sensitivity = 0.001f;
 
+        public static bool enableGUI = false;
+
         public static void CalcLookVector(float relPitch, float relYaw)
         {
             Rotation.X -= relPitch * Sensitivity;
             Rotation.Y += relYaw * Sensitivity;
+
+            Rotation.X = Math.Clamp(Rotation.X, -MathF.PI / 2 + 0.01f, MathF.PI / 2 - 0.01f);
 
             Forward = UMath.Normalize( new Vector3D<float>(
                 MathF.Cos(Rotation.X) * MathF.Cos(Rotation.Y),

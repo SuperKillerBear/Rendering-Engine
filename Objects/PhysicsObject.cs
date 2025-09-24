@@ -24,6 +24,8 @@ namespace RenderingEngine.Objects
         public PhysicsObject(Mesh mesh) :
             base(mesh)
         {
+            this.name = "Physics Cube";
+
             massInv = 1 / mass;
             Acceleration.Y = -g;
 

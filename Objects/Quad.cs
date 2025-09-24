@@ -13,6 +13,7 @@ namespace RenderingEngine.Objects
         public Quad(GL gl)
             : base(new QuadMesh(gl))
         {
+            this.name = "Quad";
             //Any Additional Things here
         }
 

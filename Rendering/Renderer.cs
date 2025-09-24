@@ -39,13 +39,6 @@ namespace RenderingEngine.Rendering
             //Enable Shader Program
             gl.UseProgram(shaderProgram);
 
-            //Enable Rel Mouse Movement
-            //SDL.SDL_SetRelativeMouseMode(SDL.SDL_bool.SDL_TRUE); // lock & get xrel/yrel
-
-            //Build ImGui Controller
-            //_imgui = new ImGuiController(gl, Program.ScreenWidth, Program.ScreenHeight);
-
-
 
             //Try Obj Parser
 
