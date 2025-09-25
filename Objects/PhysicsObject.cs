@@ -17,6 +17,9 @@ namespace RenderingEngine.Objects
         public float restitution = 1f;
         private float g = 9.81f;
 
+        public bool applyGravity = true;
+        public bool tickPhysics = true;
+
         public Vector3D<float> ForceAccum = Vector3D<float>.Zero;
         public Vector3D<float> Acceleration = Vector3D<float>.Zero;
         public Vector3D<float> Velocity = Vector3D<float>.Zero;
@@ -35,10 +38,12 @@ namespace RenderingEngine.Objects
 
         public void TickPhysics(double deltaTime)
         {
+            if (!tickPhysics) return;
+
             float dt = (float) deltaTime;
 
             //Apply Gravity
-            ForceAccum.Y -= g * mass;
+            if (applyGravity) ForceAccum.Y -= g * mass;
 
             //TODO: Collision Checks, etc
             if (Position.Y <= 0.5 * Scale.Y && Velocity.Y < 0)

@@ -100,7 +100,8 @@ namespace RenderingEngine.Objects
                     );
 
                 Console.WriteLine($"COLLISION! Resultant: {resultant.ToString()}");
-
+                Console.WriteLine($"Positions: {Position.ToString()}, {obj2.Position.ToString()}");
+                Console.WriteLine($"Max, Min Z. {name}: {zMax}, {zMin}, {obj2.name}: {obj2.zMin}, {obj2.zMin}");
             }
 
             return resultant;

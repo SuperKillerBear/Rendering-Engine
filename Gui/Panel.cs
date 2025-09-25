@@ -85,12 +85,19 @@ namespace RenderingEngine.Gui
         public override void Draw()
         {
             if (selectedObject == null) return;
+
             ImGuiNET.ImGui.Begin("Inspector");
 
             ImGuiNET.ImGui.InputText("Name", ref selectedObject.name, 32);
             this.InputVector3D("Position", ref selectedObject.Position);
             this.InputVector3D("Rotation", ref selectedObject.Rotation);
             this.InputVector3D("Scale", ref selectedObject.Scale);
+
+            if (selectedObject is PhysicsObject)
+            {
+                ImGui.Checkbox("Apply Gravity", ref (selectedObject as PhysicsObject).applyGravity);
+                ImGui.Checkbox("Tick Physics", ref (selectedObject as PhysicsObject).tickPhysics);
+            }
             ImGui.Text($"Chunks: {string.Join(", ", selectedObject.chunks.Select(c => $"({c.X}, {c.Y})"))}");
 
             ImGuiNET.ImGui.End();

@@ -128,6 +128,7 @@ namespace RenderingEngine
                 Console.WriteLine($"FPS: {FPSFrameCount}");
                 FPSFrameCount = 0;
                 frameStopwatch.Reset();
+                frameStopwatch.Start();
             }
         }
 
