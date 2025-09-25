@@ -99,10 +99,19 @@ namespace RenderingEngine.Objects
                     pz * UMath.Sign(dPos.Z)
                     );
 
-                Console.WriteLine($"COLLISION! Resultant: {resultant.ToString()}");
-                Console.WriteLine($"Positions: {Position.ToString()}, {obj2.Position.ToString()}");
-                Console.WriteLine($"Max, Min Z. {name}: {zMax}, {zMin}, {obj2.name}: {obj2.zMin}, {obj2.zMin}");
+                
+                
+                
+            
             }
+
+            Console.WriteLine($"X: {px}");
+            Console.WriteLine($"Y: {py}");
+            Console.WriteLine($"Z: {pz}");
+
+            Console.WriteLine($"Resultant: {resultant.ToString()}");
+            Console.WriteLine($"Positions: {Position.ToString()}, {obj2.Position.ToString()}");
+            Console.WriteLine($"Max, Min Y. {name}: {yMax}, {yMin}, {obj2.name}: {obj2.yMin}, {obj2.yMin}");
 
             return resultant;
         }

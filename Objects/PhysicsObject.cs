@@ -1,4 +1,5 @@
 ﻿using RenderingEngine.Rendering;
+using RenderingEngine.Utilities;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using System;
@@ -80,10 +81,20 @@ namespace RenderingEngine.Objects
                 {
                     if (Renderer.dynObjs[i] != null && Renderer.dynObjs[i].chunks.Contains(chunks[c]) && Renderer.dynObjs[i] != this)
                     {
-                        this.CalcCollisions(Renderer.dynObjs[i]);
+                        var resultant = this.CalcCollisions(Renderer.dynObjs[i]);
+
+                        if (resultant != Vector3D<float>.Zero && (UMath.Dot(new Vector3D<float>(0, 1, 0), Velocity) < 0))
+                        {
+                            //Simple Collision Response
+                            Velocity *= -1;
+                        }
                     }
                 }
             }
+
+
+
+
         }
     }
 }
