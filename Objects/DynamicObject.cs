@@ -1,4 +1,6 @@
 ﻿using RenderingEngine.Rendering;
+using RenderingEngine.Utilities;
+using Silk.NET.Core.Native;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using System;
@@ -24,7 +26,8 @@ namespace RenderingEngine.Objects
 
         public string name = "Dynamic Object";
 
-        
+        public float xMin, xMax, yMin, yMax, zMin, zMax;
+
         public Mesh Mesh { get; set; }
 
         // Per-object transform ie rotation, position, scale
@@ -50,14 +53,14 @@ namespace RenderingEngine.Objects
         {
             chunks.Clear();
 
-            float xMin = Position.X - (Scale.X / 2);
-            float xMax = Position.X + (Scale.X / 2);
+            xMin = Position.X - (Scale.X / 2);
+            xMax = Position.X + (Scale.X / 2);
 
-            float yMin = Position.Y - (Scale.Y / 2);
-            float yMax = Position.Y + (Scale.Y / 2);
+            yMin = Position.Y - (Scale.Y / 2);
+            yMax = Position.Y + (Scale.Y / 2);
 
-            float zMin = Position.Z - (Scale.Z / 2);
-            float zMax = Position.Z + (Scale.Z / 2);
+            zMin = Position.Z - (Scale.Z / 2);
+            zMax = Position.Z + (Scale.Z / 2);
 
 
             int chunkSize = Program.chunkSize;
@@ -77,6 +80,30 @@ namespace RenderingEngine.Objects
             }
         }
 
-        
+        public Vector3D<float> CalcCollisions(DynamicObject obj2)
+        {
+            Vector3D<float> resultant = Vector3D<float>.Zero;
+
+            //Do AABB Collision Checks Here
+            var dPos = obj2.Position - this.Position;
+
+            var px = (this.Scale.X / 2 + obj2.Scale.X / 2) - MathF.Abs(dPos.X);
+            var py = (this.Scale.Y / 2 + obj2.Scale.Y / 2) - MathF.Abs(dPos.Y);
+            var pz = (this.Scale.Z / 2 + obj2.Scale.Z / 2) - MathF.Abs(dPos.Z);
+
+            if (px > 0 && py > 0 && pz > 0)
+            {
+                resultant = new Vector3D<float>(
+                    px * UMath.Sign(dPos.X),
+                    py * UMath.Sign(dPos.Y),
+                    pz * UMath.Sign(dPos.Z)
+                    );
+
+                Console.WriteLine($"COLLISION! Resultant: {resultant.ToString()}");
+
+            }
+
+            return resultant;
+        }
     }
 }

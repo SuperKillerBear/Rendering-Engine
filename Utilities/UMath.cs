@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -41,7 +42,10 @@ namespace RenderingEngine.Utilities
                 );
         }
 
-
+        public static int Sign(float v)
+        {
+            return v < 0 ? -1 : 1;
+        }
 
 
 

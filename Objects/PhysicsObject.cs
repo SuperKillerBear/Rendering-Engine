@@ -58,6 +58,20 @@ namespace RenderingEngine.Objects
             ForceAccum = Vector3D<float>.Zero;
 
             this.CalcChunks();
+
+            //Check Collisions with other Physics Objects in same chunks
+
+            //Flawed Logic as they may not have calced now physics chuncks
+            for (int i = 0; i < Renderer.dynObjs.Length; i++)
+            {
+                for (int c = 0; c < chunks.Count; c++)
+                {
+                    if (Renderer.dynObjs[i] != null && Renderer.dynObjs[i].chunks.Contains(chunks[c]) && Renderer.dynObjs[i] != this)
+                    {
+                        this.CalcCollisions(Renderer.dynObjs[i]);
+                    }
+                }
+            }
         }
     }
 }
