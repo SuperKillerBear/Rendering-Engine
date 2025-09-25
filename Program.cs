@@ -135,7 +135,7 @@ namespace RenderingEngine
         }
 
         private void SetupGui()
-        {
+        {            
             inspectorPanel = new InspectorPanel();
             hierarchyPanel = new HierarchyPanel(Renderer.dynObjs, inspectorPanel);
             settingsPanel = new SettingsPanel();
