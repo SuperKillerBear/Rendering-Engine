@@ -18,7 +18,7 @@ namespace RenderingEngine.Objects
         private float g = 9.81f;
 
         public bool applyGravity = true;
-        public bool tickPhysics = true;
+        public bool tickPhysics = false;
 
         public Vector3D<float> ForceAccum = Vector3D<float>.Zero;
         public Vector3D<float> Acceleration = Vector3D<float>.Zero;
@@ -62,6 +62,13 @@ namespace RenderingEngine.Objects
             //Clear Forces at the end
             ForceAccum = Vector3D<float>.Zero;
 
+            this.CheckCollisions();
+        }
+
+
+
+        public void CheckCollisions()
+        {
             this.CalcChunks();
 
             //Check Collisions with other Physics Objects in same chunks

@@ -21,6 +21,7 @@ namespace RenderingEngine
     {
         public static bool running = true;
         private static int FPSFrameCount = 0;
+        public static int lastFPS = 0;
         private static Stopwatch frameStopwatch = new Stopwatch();
         
         
@@ -125,7 +126,8 @@ namespace RenderingEngine
             FPSFrameCount++;
             if (frameStopwatch.ElapsedMilliseconds >= 1000)
             {
-                Console.WriteLine($"FPS: {FPSFrameCount}");
+                //Console.WriteLine($"FPS: {FPSFrameCount}");
+                lastFPS = FPSFrameCount;
                 FPSFrameCount = 0;
                 frameStopwatch.Reset();
                 frameStopwatch.Start();

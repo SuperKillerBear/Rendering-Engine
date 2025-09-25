@@ -85,7 +85,7 @@ namespace RenderingEngine.Gui
         public override void Draw()
         {
             if (selectedObject == null) return;
-
+            bool isPhysic = selectedObject is PhysicsObject;
             ImGuiNET.ImGui.Begin("Inspector");
 
             ImGuiNET.ImGui.InputText("Name", ref selectedObject.name, 32);
@@ -93,12 +93,18 @@ namespace RenderingEngine.Gui
             this.InputVector3D("Rotation", ref selectedObject.Rotation);
             this.InputVector3D("Scale", ref selectedObject.Scale);
 
-            if (selectedObject is PhysicsObject)
+            if (isPhysic)
             {
                 ImGui.Checkbox("Apply Gravity", ref (selectedObject as PhysicsObject).applyGravity);
                 ImGui.Checkbox("Tick Physics", ref (selectedObject as PhysicsObject).tickPhysics);
             }
             ImGui.Text($"Chunks: {string.Join(", ", selectedObject.chunks.Select(c => $"({c.X}, {c.Y})"))}");
+            
+            if (ImGui.Button("Update Calcs"))
+            {
+                if (isPhysic) (selectedObject as PhysicsObject).CheckCollisions();
+                else selectedObject.CalcChunks();
+            }
 
             ImGuiNET.ImGui.End();
         }
@@ -109,10 +115,14 @@ namespace RenderingEngine.Gui
         public override void Draw()
         {
             ImGuiNET.ImGui.Begin("Settings");
+
+            ImGui.Text($"FPS: {Program.lastFPS}");
             ImGuiNET.ImGui.InputFloat("Sensitivity", ref Camera.Sensitivity);
-            ImGuiNET.ImGui.InputInt("FOV", ref Camera.FOV, (int) Math.PI / 180);
+            ImGuiNET.ImGui.InputInt("FOV", ref Camera.FOV, (int)Math.PI / 180);
             ImGuiNET.ImGui.InputInt("Chunk Size", ref Program.chunkSize, 1, 2);
+
             ImGuiNET.ImGui.End();
         }
     }
+
 }
