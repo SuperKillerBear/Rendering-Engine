@@ -40,6 +40,7 @@ namespace RenderingEngine
         // Create Gui Panels
         private HierarchyPanel hierarchyPanel;
         private InspectorPanel inspectorPanel;
+        private SettingsPanel settingsPanel;
 
 
         // Create Chunk Size
@@ -134,7 +135,7 @@ namespace RenderingEngine
         {
             inspectorPanel = new InspectorPanel();
             hierarchyPanel = new HierarchyPanel(Renderer.dynObjs, inspectorPanel);
-            
+            settingsPanel = new SettingsPanel();
         }
 
         private void OnRender(double deltaTime)
@@ -152,6 +153,7 @@ namespace RenderingEngine
             {
                 hierarchyPanel.Draw();
                 inspectorPanel.Draw();
+                settingsPanel.Draw();
             }
             
 

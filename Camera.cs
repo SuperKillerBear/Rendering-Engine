@@ -21,7 +21,7 @@ namespace RenderingEngine
         public static Vector3D<float> Right;
         public static Vector3D<float> Up = new Vector3D<float>(0, 1, 0);
 
-        private static float Sensitivity = 0.001f;
+        public static float Sensitivity = 0.001f;
 
         public static bool enableGUI = false;
 

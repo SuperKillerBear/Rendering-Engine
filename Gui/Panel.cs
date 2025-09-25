@@ -40,14 +40,39 @@ namespace RenderingEngine.Gui
         public override void Draw()
         {
             ImGuiNET.ImGui.Begin("Hierarchy");
+
+            bool clickedItem = false;
             foreach (var obj in sceneObjects)
             {
                 if (ImGuiNET.ImGui.Selectable(obj.name, obj == selectedObject))
                 {
                     selectedObject = obj;
+                    clickedItem = true;
+                    
                 }
             }
-            inspectorPanel.SetSelected(selectedObject);
+            
+
+            if (ImGui.IsWindowHovered() && !clickedItem)
+            {
+                //Make Better Logic + Code Here
+                if (ImGui.IsMouseClicked(ImGuiMouseButton.Right)) {
+                    selectedObject = null;
+                    ImGui.OpenPopup("HierarchyContextMenu");
+                }
+
+            }
+            if (ImGui.BeginPopup("HierarchyContextMenu"))
+            {
+                if (ImGui.MenuItem("Add Object"))
+                {
+                    //Logic
+                }
+                ImGui.EndPopup();
+            }
+            
+            inspectorPanel.SetSelected(selectedObject); 
+            
             ImGuiNET.ImGui.End();
         }
     }
@@ -68,6 +93,18 @@ namespace RenderingEngine.Gui
             this.InputVector3D("Scale", ref selectedObject.Scale);
             ImGui.Text($"Chunks: {string.Join(", ", selectedObject.chunks.Select(c => $"({c.X}, {c.Y})"))}");
 
+            ImGuiNET.ImGui.End();
+        }
+    }
+
+    class SettingsPanel : Panel
+    {
+        public override void Draw()
+        {
+            ImGuiNET.ImGui.Begin("Settings");
+            ImGuiNET.ImGui.InputFloat("Sensitivity", ref Camera.Sensitivity);
+            ImGuiNET.ImGui.InputInt("FOV", ref Camera.FOV, (int) Math.PI / 180);
+            ImGuiNET.ImGui.InputInt("Chunk Size", ref Program.chunkSize, 1, 2);
             ImGuiNET.ImGui.End();
         }
     }
