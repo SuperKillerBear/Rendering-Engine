@@ -105,6 +105,7 @@ namespace RenderingEngine.Objects
             
             }
 
+            /*
             Console.WriteLine($"X: {px}");
             Console.WriteLine($"Y: {py}");
             Console.WriteLine($"Z: {pz}");
@@ -112,6 +113,7 @@ namespace RenderingEngine.Objects
             Console.WriteLine($"Resultant: {resultant.ToString()}");
             Console.WriteLine($"Positions: {Position.ToString()}, {obj2.Position.ToString()}");
             Console.WriteLine($"Max, Min Y. {name}: {yMax}, {yMin}, {obj2.name}: {obj2.yMin}, {obj2.yMin}");
+            */
 
             return resultant;
         }

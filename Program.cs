@@ -13,6 +13,7 @@ using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Dynamic;
+using System.Numerics;
 using static Silk.NET.Core.Native.WinString;
 
 namespace RenderingEngine
@@ -78,8 +79,15 @@ namespace RenderingEngine
             window.Load += OnLoad;
             window.Update += OnUpdate;
             window.Render += OnRender;            
-            //window.Resize += OnResize;
+            window.Resize += OnResize;
             
+        }
+
+        private void OnResize(Vector2D<int> size)
+        {
+            gl.Viewport(0, 0, (uint)size.X, (uint) size.Y);
+            aspectRatio = (float)size.X / size.Y;
+            ImGui.GetIO().DisplaySize = new Vector2(size.X, size.Y);
         }
 
         private void OnLoad()
