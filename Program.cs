@@ -66,7 +66,7 @@ namespace RenderingEngine
             var options = WindowOptions.Default;
             options.Size = new Vector2D<int>(ScreenWidth, ScreenHeight);
             options.Title = "Doomy";
-            options.API = new GraphicsAPI(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Default, new APIVersion(4, 6));
+            options.API = new GraphicsAPI(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Default, new APIVersion(4, 6)); //4, 6
             options.FramesPerSecond = 0;
             options.UpdatesPerSecond = 0;
             options.VSync = false;
@@ -90,7 +90,8 @@ namespace RenderingEngine
             gl.ClearColor(0.1f, 0.2f, 0.3f, 1.0f);
 
             Console.WriteLine($"OpenGL Version: {gl.GetStringS(GLEnum.Version)}");
-
+            Console.WriteLine($"Vendor: {gl.GetStringS(GLEnum.Vendor)}");
+            Console.WriteLine($"Renderer: {gl.GetStringS(GLEnum.Renderer)}");
             // Create Shader Program
             shader = new RenderingEngine.Rendering.Shader(gl, "Shaders/simple.vert", "Shaders/simple.frag");
             // Create Renderer
@@ -154,9 +155,28 @@ namespace RenderingEngine
             //Show Functions of ImGUI
             if (Camera.enableGUI)
             {
+                var io = ImGui.GetIO();
+                var centre = new System.Numerics.Vector2(io.DisplaySize.X * 0.5f, io.DisplaySize.Y * 0.5f);
+                
+
+                ImGui.SetNextWindowPos(centre, ImGuiCond.Always, new System.Numerics.Vector2(0.5f, 0.5f));
+
+                ImGui.Begin("Demo");
+                ImGui.Text("Hello!");
+                if (ImGui.Button("Click Me"))
+                {
+                    Console.WriteLine("ButtonPressed");
+                }
+                ImGui.End();
+                /*
                 hierarchyPanel.Draw();
+
+                ImGui.SetNextWindowPos(centre, ImGuiCond.Always, new System.Numerics.Vector2(0.5f, 0.5f));
                 inspectorPanel.Draw();
+
+                ImGui.SetNextWindowPos(centre, ImGuiCond.Always, new System.Numerics.Vector2(0.5f, 0.5f));
                 settingsPanel.Draw();
+                */
             }
             
 
