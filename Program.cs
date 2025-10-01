@@ -47,6 +47,7 @@ namespace RenderingEngine
 
         // Create Chunk Size
         public static int chunkSize = 8;
+        public static float tickRate = 1f;
 
 
         static void Main(string[] args)

@@ -19,8 +19,24 @@ namespace RenderingEngine.Objects
             EBO;  //Element Buffer Object => Indices
 
         public Vector3D<float> Position;
-        public Vector3D<float> Rotation;
+
+        private Vector3D<float> rotation;
+        public Vector3D<float> Rotation
+        {
+            get => rotation;
+            set
+            {
+                rotation = value;
+                CalcAABBMaxMins();                
+            }
+        }
+
+        public ref Vector3D<float> RotationRef => ref rotation;
+
         public Vector3D<float> Scale = Vector3D<float>.One;
+
+        private Vector3D<float> lastRotation;
+
 
         public List<Vector2D<int>> chunks = new List<Vector2D<int>>();
 
@@ -32,6 +48,8 @@ namespace RenderingEngine.Objects
 
         // Per-object transform ie rotation, position, scale
         public Matrix4X4<float> ModelMatrix { get; set; }
+
+        public bool debug = false;
 
         public void UpdateModelMatrix()
         {
@@ -46,21 +64,69 @@ namespace RenderingEngine.Objects
         public DynamicObject(Mesh mesh) 
         { 
             this.Mesh = mesh;
+            lastRotation = this.Rotation;            
             this.CalcChunks();
+        }
+
+        private void FlatAABB()
+        {
+            xMin = Position.X - (Scale.X / 2);
+            xMax = Position.X + (Scale.X / 2);
+            yMin = Position.Y - (Scale.Y / 2);
+            yMax = Position.Y + (Scale.Y / 2);
+            zMin = Position.Z - (Scale.Z / 2);
+            zMax = Position.Z + (Scale.Z / 2);
+        } 
+
+        public void CalcAABBMaxMins()
+        {
+            if (this.Rotation == Vector3D<float>.Zero)
+            {
+
+                FlatAABB();
+
+                var min = new Vector3D<float>(xMin, yMin, zMin);
+                var max = new Vector3D<float>(xMax, yMax, zMax);
+                
+                if (debug)
+                {
+                    Console.WriteLine("Didnt Rotate AABB Calc");
+                    Console.WriteLine($"{this.name}, Min: {min.ToString()}, Max: {max.ToString()}");
+                }
+            }
+            else
+            {
+                FlatAABB();
+
+                var min = new Vector3D<float>(xMin, yMin, zMin);
+                var max = new Vector3D<float>(xMax, yMax, zMax);
+
+                Vector3D<float> newMin, newMax;
+                UMath.RotateAABB(min, max, this.Rotation, out newMin, out newMax);
+
+                xMin = newMin.X;
+                yMin = newMin.Y;
+                zMin = newMin.Z;
+
+                xMax = newMax.X;
+                yMax = newMax.Y;
+                zMax = newMax.Z;
+
+                if (debug)
+                {
+                    Console.WriteLine($"{this.name}, Rotated AABB Calc, LastRot: {lastRotation.ToString()}, newRot: {Rotation.ToString()}");
+                    Console.WriteLine($"OldMin: {min.ToString()}, OldMax: {max.ToString()}");
+                    Console.WriteLine($"NewMin: {newMin.ToString()}, NewMax: {newMax.ToString()}");
+                }
+            }
+            lastRotation = rotation;
         }
 
         public void CalcChunks()
         {
             chunks.Clear();
 
-            xMin = Position.X - (Scale.X / 2);
-            xMax = Position.X + (Scale.X / 2);
-
-            yMin = Position.Y - (Scale.Y / 2);
-            yMax = Position.Y + (Scale.Y / 2);
-
-            zMin = Position.Z - (Scale.Z / 2);
-            zMax = Position.Z + (Scale.Z / 2);
+            CalcAABBMaxMins();
 
 
             int chunkSize = Program.chunkSize;
@@ -87,9 +153,9 @@ namespace RenderingEngine.Objects
             //Do AABB Collision Checks Here
             var dPos = obj2.Position - this.Position;
 
-            var px = (this.Scale.X / 2 + obj2.Scale.X / 2) - MathF.Abs(dPos.X);
-            var py = (this.Scale.Y / 2 + obj2.Scale.Y / 2) - MathF.Abs(dPos.Y);
-            var pz = (this.Scale.Z / 2 + obj2.Scale.Z / 2) - MathF.Abs(dPos.Z);
+            var px = (this.xMax / 2 + obj2.xMax / 2) - MathF.Abs(dPos.X);
+            var py = (this.yMax / 2 + obj2.yMax / 2) - MathF.Abs(dPos.Y);
+            var pz = (this.zMax / 2 + obj2.zMax / 2) - MathF.Abs(dPos.Z);
 
             if (px > 0 && py > 0 && pz > 0)
             {

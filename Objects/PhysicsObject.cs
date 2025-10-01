@@ -41,7 +41,7 @@ namespace RenderingEngine.Objects
         {
             if (!tickPhysics) return;
 
-            float dt = (float) deltaTime;
+            float dt = (float) deltaTime * Program.tickRate;
 
             //Apply Gravity
             if (applyGravity) ForceAccum.Y -= g * mass;
@@ -86,7 +86,7 @@ namespace RenderingEngine.Objects
                         if (resultant != Vector3D<float>.Zero && (UMath.Dot(new Vector3D<float>(0, 1, 0), Velocity) < 0))
                         {
                             //Simple Collision Response
-                            Velocity *= -1;
+                            Velocity *= -restitution;
                         }
                     }
                 }

@@ -54,8 +54,12 @@ namespace RenderingEngine.Rendering
 
             //Create Floor Quad
             var floor = new Quad(gl);
-            floor.Rotation.X = (float) Math.PI / 2;
+
+            var rot = new Vector3D<float>( (float) Math.PI / 2, 0, 0);
+            floor.Rotation = rot;
+
             floor.Scale = new Vector3D<float>(5);
+
             floor.Position.Y = -0.5f;
 
             //Physics Object
