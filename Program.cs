@@ -124,6 +124,7 @@ namespace RenderingEngine
             }
             else Console.WriteLine("Bindless Textures ARE Supported...");
 
+
             frameStopwatch.Start();
         }
 
@@ -164,28 +165,13 @@ namespace RenderingEngine
             //Show Functions of ImGUI
             if (Camera.enableGUI)
             {
-                var io = ImGui.GetIO();
-                var centre = new System.Numerics.Vector2(io.DisplaySize.X * 0.5f, io.DisplaySize.Y * 0.5f);
                 
-
-                ImGui.SetNextWindowPos(centre, ImGuiCond.Always, new System.Numerics.Vector2(0.5f, 0.5f));
-
-                ImGui.Begin("Demo");
-                ImGui.Text("Hello!");
-                if (ImGui.Button("Click Me"))
-                {
-                    Console.WriteLine("ButtonPressed");
-                }
-                ImGui.End();
-                /*
                 hierarchyPanel.Draw();
 
-                ImGui.SetNextWindowPos(centre, ImGuiCond.Always, new System.Numerics.Vector2(0.5f, 0.5f));
                 inspectorPanel.Draw();
 
-                ImGui.SetNextWindowPos(centre, ImGuiCond.Always, new System.Numerics.Vector2(0.5f, 0.5f));
                 settingsPanel.Draw();
-                */
+                
             }
             
 

@@ -67,6 +67,7 @@ namespace RenderingEngine.Gui
                 if (ImGui.MenuItem("Add Object"))
                 {
                     //Logic
+
                 }
                 ImGui.EndPopup();
             }
@@ -118,6 +119,7 @@ namespace RenderingEngine.Gui
 
     class SettingsPanel : Panel
     {
+        private string selectedLevelName = "";
         public override void Draw()
         {
             ImGui.Begin("Settings");
@@ -129,8 +131,15 @@ namespace RenderingEngine.Gui
             ImGui.InputInt("FOV", ref Camera.FOV, (int)Math.PI / 180);
             ImGui.InputInt("Chunk Size", ref Program.chunkSize, 1, 2);
             ImGui.SliderFloat("Tick Rate", ref Program.tickRate, 0.01f, 10f);
+            ImGui.Text($"Current Level Name: {LevelHandler.currentLevel}");
+            ImGui.InputText("Selected Level Name", ref selectedLevelName, 32);
+            if (ImGui.Button("Save Level")) { LevelHandler.SaveLevel(selectedLevelName); }
+            if (ImGui.Button("Load Level")) { LevelHandler.LoadLevel(selectedLevelName); }
             ImGui.End();
         }
+
+
+
     }
 
 }
