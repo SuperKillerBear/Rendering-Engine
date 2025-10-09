@@ -43,15 +43,19 @@ namespace RenderingEngine.Gui
             ImGuiNET.ImGui.Begin("Hierarchy");
 
             bool clickedItem = false;
+            int idx = 0;
             foreach (var comp in Renderer.RenderingObjects)
             {
                 var obj = comp.owner;
+                ImGui.PushID(idx);
                 if (ImGuiNET.ImGui.Selectable(obj.name, obj == selectedObject))
                 {
                     selectedObject = obj;
                     clickedItem = true;
                     
                 }
+                ImGui.PopID();
+                idx++;
             }
             
 

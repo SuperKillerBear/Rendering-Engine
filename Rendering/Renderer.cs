@@ -56,7 +56,7 @@ namespace RenderingEngine.Rendering
             //var mesh = new Mesh(gl, verts, inds);
             //var loaded = new LoadedDynamicObject(gl, mesh, new Vector3D<float>(1.5f));
 
-            /*
+            
             var floor = new GameObject();
             floor.AddComponent<RendererComponent>().Mesh = new QuadMesh(gl);
             
@@ -66,7 +66,7 @@ namespace RenderingEngine.Rendering
             floor.Transform.Scale = new Vector3D<float>(5);
 
             floor.Transform.Position.Y = 0.5f;
-            */
+            
             var cube = new GameObject();
             cube.AddComponent<RendererComponent>().Mesh = new CubeMesh(gl);
             cube.AddComponent<RigidBodyComponent>();
