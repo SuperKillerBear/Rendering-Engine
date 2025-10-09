@@ -33,10 +33,10 @@ namespace RenderingEngine.GameObjects
             massInv = 1 / mass;
             Acceleration.Y = -g;
 
-            PhysicsObjectsHandler.AddObj(this);
+            //PhysicsObjectsHandler.AddObj(this);
         }
 
-
+        /*
         public void TickPhysics(double deltaTime)
         {
             if (!tickPhysics) return;
@@ -96,5 +96,6 @@ namespace RenderingEngine.GameObjects
 
 
         }
+    */
     }
 }

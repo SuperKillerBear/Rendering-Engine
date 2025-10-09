@@ -25,7 +25,7 @@ namespace RenderingEngine
 
             writer.Write((ushort)nameData.Length); //Level Name Length
             writer.Write(nameData); //Level Name
-
+            /*
             uint dynObjCount = (uint)Renderer.dynObjs.Length;
 
             writer.Write(dynObjCount); //Object Count
@@ -34,7 +34,7 @@ namespace RenderingEngine
             {
                 writer.Write(Renderer.dynObjs[i].name); //Write Object Data
             }
-
+            */
             writer.Close();
         }
 
@@ -57,7 +57,7 @@ namespace RenderingEngine
             byte[] nameData = reader.ReadBytes(length); //Read Name Data
 
             string LevelName = Encoding.UTF8.GetString(nameData);
-
+            /*
             uint objectCount = reader.ReadUInt32(); //Read Object Count
 
             for (int i = 0; i < objectCount; i++)
@@ -66,7 +66,7 @@ namespace RenderingEngine
                 //TODO: Assign Object Data to DynObj List
                 Console.WriteLine($"Read Object {i}: {objName}");
             }
-
+            */
             Console.WriteLine($"Name: {LevelName}");
             currentLevel = LevelName;
             reader.Close();

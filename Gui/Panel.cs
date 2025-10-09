@@ -1,5 +1,7 @@
 ﻿using ImGuiNET;
+using RenderingEngine.Components;
 using RenderingEngine.GameObjects;
+using RenderingEngine.Rendering;
 using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;
@@ -26,14 +28,13 @@ namespace RenderingEngine.Gui
 
     class HierarchyPanel : Panel
     {
-        private DynamicObject selectedObject;
-        private DynamicObject[] sceneObjects;
+        private GameObject selectedObject;
+        
 
         private InspectorPanel inspectorPanel;
 
-        public HierarchyPanel(DynamicObject[] sceneObjects, InspectorPanel insPanel)
+        public HierarchyPanel(InspectorPanel insPanel)
         {
-            this.sceneObjects = sceneObjects;
             this.inspectorPanel = insPanel;
         }
 
@@ -42,8 +43,9 @@ namespace RenderingEngine.Gui
             ImGuiNET.ImGui.Begin("Hierarchy");
 
             bool clickedItem = false;
-            foreach (var obj in sceneObjects)
+            foreach (var comp in Renderer.RenderingObjects)
             {
+                var obj = comp.owner;
                 if (ImGuiNET.ImGui.Selectable(obj.name, obj == selectedObject))
                 {
                     selectedObject = obj;
@@ -80,39 +82,45 @@ namespace RenderingEngine.Gui
 
     class InspectorPanel : Panel
     {
-        private DynamicObject selectedObject;
-        public void SetSelected(DynamicObject obj) => selectedObject = obj;
+        private GameObject selectedObject;
+        public void SetSelected(GameObject obj) => selectedObject = obj;
 
         public override void Draw()
         {
             if (selectedObject == null) return;
-            bool isPhysic = selectedObject is PhysicsObject;
+            ColliderComponent? collider = selectedObject.GetComponent<ColliderComponent>();
+            bool isPhysic = collider is RigidBodyComponent;
             ImGui.Begin("Inspector");
 
             ImGui.InputText("Name", ref selectedObject.name, 32);
-            this.InputVector3D("Position", ref selectedObject.Position);
-            this.InputVector3D("Rotation", ref selectedObject.RotationRef);
-            this.InputVector3D("Scale", ref selectedObject.Scale);
-            
-            if (isPhysic)
-            {
-                InputVector3D("Velocity", ref (selectedObject as PhysicsObject).Velocity);
-                InputVector3D("Acceleration", ref (selectedObject as PhysicsObject).Acceleration);
-                ImGui.InputFloat("Mass", ref (selectedObject as PhysicsObject).mass);
-                ImGui.InputFloat("Restitution", ref (selectedObject as PhysicsObject).restitution);
-                ImGui.Checkbox("Apply Gravity", ref (selectedObject as PhysicsObject).applyGravity);
-                ImGui.Checkbox("Tick Physics", ref (selectedObject as PhysicsObject).tickPhysics);
-            }
-
+            this.InputVector3D("Position", ref selectedObject.Transform.Position);
+            this.InputVector3D("Rotation", ref selectedObject.Transform.RotationRef);
+            this.InputVector3D("Scale", ref selectedObject.Transform.Scale);
             ImGui.Checkbox("Debug", ref selectedObject.debug);
-            ImGui.Text($"Chunks: {string.Join(", ", selectedObject.chunks.Select(c => $"({c.X}, {c.Y})"))}");
-            
-            if (ImGui.Button("Update Calcs"))
-            {
-                if (isPhysic) (selectedObject as PhysicsObject).CheckCollisions();
-                else selectedObject.CalcChunks();
-            }
 
+            if (collider != null)
+            {
+                if (isPhysic)
+                {
+                    var physComp = selectedObject.GetComponent<RigidBodyComponent>();
+                    if (physComp == null) return;
+                    InputVector3D("Velocity", ref physComp.Velocity);
+                    InputVector3D("Acceleration", ref physComp.Acceleration);
+                    ImGui.InputFloat("Mass", ref physComp.Rmass);
+                    ImGui.InputFloat("Restitution", ref physComp.restitution);
+                    ImGui.Checkbox("Apply Gravity", ref physComp.applyGravity);
+                    ImGui.Checkbox("Tick Physics", ref physComp.tickPhysics);
+                }
+
+                
+                ImGui.Text($"Chunks: {string.Join(", ", collider.chunks.Select(c => $"({c.X}, {c.Y})"))}");
+
+                if (ImGui.Button("Update Calcs"))
+                {
+                    if (isPhysic) (collider as RigidBodyComponent).CheckCollisions();
+                    else collider.CalcChunks();
+                }
+            }
             ImGui.End();
         }
     }

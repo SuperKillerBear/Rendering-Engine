@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using static Silk.NET.Core.Native.WinString;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using ImGuiNET;
+using RenderingEngine.Components;
 
 
 namespace RenderingEngine.Rendering
@@ -20,7 +21,8 @@ namespace RenderingEngine.Rendering
         private int uModelLocation;
 
         //TEMPORARY
-        public static DynamicObject[] dynObjs; 
+        //public static DynamicObject[] dynObjs; 
+        public static List<RendererComponent> RenderingObjects = new List<RendererComponent>();
 
         public Renderer(GL gl, uint shaderProgram)
         {
@@ -40,6 +42,8 @@ namespace RenderingEngine.Rendering
             gl.UseProgram(shaderProgram);
 
 
+            
+
             //Try Obj Parser
 
             //string pasted = @"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\RawObjData\RobinHoodBay";
@@ -52,23 +56,24 @@ namespace RenderingEngine.Rendering
             //var mesh = new Mesh(gl, verts, inds);
             //var loaded = new LoadedDynamicObject(gl, mesh, new Vector3D<float>(1.5f));
 
-            //Create Floor Quad
-            var floor = new Quad(gl);
-
-            var rot = new Vector3D<float>( (float) Math.PI / 2, 0, 0);
-            floor.Rotation = rot;
-
-            floor.Scale = new Vector3D<float>(5);
-
-            floor.Position.Y = -0.5f;
-
-            //Physics Object
-            var cube = new PhysicsObject(new CubeMesh(gl));
-            cube.Position.Y = 4.5f;
+            /*
+            var floor = new GameObject();
+            floor.AddComponent<RendererComponent>().Mesh = new QuadMesh(gl);
             
-            //ASSIGN OBJECTS
-            //dynObjs = new DynamicObject[] { loaded };
-            dynObjs = [floor, cube];
+            var rot = new Vector3D<float>( (float) Math.PI / 2, 0, 0);
+            floor.Transform.Rotation = rot;
+
+            floor.Transform.Scale = new Vector3D<float>(5);
+
+            floor.Transform.Position.Y = 0.5f;
+            */
+            var cube = new GameObject();
+            cube.AddComponent<RendererComponent>().Mesh = new CubeMesh(gl);
+            cube.AddComponent<RigidBodyComponent>();
+            
+            cube.Transform.Position.Y = 4.5f;
+
+            
             
         }
 
@@ -84,7 +89,7 @@ namespace RenderingEngine.Rendering
         {
             
 
-            var meshGroups = dynObjs.GroupBy(obj => obj.Mesh);
+            var meshGroups = RenderingObjects.GroupBy(obj => obj.Mesh);
 
             // Orthographic projection example
             //Matrix4X4<float> projection = Matrix4X4.CreateOrthographic(2f, 2f, 0.1f, 10f);
@@ -112,13 +117,15 @@ namespace RenderingEngine.Rendering
             foreach (var group in meshGroups)
             {
                 var mesh = group.Key;
+                if (mesh == null) continue;
+
                 gl.BindVertexArray(mesh.VAO);
                 
                 foreach (var obj in group)
                 {
-                    obj.UpdateModelMatrix();
+                    obj.owner.Transform.UpdateModelMatrix();
 
-                    Matrix4X4<float> model = obj.ModelMatrix;
+                    Matrix4X4<float> model = obj.owner.Transform.ModelMatrix;
 
                     
 

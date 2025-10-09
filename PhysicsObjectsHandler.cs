@@ -1,4 +1,5 @@
-﻿using RenderingEngine.GameObjects;
+﻿using RenderingEngine.Components;
+using RenderingEngine.GameObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,10 @@ namespace RenderingEngine
     public static class PhysicsObjectsHandler
     {
         private static int bufferSize = 15;
-        private static PhysicsObject?[] PhysObjBuffer = new PhysicsObject[bufferSize];
+        private static RigidBodyComponent?[] PhysObjBuffer = new RigidBodyComponent[bufferSize];
 
         private static int pointer = 0;
-        public static int AddObj(PhysicsObject obj)
+        public static int AddObj(RigidBodyComponent obj)
         {
             if (pointer >= bufferSize - 1) 
             { 
@@ -28,9 +29,10 @@ namespace RenderingEngine
             return (pointer - 1);
         }
 
+        /*
         public static void RemoveObj(int id)
         {
-            PhysicsObject? obj = PhysObjBuffer[id];
+            RigidBodyComponent? obj = PhysObjBuffer[id];
 
             if (obj != null)
             {
@@ -38,13 +40,13 @@ namespace RenderingEngine
             }
             else { Console.WriteLine($"Object id {id.ToString()} is already null!"); }
         }
-
+        */
 
         public static void TickObjs(double deltaTime)
         {
             for (int i = 0; i < pointer; i++)
             {
-                PhysicsObject? obj = PhysObjBuffer[i];
+                RigidBodyComponent? obj = PhysObjBuffer[i];
                 if (obj != null)
                 {
                     obj.TickPhysics(deltaTime);

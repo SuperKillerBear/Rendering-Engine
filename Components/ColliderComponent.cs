@@ -14,8 +14,6 @@ namespace RenderingEngine.Components
 {
     public class ColliderComponent : Component
     {
-        private TransformComponent? transform;
-
         public List<Vector2D<int>> chunks = new List<Vector2D<int>>();
 
         private float xMin, xMax, yMin, yMax, zMin, zMax;
@@ -27,14 +25,12 @@ namespace RenderingEngine.Components
             base.Init(Owner); //Init + Set Owner
             
             //Owner will not be null here
-            this.transform = owner.GetComponent<TransformComponent>();
+            
         }
 
         public void CalcAABBMaxMins()
         {
-            if (transform == null) return;
-
-            if (transform.Rotation == Vector3D<float>.Zero)
+            if (owner.Transform.Rotation == Vector3D<float>.Zero)
             {
 
                 FlatAABB();
@@ -56,7 +52,7 @@ namespace RenderingEngine.Components
                 var max = new Vector3D<float>(xMax, yMax, zMax);
 
                 Vector3D<float> newMin, newMax;
-                UMath.RotateAABB(min, max, transform.Rotation, out newMin, out newMax);
+                UMath.RotateAABB(min, max, owner.Transform.Rotation, out newMin, out newMax);
 
                 xMin = newMin.X;
                 yMin = newMin.Y;
@@ -68,24 +64,24 @@ namespace RenderingEngine.Components
 
                 if (owner.debug)
                 {
-                    Console.WriteLine($"{owner.name}, Rotated AABB Calc, LastRot: {lastRotation.ToString()}, newRot: {transform.Rotation.ToString()}");
+                    Console.WriteLine($"{owner.name}, Rotated AABB Calc, LastRot: {lastRotation.ToString()}, newRot: {owner.Transform.Rotation.ToString()}");
                     Console.WriteLine($"OldMin: {min.ToString()}, OldMax: {max.ToString()}");
                     Console.WriteLine($"NewMin: {newMin.ToString()}, NewMax: {newMax.ToString()}");
                 }
             }
-            lastRotation = transform.Rotation;
+            lastRotation = owner.Transform.Rotation;
         }
 
         private void FlatAABB()
         {
-            if (transform == null) return;
+            if (owner.Transform == null) return;
 
-            xMin = transform.Position.X - (transform.Scale.X / 2);
-            xMax = transform.Position.X + (transform.Scale.X / 2);
-            yMin = transform.Position.Y - (transform.Scale.Y / 2);
-            yMax = transform.Position.Y + (transform.Scale.Y / 2);
-            zMin = transform.Position.Z - (transform.Scale.Z / 2);
-            zMax = transform.Position.Z + (transform.Scale.Z / 2);
+            xMin = owner.Transform.Position.X - (owner.Transform.Scale.X / 2);
+            xMax = owner.Transform.Position.X + (owner.Transform.Scale.X / 2);
+            yMin = owner.Transform.Position.Y - (owner.Transform.Scale.Y / 2);
+            yMax = owner.Transform.Position.Y + (owner.Transform.Scale.Y / 2);
+            zMin = owner.Transform.Position.Z - (owner.Transform.Scale.Z / 2);
+            zMax = owner.Transform.Position.Z + (owner.Transform.Scale.Z / 2);
         }
 
         public void CalcChunks()
@@ -112,33 +108,16 @@ namespace RenderingEngine.Components
             }
         }
 
-        public Vector3D<float> CalcCollisions(GameObject obj2)
+        public Vector3D<float> CalcCollisions(ColliderComponent obj2)
         {
             Vector3D<float> resultant = Vector3D<float>.Zero;
 
-            var obj2Transform = obj2.GetComponent<TransformComponent>();
-
-
-            if (obj2Transform == null || transform == null)
-            {
-                if (owner.debug)
-                    Console.WriteLine($"WARN: No Transform for collision object, skipped");
-                return resultant; // Zero
-            }
-
-            var obj2Collider = obj2.GetComponent<ColliderComponent>();
-            if (obj2Collider == null)
-            {
-                Console.WriteLine($"WARN: Obj {obj2.name} Doesnt have collider, skipped");
-                return resultant; //Zero
-            }
-
             //Do AABB Collision Checks Here
-            var dPos = obj2Transform.Position - transform.Position;
+            var dPos = obj2.owner.Transform.Position - owner.Transform.Position;
 
-            var px = (this.xMax / 2 + obj2Collider.xMax / 2) - MathF.Abs(dPos.X);
-            var py = (this.yMax / 2 + obj2Collider.yMax / 2) - MathF.Abs(dPos.Y);
-            var pz = (this.zMax / 2 + obj2Collider.zMax / 2) - MathF.Abs(dPos.Z);
+            var px = (this.xMax / 2 + obj2.xMax / 2) - MathF.Abs(dPos.X);
+            var py = (this.yMax / 2 + obj2.yMax / 2) - MathF.Abs(dPos.Y);
+            var pz = (this.zMax / 2 + obj2.zMax / 2) - MathF.Abs(dPos.Z);
 
             if (px > 0 && py > 0 && pz > 0)
             {

@@ -12,7 +12,7 @@ namespace RenderingEngine.GameObjects
         public string name = "Empty Object";
         public bool debug = false;
 
-
+        public readonly TransformComponent Transform;
 
         private GameObject? parent;
         private List<GameObject> children = new List<GameObject>();
@@ -22,7 +22,7 @@ namespace RenderingEngine.GameObjects
         public GameObject(GameObject? Parent = null)
         {
             this.parent = Parent;
-            this.AddComponent(new TransformComponent());
+            Transform = this.AddComponent<TransformComponent>();
         }
 
         public bool RemoveComponent(Component component)
@@ -41,10 +41,12 @@ namespace RenderingEngine.GameObjects
         }
 
 
-        public void AddComponent(Component component)
+        public T AddComponent<T>() where T : Component, new()
         {
+            var component = new T();
             this.components.Add(component);
             component.Init(this);
+            return component;
         }
 
     }
