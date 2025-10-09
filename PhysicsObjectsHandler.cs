@@ -2,6 +2,7 @@
 using RenderingEngine.GameObjects;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,14 +19,14 @@ namespace RenderingEngine
         {
             if (pointer >= bufferSize - 1) 
             { 
-                Console.WriteLine("Physics Obj Buffer Full, Cant add new object!");  
+                Console.WriteLine("WARN: Physics Obj Buffer Full, Cant add new object!");  
                 return -1; 
             }
             
             PhysObjBuffer[pointer] = obj;
 
             pointer++;
-
+            //Console.WriteLine($"Added Physics Object, new count: {pointer.ToString()}");
             return (pointer - 1);
         }
 
@@ -44,6 +45,7 @@ namespace RenderingEngine
 
         public static void TickObjs(double deltaTime)
         {
+            
             for (int i = 0; i < pointer; i++)
             {
                 RigidBodyComponent? obj = PhysObjBuffer[i];
@@ -51,6 +53,7 @@ namespace RenderingEngine
                 {
                     obj.TickPhysics(deltaTime);
                 }
+                
             }
         }
 

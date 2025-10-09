@@ -14,8 +14,6 @@ namespace RenderingEngine.Components
 {
     public class RigidBodyComponent : ColliderComponent
     {
-        private TransformComponent? transform;
-
         private float _mass = 10;
         public float mass
         {
@@ -44,17 +42,12 @@ namespace RenderingEngine.Components
         {
             base.Init(Owner); //Init + Set Owner
 
-            //Owner will not be null here
-            this.transform = owner.GetComponent<TransformComponent>();
-            
-
             PhysicsObjectsHandler.AddObj(this);
         }
 
         public void TickPhysics(double deltaTime)
         {
-            if (!tickPhysics || transform == null) return;
-
+            if (!tickPhysics) return;
 
             float dt = (float)deltaTime * Program.tickRate;
 
@@ -62,7 +55,7 @@ namespace RenderingEngine.Components
             if (applyGravity) ForceAccum.Y -= g * mass;
 
             //TODO: Collision Checks, etc
-            if (transform.Position.Y <= 0.5 * transform.Scale.Y && Velocity.Y < 0)
+            if (owner.Transform.Position.Y <= 0.5 * owner.Transform.Scale.Y && Velocity.Y < 0)
             {
                 Velocity.Y *= (float)-restitution;
             }
@@ -72,7 +65,7 @@ namespace RenderingEngine.Components
             Velocity += ForceAccum * massInv * dt;
 
             //Update Position Accordingly
-            transform.Position += Velocity * dt;
+            owner.Transform.Position += Velocity * dt;
 
 
             //Clear Forces at the end
