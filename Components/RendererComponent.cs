@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace RenderingEngine.Components
 {
-    public class Collider : Component
+    public class RendererComponent : Component
     {
+
     }
 }

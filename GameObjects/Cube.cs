@@ -6,17 +6,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RenderingEngine.Objects
+namespace RenderingEngine.GameObjects
 {
-    public class Quad : DynamicObject
+    public class Cube : DynamicObject
     {
-        public Quad(GL gl)
-            : base(new QuadMesh(gl))
+        public Cube(GL gl)
+            : base(new CubeMesh(gl))
         {
-            this.name = "Quad";
             //Any Additional Things here
+            this.name = "Cube";
         }
-
-
     }
 }

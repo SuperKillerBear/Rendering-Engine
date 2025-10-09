@@ -2,7 +2,7 @@
 using RenderingEngine.Meshes;
 using Silk.NET.OpenGL;
 
-namespace RenderingEngine.Objects
+namespace RenderingEngine.GameObjects
 {
     public class Triangle : DynamicObject
     {

@@ -1,5 +1,5 @@
 ﻿using RenderingEngine.Meshes;
-using RenderingEngine.Objects;
+using RenderingEngine.GameObjects;
 using RenderingEngine.RawObjData;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;

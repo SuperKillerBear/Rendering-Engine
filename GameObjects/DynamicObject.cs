@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RenderingEngine.Objects
+namespace RenderingEngine.GameObjects
 {
     public abstract class DynamicObject
     {
@@ -183,5 +183,6 @@ namespace RenderingEngine.Objects
 
             return resultant;
         }
+
     }
 }

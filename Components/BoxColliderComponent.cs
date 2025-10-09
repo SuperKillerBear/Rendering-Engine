@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RenderingEngine.Components
 {
-    public class BoxCollider : Collider
+    public class BoxColliderComponent : ColliderComponent
     {
         public Vector3D<float> size = new Vector3D<float>(1,1,1);
         public Vector3D<float> center = new Vector3D<float>(0,0,0);

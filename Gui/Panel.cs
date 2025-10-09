@@ -1,5 +1,5 @@
 ﻿using ImGuiNET;
-using RenderingEngine.Objects;
+using RenderingEngine.GameObjects;
 using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;

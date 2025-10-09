@@ -5,23 +5,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RenderingEngine.Objects
+namespace RenderingEngine.GameObjects
 {
-    public class Object
+    public class GameObject
     {
-        private Object? parent;
-        private List<Object> children = new List<Object>();
+        public string name = "Empty Object";
+        public bool debug = false;
+
+
+
+        private GameObject? parent;
+        private List<GameObject> children = new List<GameObject>();
 
         private List<Component> components = new List<Component>();
 
-        public Object(Object? Parent = null)
+        public GameObject(GameObject? Parent = null)
         {
             this.parent = Parent;
-            
+            this.AddComponent(new TransformComponent());
         }
 
+        public bool RemoveComponent(Component component)
+        {
+            return this.components.Remove(component);
+        }
 
-        public Component? GetComponent<T>() where T: Component
+        public T? GetComponent<T>() where T: Component
         {
             foreach (var comp in this.components)
             {
@@ -35,7 +44,7 @@ namespace RenderingEngine.Objects
         public void AddComponent(Component component)
         {
             this.components.Add(component);
-            component.SetOwner(this);
+            component.Init(this);
         }
 
     }

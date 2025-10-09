@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RenderingEngine.Components
 {
-    public class RigidBody : Component
+    public class RigidBodyComponent : Component
     {
     }
 }

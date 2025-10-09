@@ -1,6 +1,6 @@
 ﻿using ImGuiNET;
 using RenderingEngine.Gui;
-using RenderingEngine.Objects;
+using RenderingEngine.GameObjects;
 using RenderingEngine.Rendering;
 using SDL2;
 using Silk.NET.Core.Native;
