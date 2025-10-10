@@ -22,6 +22,7 @@ namespace RenderingEngine.GameObjects
         public GameObject(GameObject? Parent = null)
         {
             this.parent = Parent;
+            Program.SceneObjects.Add(this);
             Transform = this.AddComponent<TransformComponent>();
         }
 

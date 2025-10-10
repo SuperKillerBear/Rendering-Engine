@@ -44,9 +44,8 @@ namespace RenderingEngine.Gui
 
             bool clickedItem = false;
             int idx = 0;
-            foreach (var comp in Renderer.RenderingObjects)
+            foreach (var obj in Program.SceneObjects)
             {
-                var obj = comp.owner;
                 ImGui.PushID(idx);
                 if (ImGuiNET.ImGui.Selectable(obj.name, obj == selectedObject))
                 {
@@ -110,7 +109,9 @@ namespace RenderingEngine.Gui
                     if (physComp == null) return;
                     InputVector3D("Velocity", ref physComp.Velocity);
                     InputVector3D("Acceleration", ref physComp.Acceleration);
+                    InputVector3D("Force Accum", ref physComp.ForceAccum);
                     ImGui.InputFloat("Mass", ref physComp.Rmass);
+                    ImGui.Text($"Mass Inverse: {physComp.massInv}");
                     ImGui.InputFloat("Restitution", ref physComp.restitution);
                     ImGui.Checkbox("Apply Gravity", ref physComp.applyGravity);
                     ImGui.Checkbox("Tick Physics", ref physComp.tickPhysics);
@@ -139,14 +140,15 @@ namespace RenderingEngine.Gui
             ImGui.Text($"FPS: {Program.lastFPS}");
             ImGui.Text($"Screen: {Program.ScreenWidth}x{Program.ScreenHeight}");
             ImGui.Text($"Camera Position: {Camera.Position.X}, {Camera.Position.Y}, {Camera.Position.Z}");
+            ImGui.Text($"Accumulated Mouse Positon: ({InputHandler.accumMouseRelX}, {InputHandler.accumMouseRelY})");
             ImGui.InputFloat("Sensitivity", ref Camera.Sensitivity);
             ImGui.InputInt("FOV", ref Camera.FOV, (int)Math.PI / 180);
             ImGui.InputInt("Chunk Size", ref Program.chunkSize, 1, 2);
             ImGui.SliderFloat("Tick Rate", ref Program.tickRate, 0.01f, 10f);
-            ImGui.Text($"Current Level Name: {LevelHandler.currentLevel}");
+            ImGui.Text($"Current Level Name: {FileHandler.currentLevel}");
             ImGui.InputText("Selected Level Name", ref selectedLevelName, 32);
-            if (ImGui.Button("Save Level")) { LevelHandler.SaveLevel(selectedLevelName); }
-            if (ImGui.Button("Load Level")) { LevelHandler.LoadLevel(selectedLevelName); }
+            if (ImGui.Button("Save Level")) { FileHandler.SaveLevel(selectedLevelName); }
+            if (ImGui.Button("Load Level")) { FileHandler.LoadLevel(selectedLevelName); }
             ImGui.End();
         }
 

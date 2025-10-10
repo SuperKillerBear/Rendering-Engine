@@ -50,6 +50,9 @@ namespace RenderingEngine
         public static float tickRate = 1f;
 
 
+        public static List<GameObject> SceneObjects = new List<GameObject>();
+
+
         static void Main(string[] args)
         {
             var app = new Program();
@@ -114,6 +117,9 @@ namespace RenderingEngine
             InputHandler.RegisterDevices(input, window);
 
             SetupGui();
+
+            //Load Default Game Settings
+            FileHandler.LoadGameSettings();
 
             aspectRatio = (float)ScreenWidth / ScreenHeight;
 
@@ -183,6 +189,7 @@ namespace RenderingEngine
         public static void Cleanup()
         {
             //_imgui.Dispose(); //Throws Error, Not Neccisary?
+            FileHandler.SaveGameSettings();
             window.Close();
         }
 

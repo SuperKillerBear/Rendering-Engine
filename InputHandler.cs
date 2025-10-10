@@ -15,7 +15,7 @@ namespace RenderingEngine
     public static class InputHandler
     {
         private static Vector2 lastPos = Vector2.Zero;
-        static float accumMouseRelX, accumMouseRelY;
+        public static float accumMouseRelX, accumMouseRelY;
 
         // persistent key state
         static bool w, a, s, d, up, down, sprint;
@@ -80,10 +80,14 @@ namespace RenderingEngine
                 case Key.Space: up = false; break;
                 case Key.ControlLeft: down = false; break;
                 case Key.ShiftLeft: sprint = false; break;
-                case Key.E: 
+                case Key.Tab: 
                     Camera.enableGUI = !Camera.enableGUI;
                     mouse.Cursor.CursorMode = Camera.enableGUI ? CursorMode.Normal : CursorMode.Raw;
                     break;
+                case Key.Up:
+                    Program.SceneObjects[1].Transform.Position.Y += 0.5f; break;
+                case Key.Down:
+                    Program.SceneObjects[1].Transform.Position.Y -= 0.5f; break;
             }
         }
 

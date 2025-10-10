@@ -20,13 +20,13 @@ namespace RenderingEngine.Components
             get => _mass;
             set
             {
-                massInv = 1 / value;
                 _mass = value;
+                massInv = (float)1 / _mass;
             }
         }
         public ref float Rmass => ref _mass;
 
-        public float massInv = 1 / 10;
+        public float massInv = (float) 1 / 10;
 
         public float restitution = 1f;
         private float g = 9.81f;
@@ -52,19 +52,20 @@ namespace RenderingEngine.Components
             float dt = (float)deltaTime * Program.tickRate;
 
             //Apply Gravity
-            if (applyGravity) ForceAccum.Y -= g * mass;
+            if (applyGravity) this.ForceAccum.Y -= g * mass;
 
             //TODO: Collision Checks, etc
-            if (owner.Transform.Position.Y <= 0.5 * owner.Transform.Scale.Y && Velocity.Y < 0)
+            if (owner.Transform.Position.Y <= 0.5 * owner.Transform.Scale.Y && this.Velocity.Y < 0)
             {
-                Velocity.Y *= (float)-restitution;
+                this.Velocity.Y *= (float)-restitution;
             }
 
 
             //Apply Force to Velocity   F = MA
-            Velocity += ForceAccum * massInv * dt;
+            //Velocity += ForceAccum * massInv * dt;
+            Velocity += ForceAccum * 0.1f * dt;
 
-            //Update Position Accordingly
+            //Update Position Accordingly NOT WORKING
             owner.Transform.Position += Velocity * dt;
 
 
@@ -108,6 +109,7 @@ namespace RenderingEngine.Components
 
 
         }
+
 
     }
 }
