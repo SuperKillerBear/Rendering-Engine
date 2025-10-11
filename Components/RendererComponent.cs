@@ -33,7 +33,11 @@ namespace RenderingEngine.Components
             }
         }
 
-        
+        public override void Dispose()
+        {
+            base.Dispose();
+            Mesh = null;
+        }
 
     }
 }

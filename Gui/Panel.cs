@@ -128,7 +128,7 @@ namespace RenderingEngine.Gui
             ImGui.InputText("Selected Level Name", ref selectedSceneName, 32);
             if (ImGui.Button("Save Scene")) { FileHandler.SaveScene(selectedSceneName); }
             if (ImGui.Button("Load Scene")) { FileHandler.LoadScene(selectedSceneName); }
-            if (ImGui.Button("Clear Scene")) { Program.SceneObjects.Clear(); }
+            if (ImGui.Button("Clear Scene")) { Program.ClearScene(); }
             
             ImGui.End();
         }

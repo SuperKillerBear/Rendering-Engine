@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RenderingEngine.GameObjects
 {
-    public class GameObject
+    public class GameObject : IDisposable
     {
         public string name = "Empty Object";
         public bool debug = false;
@@ -53,6 +53,18 @@ namespace RenderingEngine.GameObjects
         {
             this.Components.Add(component);
             component.Init(this);
+        }
+
+        public void Dispose()
+        {
+            foreach (var comp in this.Components)
+            {
+                if (comp is IDisposable disposable)
+                    disposable.Dispose();
+                
+            }
+
+            Components.Clear();
         }
     }
 }

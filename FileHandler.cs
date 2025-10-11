@@ -1,10 +1,12 @@
 ﻿using RenderingEngine.Components;
 using RenderingEngine.GameObjects;
+using RenderingEngine.Meshes;
 using RenderingEngine.Rendering;
 using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -128,6 +130,7 @@ namespace RenderingEngine
         {
             string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\LevelData\{name}.dat";
             Console.WriteLine($"Trying to Read Level: {name}");
+            
             if (!File.Exists(localPath))
             {
                 Console.WriteLine("WARN: Level Does Not Exist");
@@ -151,12 +154,14 @@ namespace RenderingEngine
             
             uint objectCount = reader.ReadUInt32(); //Read Object Count
 
-            Program.SceneObjects.Clear();
+            Program.ClearScene();
 
             for (int i = 0; i < objectCount; i++)
             {
                 GameObject newObj = new GameObject();
 
+                newObj.AddComponent<RendererComponent>().Mesh = new CubeMesh(Program.gl);
+                
                 ushort objNameLen = reader.ReadUInt16(); //Read Object Name Length
                 byte[] objNameData = reader.ReadBytes(objNameLen); //Read Object Name Data
                 string objName = Encoding.UTF8.GetString(objNameData); //Decode Object Name
@@ -176,7 +181,7 @@ namespace RenderingEngine
                     }
 
                     Component newComp = ComponentRegistry.Deserialize(typeID, reader);
-                    newObj.AssignComponent(newComp);
+                    if (newComp is not RendererComponent) newObj.AssignComponent(newComp);
                 }
 
                 Program.SceneObjects.Add(newObj);
@@ -187,6 +192,9 @@ namespace RenderingEngine
             Console.WriteLine($"Name: {LevelName}");
             currentLevel = LevelName;
             reader.Close();
+
+            Program.PhysicsEnabled = true; //Will always turn on physics when scene loaded
+            Program.RenderingEnabled = true;
         }
 
         private static void WriteVector3D(BinaryWriter writer, Vector3D<float> vec)

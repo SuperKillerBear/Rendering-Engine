@@ -89,8 +89,6 @@ namespace RenderingEngine.Rendering
 
         public void Draw()
         {
-            
-
             var meshGroups = RenderingObjects.GroupBy(obj => obj.Mesh);
 
             // Orthographic projection example
@@ -129,8 +127,6 @@ namespace RenderingEngine.Rendering
 
                     Matrix4X4<float> model = obj.owner.Transform.ModelMatrix;
 
-                    
-
                     unsafe
                     {
                         gl.UniformMatrix4(uModelLocation, 1, false, (float*)&model);
@@ -150,8 +146,6 @@ namespace RenderingEngine.Rendering
 
 
                     }
-
-
 
 
                 }

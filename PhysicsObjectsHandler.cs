@@ -30,19 +30,8 @@ namespace RenderingEngine
             return (pointer - 1);
         }
 
-        /*
-        public static void RemoveObj(int id)
-        {
-            RigidBodyComponent? obj = PhysObjBuffer[id];
-
-            if (obj != null)
-            {
-                PhysObjBuffer[id] = null;
-            }
-            else { Console.WriteLine($"Object id {id.ToString()} is already null!"); }
-        }
-        */
-
+        
+        
         public static void TickObjs(double deltaTime)
         {
             
@@ -55,6 +44,11 @@ namespace RenderingEngine
                 }
                 
             }
+        }
+
+        public static void ClearAll()
+        {
+            PhysObjBuffer = new RigidBodyComponent[bufferSize];
         }
 
 

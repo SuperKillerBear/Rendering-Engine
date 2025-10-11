@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace RenderingEngine.Components
 {
-    public abstract class Component
+    public abstract class Component : IDisposable
     {
         public GameObject? owner = null;
         public abstract string ComponentName { get; }
@@ -38,6 +38,12 @@ namespace RenderingEngine.Components
             if (changed) vec = new Vector3D<float>(newVec.X, newVec.Y, newVec.Z);
             return changed;
         }
+    
+        public virtual void Dispose()
+        {
+            //Default Behaviour
+        }
+    
     }
 
     

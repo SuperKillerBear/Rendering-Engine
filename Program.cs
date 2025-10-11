@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.Numerics;
 using static Silk.NET.Core.Native.WinString;
+using RenderingEngine.Meshes;
 
 namespace RenderingEngine
 {
@@ -26,7 +27,7 @@ namespace RenderingEngine
         private static Stopwatch frameStopwatch = new Stopwatch();
         
         
-        private GL gl;
+        public static GL gl;
 
         public static int ScreenWidth = 1200, ScreenHeight = 1200;
         public static bool fullscreen = false;
@@ -51,6 +52,9 @@ namespace RenderingEngine
 
 
         public static List<GameObject> SceneObjects = new List<GameObject>();
+
+        public static bool RenderingEnabled = true;
+        public static bool PhysicsEnabled = true;
 
 
         static void Main(string[] args)
@@ -130,6 +134,7 @@ namespace RenderingEngine
             }
             else Console.WriteLine("Bindless Textures ARE Supported...");
 
+            
 
             frameStopwatch.Start();
         }
@@ -138,7 +143,7 @@ namespace RenderingEngine
         {
             InputHandler.UpdateCamera(deltaTime);
 
-            PhysicsObjectsHandler.TickObjs(deltaTime);
+            if (PhysicsEnabled) PhysicsObjectsHandler.TickObjs(deltaTime);
 
             FPSFrameCount++;
             if (frameStopwatch.ElapsedMilliseconds >= 1000)
@@ -166,7 +171,7 @@ namespace RenderingEngine
             
             //DO RENDERING
             renderer.Clear();
-            renderer.Draw();
+            if (RenderingEnabled) renderer.Draw();
 
             //Show Functions of ImGUI
             if (Camera.enableGUI)
@@ -184,7 +189,24 @@ namespace RenderingEngine
             _imgui.Render();
         }
 
-        
+        public static void ClearScene()
+        {
+            PhysicsEnabled = false;
+            RenderingEnabled = false;
+
+            Renderer.RenderingObjects.Clear();
+            PhysicsObjectsHandler.ClearAll();
+
+            foreach (GameObject obj in SceneObjects)
+                obj.Dispose();
+            SceneObjects.Clear();
+
+            //Force Memory Cleanup
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+
+        }
 
         public static void Cleanup()
         {

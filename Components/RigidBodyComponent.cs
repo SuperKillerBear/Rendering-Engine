@@ -157,6 +157,7 @@ namespace RenderingEngine.Components
             tickPhysics = reader.ReadBoolean();
         }
 
+        
 
     }
 }
