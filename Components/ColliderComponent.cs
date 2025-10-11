@@ -1,4 +1,5 @@
-﻿using RenderingEngine.GameObjects;
+﻿using ImGuiNET;
+using RenderingEngine.GameObjects;
 using RenderingEngine.Utilities;
 using Silk.NET.Input;
 using Silk.NET.Maths;
@@ -14,6 +15,8 @@ namespace RenderingEngine.Components
 {
     public class ColliderComponent : Component
     {
+        public override string ComponentName => "Collider Component";
+
         public List<Vector2D<int>> chunks = new List<Vector2D<int>>();
 
         private float xMin, xMax, yMin, yMax, zMin, zMax;
@@ -23,9 +26,9 @@ namespace RenderingEngine.Components
         public override void Init(GameObject Owner)
         {
             base.Init(Owner); //Init + Set Owner
-            
+
             //Owner will not be null here
-            
+
         }
 
         public void CalcAABBMaxMins()
@@ -143,6 +146,10 @@ namespace RenderingEngine.Components
             return resultant;
         }
 
+        public override void OnInspectorGUI()
+        {
+            //No editable properties
+        }
 
     }
 }

@@ -91,48 +91,26 @@ namespace RenderingEngine.Gui
         public override void Draw()
         {
             if (selectedObject == null) return;
-            ColliderComponent? collider = selectedObject.GetComponent<ColliderComponent>();
-            bool isPhysic = collider is RigidBodyComponent;
             ImGui.Begin("Inspector");
 
             ImGui.InputText("Name", ref selectedObject.name, 32);
-            this.InputVector3D("Position", ref selectedObject.Transform.Position);
-            this.InputVector3D("Rotation", ref selectedObject.Transform.RotationRef);
-            this.InputVector3D("Scale", ref selectedObject.Transform.Scale);
             ImGui.Checkbox("Debug", ref selectedObject.debug);
 
-            if (collider != null)
+            foreach (var comp in selectedObject.Components)
             {
-                if (isPhysic)
+                if (ImGui.CollapsingHeader(comp.ComponentName))
                 {
-                    var physComp = selectedObject.GetComponent<RigidBodyComponent>();
-                    if (physComp == null) return;
-                    InputVector3D("Velocity", ref physComp.Velocity);
-                    InputVector3D("Acceleration", ref physComp.Acceleration);
-                    InputVector3D("Force Accum", ref physComp.ForceAccum);
-                    ImGui.InputFloat("Mass", ref physComp.Rmass);
-                    ImGui.Text($"Mass Inverse: {physComp.massInv}");
-                    ImGui.InputFloat("Restitution", ref physComp.restitution);
-                    ImGui.Checkbox("Apply Gravity", ref physComp.applyGravity);
-                    ImGui.Checkbox("Tick Physics", ref physComp.tickPhysics);
-                }
-
-                
-                ImGui.Text($"Chunks: {string.Join(", ", collider.chunks.Select(c => $"({c.X}, {c.Y})"))}");
-
-                if (ImGui.Button("Update Calcs"))
-                {
-                    if (isPhysic) (collider as RigidBodyComponent).CheckCollisions();
-                    else collider.CalcChunks();
+                    comp.OnInspectorGUI();
                 }
             }
+
             ImGui.End();
         }
     }
 
     class SettingsPanel : Panel
     {
-        private string selectedLevelName = "";
+        private string selectedSceneName = "";
         public override void Draw()
         {
             ImGui.Begin("Settings");
@@ -145,10 +123,13 @@ namespace RenderingEngine.Gui
             ImGui.InputInt("FOV", ref Camera.FOV, (int)Math.PI / 180);
             ImGui.InputInt("Chunk Size", ref Program.chunkSize, 1, 2);
             ImGui.SliderFloat("Tick Rate", ref Program.tickRate, 0.01f, 10f);
+            ImGui.Text($"Scene Objects Count: {Program.SceneObjects.Count}");
             ImGui.Text($"Current Level Name: {FileHandler.currentLevel}");
-            ImGui.InputText("Selected Level Name", ref selectedLevelName, 32);
-            if (ImGui.Button("Save Level")) { FileHandler.SaveLevel(selectedLevelName); }
-            if (ImGui.Button("Load Level")) { FileHandler.LoadLevel(selectedLevelName); }
+            ImGui.InputText("Selected Level Name", ref selectedSceneName, 32);
+            if (ImGui.Button("Save Scene")) { FileHandler.SaveScene(selectedSceneName); }
+            if (ImGui.Button("Load Scene")) { FileHandler.LoadScene(selectedSceneName); }
+            if (ImGui.Button("Clear Scene")) { Program.SceneObjects.Clear(); }
+            
             ImGui.End();
         }
 

@@ -1,15 +1,20 @@
-﻿using System;
+﻿using ImGuiNET;
+using RenderingEngine.GameObjects;
+using Silk.NET.Maths;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using RenderingEngine.GameObjects;
 
 namespace RenderingEngine.Components
 {
-    public class Component
+    public abstract class Component
     {
         public GameObject? owner = null;
+        public abstract string ComponentName { get; }
+
 
         public void SetOwner(GameObject Owner)
         {
@@ -20,6 +25,18 @@ namespace RenderingEngine.Components
         {
             this.owner = Owner;
             //Base Init
+        }
+
+        public abstract void OnInspectorGUI();
+
+
+        public static bool InputVector3D(string label, ref Vector3D<float> vec)
+        {
+            Vector3 newVec = new Vector3(vec.X, vec.Y, vec.Z);
+
+            bool changed = ImGui.InputFloat3(label, ref newVec);
+            if (changed) vec = new Vector3D<float>(newVec.X, newVec.Y, newVec.Z);
+            return changed;
         }
     }
 

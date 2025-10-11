@@ -58,6 +58,7 @@ namespace RenderingEngine.Rendering
 
             
             var floor = new GameObject();
+            floor.name = "Floor";
             floor.AddComponent<RendererComponent>().Mesh = new QuadMesh(gl);
             
             var rot = new Vector3D<float>( (float) Math.PI / 2, 0, 0);
@@ -68,6 +69,7 @@ namespace RenderingEngine.Rendering
             floor.Transform.Position.Y = 0.5f;
             
             var cube = new GameObject();
+            cube.name = "Physics Cube";
             cube.AddComponent<RendererComponent>().Mesh = new CubeMesh(gl);
             cube.AddComponent<RigidBodyComponent>();
             

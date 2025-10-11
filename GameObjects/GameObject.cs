@@ -17,7 +17,7 @@ namespace RenderingEngine.GameObjects
         private GameObject? parent;
         private List<GameObject> children = new List<GameObject>();
 
-        private List<Component> components = new List<Component>();
+        public List<Component> Components = new List<Component>();
 
         public GameObject(GameObject? Parent = null)
         {
@@ -28,12 +28,12 @@ namespace RenderingEngine.GameObjects
 
         public bool RemoveComponent(Component component)
         {
-            return this.components.Remove(component);
+            return this.Components.Remove(component);
         }
 
         public T? GetComponent<T>() where T: Component
         {
-            foreach (var comp in this.components)
+            foreach (var comp in this.Components)
             {
                 if (comp is T matchedComponent)
                     return matchedComponent;
@@ -41,14 +41,18 @@ namespace RenderingEngine.GameObjects
             return null;
         }
 
-
         public T AddComponent<T>() where T : Component, new()
         {
             var component = new T();
-            this.components.Add(component);
+            this.Components.Add(component);
             component.Init(this);
             return component;
         }
 
+        public void AssignComponent(Component component)
+        {
+            this.Components.Add(component);
+            component.Init(this);
+        }
     }
 }

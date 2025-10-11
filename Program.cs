@@ -119,7 +119,7 @@ namespace RenderingEngine
             SetupGui();
 
             //Load Default Game Settings
-            FileHandler.LoadGameSettings();
+            FileHandler.Init();
 
             aspectRatio = (float)ScreenWidth / ScreenHeight;
 

@@ -1,4 +1,5 @@
-﻿using RenderingEngine.GameObjects;
+﻿using ImGuiNET;
+using RenderingEngine.GameObjects;
 using RenderingEngine.Rendering;
 using RenderingEngine.Utilities;
 using Silk.NET.Input;
@@ -6,14 +7,17 @@ using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
 
 namespace RenderingEngine.Components
 {
-    public class RigidBodyComponent : ColliderComponent
+    public class RigidBodyComponent : ColliderComponent, ISerializable
     {
+        public override string ComponentName => "RigidBody Component";
+
         private float _mass = 10;
         public float mass
         {
@@ -76,7 +80,7 @@ namespace RenderingEngine.Components
         }
 
 
-        //TODO UPDATE FOR ECS
+        
         public void CheckCollisions()
         {
             this.CalcChunks();
@@ -108,6 +112,49 @@ namespace RenderingEngine.Components
 
 
 
+        }
+
+
+        public override void OnInspectorGUI()
+        {
+            ImGui.Text("RigidBody Component");
+            ImGui.DragFloat("Mass", ref _mass, 0.1f, 0.1f, 1000f);
+
+            ImGui.Text($"Acceleration: {Acceleration}");
+            ImGui.Text($"Velocity: {Velocity}");
+
+            ImGui.DragFloat("Restitution", ref restitution, 0.01f, 0f, 1f);
+            ImGui.DragFloat("Gravity", ref g, 0.1f, 0f, 100f);
+            
+            ImGui.Text($"Chunks: {string.Join(", ", chunks.Select(c => $"({c.X}, {c.Y})"))}");
+
+            ImGui.Checkbox("Apply Gravity", ref applyGravity);
+            ImGui.Checkbox("Tick Physics", ref tickPhysics);
+
+            if (ImGui.Button("Update Calcs"))
+            {
+                CheckCollisions();
+            }
+
+        }
+    
+        
+        public void Serialize(BinaryWriter writer)
+        {
+            writer.Write(mass);
+            writer.Write(restitution);
+            writer.Write(g);
+            writer.Write(applyGravity);
+            writer.Write(tickPhysics);
+        }
+        
+        public void Deserialize(BinaryReader reader)
+        {
+            mass = reader.ReadSingle();
+            restitution = reader.ReadSingle();
+            g = reader.ReadSingle();
+            applyGravity = reader.ReadBoolean();
+            tickPhysics = reader.ReadBoolean();
         }
 
 

@@ -1,4 +1,6 @@
-﻿using RenderingEngine.Rendering;
+﻿using RenderingEngine.Components;
+using RenderingEngine.GameObjects;
+using RenderingEngine.Rendering;
 using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;
@@ -12,6 +14,20 @@ namespace RenderingEngine
     public static class FileHandler
     {
         public static string currentLevel;
+
+        public static void Init()
+        {
+            //Register Components Here
+            ComponentRegistry.RegisterSerializable<TransformComponent>(1);
+            ComponentRegistry.RegisterSerializable<RigidBodyComponent>(2);
+
+            ComponentRegistry.RegisterNonSerializable<RendererComponent>(3);
+            
+            //TODO: Change Box Collider to Serializable Later when Implemented
+            ComponentRegistry.RegisterNonSerializable<BoxColliderComponent>(4);
+            
+            LoadGameSettings();
+        }
 
         public static void SaveGameSettings()
         {
@@ -61,7 +77,7 @@ namespace RenderingEngine
             }
         }
 
-        public static void SaveLevel(string name)
+        public static void SaveScene(string name)
         {
             string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\LevelData\{name}.dat";
             Console.WriteLine($"Writing Level: {localPath}");
@@ -81,17 +97,42 @@ namespace RenderingEngine
 
             for (int i = 0; i < objsCount; i++)
             {
-                writer.Write(Program.SceneObjects[i].name); //Write Object Data
+                //Write Headers
+                writer.Write((ushort)Program.SceneObjects[i].name.Length); //Write Object Name Length
+                writer.Write(Encoding.UTF8.GetBytes(Program.SceneObjects[i].name)); //Write Object Name
 
+                //writer.Write(Program.SceneObjects[i].name); //Write Object Data
+
+                writer.Write((uint)Program.SceneObjects[i].Components.Count); //Write Component Count
+
+                foreach (var comp in Program.SceneObjects[i].Components)
+                {
+                    ushort? typeID = ComponentRegistry.GetTypeID(comp);
+
+                    if (typeID == null)
+                        continue; //Skip Unregistered Components
+
+                    writer.Write((ushort)typeID); //Write Component Type ID
+
+                    if (comp is ISerializable serializableComp)
+                    {
+                        serializableComp.Serialize(writer); //Serialize Component Data
+                    }
+                }
             }
             
             writer.Close();
         }
 
-        public static void LoadLevel(string name)
+        public static void LoadScene(string name)
         {
             string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\LevelData\{name}.dat";
             Console.WriteLine($"Trying to Read Level: {name}");
+            if (!File.Exists(localPath))
+            {
+                Console.WriteLine("WARN: Level Does Not Exist");
+                return;
+            }
             var reader = new BinaryReader(File.Open(localPath, FileMode.Open));
             uint magic = reader.ReadUInt32();
 
@@ -101,21 +142,48 @@ namespace RenderingEngine
                 return;
             }
 
+            
 
             ushort length = reader.ReadUInt16(); //Read the Length of the name
             byte[] nameData = reader.ReadBytes(length); //Read Name Data
 
             string LevelName = Encoding.UTF8.GetString(nameData);
-            /*
+            
             uint objectCount = reader.ReadUInt32(); //Read Object Count
+
+            Program.SceneObjects.Clear();
 
             for (int i = 0; i < objectCount; i++)
             {
-                string objName = reader.ReadString(); //Read Object Data
-                //TODO: Assign Object Data to DynObj List
-                Console.WriteLine($"Read Object {i}: {objName}");
+                GameObject newObj = new GameObject();
+
+                ushort objNameLen = reader.ReadUInt16(); //Read Object Name Length
+                byte[] objNameData = reader.ReadBytes(objNameLen); //Read Object Name Data
+                string objName = Encoding.UTF8.GetString(objNameData); //Decode Object Name
+
+                newObj.name = objName;
+
+                uint compCount = reader.ReadUInt32(); //Read 
+
+                for (int c = 0; c < compCount; c++)
+                {
+                    ushort typeID = reader.ReadUInt16();
+
+                    if (!ComponentRegistry.factories.ContainsKey(typeID))
+                    {
+                        Console.WriteLine($"Unknown Component Type ID: {typeID}, skipping object.");
+                        continue;
+                    }
+
+                    Component newComp = ComponentRegistry.Deserialize(typeID, reader);
+                    newObj.AssignComponent(newComp);
+                }
+
+                Program.SceneObjects.Add(newObj);
+
+
             }
-            */
+            
             Console.WriteLine($"Name: {LevelName}");
             currentLevel = LevelName;
             reader.Close();
@@ -140,5 +208,60 @@ namespace RenderingEngine
 
     }
 
-    
+    public interface ISerializable
+    {
+        void Serialize(BinaryWriter writer);
+        void Deserialize(BinaryReader reader);
+
+    }
+
+    public static class ComponentRegistry
+    {
+        public static readonly Dictionary<ushort, Func<Component>> factories = new();
+        public static readonly Dictionary<Type, ushort> typeIDs = new();
+
+        public static void RegisterSerializable<T>(ushort typeID) where T : Component, ISerializable, new()
+        {
+            factories[typeID] = () => new T();
+            typeIDs[typeof(T)] = typeID;
+        }
+
+        public static void RegisterNonSerializable<T>(ushort typeID) where T : Component, new()
+        {
+            factories[typeID] = () => new T();
+            typeIDs[typeof(T)] = typeID;
+        }
+
+        public static ushort? GetTypeID(Component component)
+        {
+            Type type = component.GetType();
+
+            if (!typeIDs.ContainsKey(type))
+            {
+                Console.WriteLine($"WARN: Unregistered Component Type: {type.ToString()}");
+                return null;
+            }
+
+            return typeIDs[type];
+        }
+
+        public static Component Deserialize(ushort typeID, BinaryReader reader)
+        {
+            if (!factories.ContainsKey(typeID))
+            {
+                throw new Exception($"Unknown Component Type: {typeID}");
+            }
+            Component comp = factories[typeID]();
+
+            if (comp is ISerializable serializableComp)
+            {
+                serializableComp.Deserialize(reader);
+            }
+
+            return comp;
+        }
+
+         
+    }
+
 }

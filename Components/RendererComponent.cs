@@ -10,7 +10,9 @@ namespace RenderingEngine.Components
 {
     public class RendererComponent : Component
     {
+        public override string ComponentName => "Renderer Component";
         public Mesh? Mesh { get; set; }
+
 
         public override void Init(GameObject Owner)
         {
@@ -18,6 +20,20 @@ namespace RenderingEngine.Components
             Mesh = null;
             Renderer.RenderingObjects.Add(this);
         }
+
+        public override void OnInspectorGUI()
+        {
+            if (Mesh != null)
+            {
+                ImGuiNET.ImGui.Text("Mesh is Assigned");
+            }
+            else
+            {
+                ImGuiNET.ImGui.Text("No Mesh Assigned");
+            }
+        }
+
+        
 
     }
 }
