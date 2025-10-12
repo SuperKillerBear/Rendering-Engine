@@ -1,6 +1,8 @@
 ﻿using ImGuiNET;
-using RenderingEngine.Gui;
+using RenderingEngine.Components;
 using RenderingEngine.GameObjects;
+using RenderingEngine.Gui;
+using RenderingEngine.Meshes;
 using RenderingEngine.Rendering;
 using SDL2;
 using Silk.NET.Core.Native;
@@ -15,7 +17,6 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.Numerics;
 using static Silk.NET.Core.Native.WinString;
-using RenderingEngine.Meshes;
 
 namespace RenderingEngine
 {
@@ -25,7 +26,6 @@ namespace RenderingEngine
         private static int FPSFrameCount = 0;
         public static int lastFPS = 0;
         private static Stopwatch frameStopwatch = new Stopwatch();
-        
         
         public static GL gl;
 
@@ -56,6 +56,8 @@ namespace RenderingEngine
         public static bool RenderingEnabled = true;
         public static bool PhysicsEnabled = true;
 
+
+        
 
         static void Main(string[] args)
         {
@@ -134,6 +136,24 @@ namespace RenderingEngine
             }
             else Console.WriteLine("Bindless Textures ARE Supported...");
 
+            
+            var floor = new GameObject();
+            floor.name = "Floor";
+            floor.AddComponent<RendererComponent>().Mesh = new QuadMesh(gl);
+
+            var rot = new Vector3D<float>((float)Math.PI / 2, 0, 0);
+            floor.Transform.Rotation = rot;
+
+            floor.Transform.Scale = new Vector3D<float>(5);
+
+            floor.Transform.Position.Y = 0.5f;
+
+            var cube = new GameObject();
+            cube.name = "Physics Cube";
+            cube.AddComponent<RendererComponent>().Mesh = new CubeMesh(gl);
+            cube.AddComponent<RigidBodyComponent>();
+
+            cube.Transform.Position.Y = 4.5f;
             
 
             frameStopwatch.Start();

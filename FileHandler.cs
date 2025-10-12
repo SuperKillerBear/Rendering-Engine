@@ -1,5 +1,6 @@
 ﻿using RenderingEngine.Components;
 using RenderingEngine.GameObjects;
+using RenderingEngine.Gui;
 using RenderingEngine.Meshes;
 using RenderingEngine.Rendering;
 using Silk.NET.Maths;
@@ -41,6 +42,10 @@ namespace RenderingEngine
             WriteVector3D(writer, Camera.Position);
             WriteVector3D(writer, Camera.Rotation);
 
+            byte[] selectedSceneNameData = Encoding.UTF8.GetBytes(SettingsPanel.selectedSceneName); //
+            writer.Write((ushort)selectedSceneNameData.Length);
+            writer.Write(selectedSceneNameData);
+
             Console.WriteLine("INFO: Game Settings Saved");
         }
 
@@ -69,6 +74,11 @@ namespace RenderingEngine
 
                 Camera.Position = ReadVector3D(reader); //Set Cam Pos
                 Camera.Rotation = ReadVector3D(reader); //Set Cam Rot
+
+                ushort selectedSceneNameLength = reader.ReadUInt16();
+                byte[] selectedSceneNameData = reader.ReadBytes(selectedSceneNameLength);
+                string selectedSceneName = Encoding.UTF8.GetString(selectedSceneNameData);
+
 
                 Console.WriteLine("INFO: Game Settings Loaded");
             }
@@ -130,7 +140,7 @@ namespace RenderingEngine
         {
             string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\LevelData\{name}.dat";
             Console.WriteLine($"Trying to Read Level: {name}");
-            
+
             if (!File.Exists(localPath))
             {
                 Console.WriteLine("WARN: Level Does Not Exist");
@@ -145,22 +155,22 @@ namespace RenderingEngine
                 return;
             }
 
-            
+
 
             ushort length = reader.ReadUInt16(); //Read the Length of the name
             byte[] nameData = reader.ReadBytes(length); //Read Name Data
 
             string LevelName = Encoding.UTF8.GetString(nameData);
-            
+
             uint objectCount = reader.ReadUInt32(); //Read Object Count
 
             Program.ClearScene();
 
             for (int i = 0; i < objectCount; i++)
             {
-                GameObject newObj = new GameObject();
+                GameObject newObj = new GameObject(autoAddTransform: false);
 
-                newObj.AddComponent<RendererComponent>().Mesh = new CubeMesh(Program.gl);
+                
                 
                 ushort objNameLen = reader.ReadUInt16(); //Read Object Name Length
                 byte[] objNameData = reader.ReadBytes(objNameLen); //Read Object Name Data
@@ -181,11 +191,16 @@ namespace RenderingEngine
                     }
 
                     Component newComp = ComponentRegistry.Deserialize(typeID, reader);
+
                     if (newComp is not RendererComponent) newObj.AssignComponent(newComp);
+
                 }
 
-                Program.SceneObjects.Add(newObj);
+                newObj.AddComponent<RendererComponent>().Mesh = new CubeMesh(Program.gl);
 
+                
+
+                newObj.Transform.UpdateModelMatrix(); //Transform is null
 
             }
             
@@ -195,6 +210,8 @@ namespace RenderingEngine
 
             Program.PhysicsEnabled = true; //Will always turn on physics when scene loaded
             Program.RenderingEnabled = true;
+
+            
         }
 
         private static void WriteVector3D(BinaryWriter writer, Vector3D<float> vec)

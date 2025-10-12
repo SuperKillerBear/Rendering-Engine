@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RenderingEngine.GameObjects;
+using ImGuiNET;
 
 namespace RenderingEngine.Components
 {
@@ -65,6 +66,7 @@ namespace RenderingEngine.Components
             InputVector3D("Rotation", ref RotationRef);
             InputVector3D("Scale", ref Scale);
 
+            if (ImGui.Button("Pos?")) { Console.WriteLine($"Position: {Position.ToString()}"); }
 
         }
 

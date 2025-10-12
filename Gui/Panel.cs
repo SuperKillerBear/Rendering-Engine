@@ -110,7 +110,8 @@ namespace RenderingEngine.Gui
 
     class SettingsPanel : Panel
     {
-        private string selectedSceneName = "";
+        public static string selectedSceneName = "Test";
+        private static bool loadSceneRequested = false;
         public override void Draw()
         {
             ImGui.Begin("Settings");
@@ -118,6 +119,7 @@ namespace RenderingEngine.Gui
             ImGui.Text($"FPS: {Program.lastFPS}");
             ImGui.Text($"Screen: {Program.ScreenWidth}x{Program.ScreenHeight}");
             ImGui.Text($"Camera Position: {Camera.Position.X}, {Camera.Position.Y}, {Camera.Position.Z}");
+            if (ImGui.Button("Reset Camera Position")) { Camera.Position = Vector3D<float>.Zero; }
             ImGui.Text($"Accumulated Mouse Positon: ({InputHandler.accumMouseRelX}, {InputHandler.accumMouseRelY})");
             ImGui.InputFloat("Sensitivity", ref Camera.Sensitivity);
             ImGui.InputInt("FOV", ref Camera.FOV, (int)Math.PI / 180);
@@ -127,7 +129,19 @@ namespace RenderingEngine.Gui
             ImGui.Text($"Current Level Name: {FileHandler.currentLevel}");
             ImGui.InputText("Selected Level Name", ref selectedSceneName, 32);
             if (ImGui.Button("Save Scene")) { FileHandler.SaveScene(selectedSceneName); }
-            if (ImGui.Button("Load Scene")) { FileHandler.LoadScene(selectedSceneName); }
+            
+            bool loadSceneClicked = ImGui.Button("Load Scene");
+            
+            if (loadSceneClicked && !loadSceneRequested)
+            {
+                loadSceneRequested = true;
+                FileHandler.LoadScene(selectedSceneName);
+            }
+            else if (!loadSceneClicked)
+            {
+                loadSceneRequested = false;
+            }
+            
             if (ImGui.Button("Clear Scene")) { Program.ClearScene(); }
             
             ImGui.End();

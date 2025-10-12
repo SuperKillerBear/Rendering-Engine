@@ -57,26 +57,6 @@ namespace RenderingEngine.Rendering
             //var loaded = new LoadedDynamicObject(gl, mesh, new Vector3D<float>(1.5f));
 
             
-            var floor = new GameObject();
-            floor.name = "Floor";
-            floor.AddComponent<RendererComponent>().Mesh = new QuadMesh(gl);
-            
-            var rot = new Vector3D<float>( (float) Math.PI / 2, 0, 0);
-            floor.Transform.Rotation = rot;
-
-            floor.Transform.Scale = new Vector3D<float>(5);
-
-            floor.Transform.Position.Y = 0.5f;
-            
-            var cube = new GameObject();
-            cube.name = "Physics Cube";
-            cube.AddComponent<RendererComponent>().Mesh = new CubeMesh(gl);
-            cube.AddComponent<RigidBodyComponent>();
-            
-            cube.Transform.Position.Y = 4.5f;
-
-            
-            
         }
 
         public void Clear()

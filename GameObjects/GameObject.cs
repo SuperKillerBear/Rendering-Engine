@@ -12,18 +12,18 @@ namespace RenderingEngine.GameObjects
         public string name = "Empty Object";
         public bool debug = false;
 
-        public readonly TransformComponent Transform;
+        public TransformComponent Transform { get; private set; }
 
         private GameObject? parent;
         private List<GameObject> children = new List<GameObject>();
 
         public List<Component> Components = new List<Component>();
 
-        public GameObject(GameObject? Parent = null)
+        public GameObject(GameObject? Parent = null, bool autoAddTransform = true)
         {
             this.parent = Parent;
             Program.SceneObjects.Add(this);
-            Transform = this.AddComponent<TransformComponent>();
+            if (autoAddTransform) Transform = this.AddComponent<TransformComponent>();
         }
 
         public bool RemoveComponent(Component component)
@@ -52,6 +52,10 @@ namespace RenderingEngine.GameObjects
         public void AssignComponent(Component component)
         {
             this.Components.Add(component);
+
+            if (component is TransformComponent && this.Transform == null)
+                this.Transform = component as TransformComponent;
+
             component.Init(this);
         }
 
