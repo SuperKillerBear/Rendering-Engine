@@ -1,4 +1,5 @@
-﻿using RenderingEngine.GameObjects;
+﻿using ImGuiNET;
+using RenderingEngine.GameObjects;
 using RenderingEngine.Rendering;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace RenderingEngine.Components
         public uint MeshID { get; private set; }
         private string meshAddress = "EMPTY";
 
+
+        public Material? material = null;
 
         public override void Init(GameObject Owner)
         {
@@ -41,6 +44,10 @@ namespace RenderingEngine.Components
 
         public override void OnInspectorGUI()
         {
+            ImGui.Text($"Mesh Address: {meshAddress}");
+            ImGui.Text($"Mesh ID: {MeshID.ToString()}");
+            ImGui.Text($"Assigned Mesh: {AssignedMesh.ToString()}");
+
             if (AssignedMesh)
             {
                 ImGuiNET.ImGui.Text("Mesh is Assigned");

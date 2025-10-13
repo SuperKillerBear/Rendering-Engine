@@ -10,9 +10,11 @@ uniform mat4 uView;
 uniform mat4 uProjection;
 
 out vec3 outColor; //What is being passed to frag shader
+out vec2 outUV;
 
 void main()
 {
     gl_Position = uProjection * uView * uModel* vec4(aPos, 1.0);    
     outColor = aColor;
+    outUV = aUV;
 }

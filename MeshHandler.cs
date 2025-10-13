@@ -41,12 +41,12 @@ namespace RenderingEngine
             
         }
 
-        public static uint? LoadMeshFile(string fileName)
+        public static uint? LoadMeshFile(string filename)
         {
-            if (loadedMeshes.ContainsKey(fileName)) return loadedMeshes[fileName];
+            if (loadedMeshes.ContainsKey(filename)) return loadedMeshes[filename];
 
             //Dont include file type
-            string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\MeshData\{fileName}";
+            string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\MeshData\{filename}";
             
             try
             {
@@ -59,7 +59,7 @@ namespace RenderingEngine
                 uint id = (uint)Meshes.Count;
                 Meshes.Add(loadedMesh);
 
-                loadedMeshes.Add(fileName, id);
+                loadedMeshes.Add(filename, id);
 
                 return id;
             }

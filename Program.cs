@@ -124,7 +124,7 @@ namespace RenderingEngine
 
             SetupGui();
 
-            
+            MaterialHandler.Init();
             MeshHandler.Init();
             FileHandler.Init(); //Load Default Game Settings
 
@@ -154,6 +154,9 @@ namespace RenderingEngine
             cube.Transform.Position.Y = 4.5f;
             
             cube.AddComponent<RendererComponent>().SetMesh("Cube");
+
+            cube.GetComponent<RendererComponent>().material
+                = MaterialHandler.CreateMaterial("cubeTexture", new Vector3D<float>(255, 0, 0));
 
             frameStopwatch.Start();
         }
@@ -217,6 +220,8 @@ namespace RenderingEngine
             PhysicsObjectsHandler.ClearAll();
 
             MeshHandler.UnloadAll();
+
+            //TODO: Clear Textures from Handler
 
             foreach (GameObject obj in SceneObjects)
                 obj.Dispose();

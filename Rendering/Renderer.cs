@@ -99,13 +99,25 @@ namespace RenderingEngine.Rendering
                 Mesh mesh = MeshHandler.GetMesh(group.Key);
                 if (mesh == null) continue;
 
+                
+
+
                 gl.BindVertexArray(mesh.VAO);
                 
-                foreach (var obj in group)
+                foreach (var rendrComp in group)
                 {
-                    obj.owner.Transform.UpdateModelMatrix();
+                    rendrComp.owner.Transform.UpdateModelMatrix();
 
-                    Matrix4X4<float> model = obj.owner.Transform.ModelMatrix;
+                    Matrix4X4<float> model = rendrComp.owner.Transform.ModelMatrix;
+
+                    Material mat = rendrComp.material;
+                    if (mat == null)
+                        mat = MaterialHandler.defaultMaterial;
+
+                    // Set material properties
+                    int colorLocation = gl.GetUniformLocation(shaderProgram, "uBaseColor");
+                    gl.Uniform3(colorLocation, mat.Colour.X, mat.Colour.Y, mat.Colour.Z);
+
 
                     unsafe
                     {
@@ -113,6 +125,7 @@ namespace RenderingEngine.Rendering
                         gl.UniformMatrix4(uViewLocation, 1, false, (float*)&view);
                         gl.UniformMatrix4(uProjectionLocation, 1, false, (float*)&projection);
 
+                        
                         if (mesh.IndexCount > 0)
                         {
                             //Sharing Vertices so more Efficient
