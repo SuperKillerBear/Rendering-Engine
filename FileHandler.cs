@@ -192,11 +192,10 @@ namespace RenderingEngine
 
                     Component newComp = ComponentRegistry.Deserialize(typeID, reader);
 
-                    if (newComp is not RendererComponent) newObj.AssignComponent(newComp);
+                    newObj.AssignComponent(newComp);
 
                 }
 
-                newObj.AddComponent<RendererComponent>().Mesh = new CubeMesh(Program.gl);
 
                 
 

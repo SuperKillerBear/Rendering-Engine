@@ -124,8 +124,10 @@ namespace RenderingEngine
 
             SetupGui();
 
-            //Load Default Game Settings
-            FileHandler.Init();
+            
+            MeshHandler.Init();
+            FileHandler.Init(); //Load Default Game Settings
+
 
             aspectRatio = (float)ScreenWidth / ScreenHeight;
 
@@ -139,7 +141,7 @@ namespace RenderingEngine
             
             var floor = new GameObject();
             floor.name = "Floor";
-            floor.AddComponent<RendererComponent>().Mesh = new QuadMesh(gl);
+            floor.AddComponent<RendererComponent>().SetMesh("Cube");
 
             var rot = new Vector3D<float>((float)Math.PI / 2, 0, 0);
             floor.Transform.Rotation = rot;
@@ -150,11 +152,12 @@ namespace RenderingEngine
 
             var cube = new GameObject();
             cube.name = "Physics Cube";
-            cube.AddComponent<RendererComponent>().Mesh = new CubeMesh(gl);
+            
             cube.AddComponent<RigidBodyComponent>();
 
             cube.Transform.Position.Y = 4.5f;
             
+            cube.AddComponent<RendererComponent>().SetMesh("Cube");
 
             frameStopwatch.Start();
         }
@@ -216,6 +219,8 @@ namespace RenderingEngine
 
             Renderer.RenderingObjects.Clear();
             PhysicsObjectsHandler.ClearAll();
+
+            MeshHandler.UnloadAll();
 
             foreach (GameObject obj in SceneObjects)
                 obj.Dispose();

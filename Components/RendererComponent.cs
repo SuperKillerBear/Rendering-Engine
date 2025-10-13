@@ -3,27 +3,44 @@ using RenderingEngine.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace RenderingEngine.Components
 {
-    public class RendererComponent : Component
+    public class RendererComponent : Component, ISerializable
     {
         public override string ComponentName => "Renderer Component";
-        public Mesh? Mesh { get; set; }
+        private bool AssignedMesh = false;
+        public uint MeshID { get; private set; }
+        private string meshAddress = "EMPTY";
 
 
         public override void Init(GameObject Owner)
         {
             base.Init(Owner); //Init + Set Owner
-            Mesh = null;
             Renderer.RenderingObjects.Add(this);
         }
 
+        public void SetMesh(string filename)
+        {
+            uint? meshID = MeshHandler.LoadMeshFile(filename);
+            if (meshID != null)
+            {
+                AssignedMesh = true;
+                MeshID = meshID.Value;
+            }
+            else
+            {
+                meshAddress = "EMPTY";
+            }
+        }
+
+
         public override void OnInspectorGUI()
         {
-            if (Mesh != null)
+            if (AssignedMesh)
             {
                 ImGuiNET.ImGui.Text("Mesh is Assigned");
             }
@@ -33,11 +50,27 @@ namespace RenderingEngine.Components
             }
         }
 
-        public override void Dispose()
+
+        public void Serialize(BinaryWriter writer)
         {
-            base.Dispose();
-            Mesh = null;
+            //TODO: Check if string is empty, if so write "EMPTY"
+
+            byte[] meshAddressData = Encoding.UTF8.GetBytes(meshAddress);
+            ushort addreessLength = (ushort)meshAddressData.Length;
+
+            writer.Write(addreessLength);
+            writer.Write(meshAddressData);
         }
 
+        public void Deserialize(BinaryReader reader)
+        {
+            ushort length = reader.ReadUInt16();
+            byte[] meshAddressData = reader.ReadBytes(length);
+
+            string meshAddress = Encoding.UTF8.GetString(meshAddressData);
+
+            Console.WriteLine($"Loaded Mesh Address Data: {meshAddress}");
+            SetMesh(meshAddress);
+        }
     }
 }

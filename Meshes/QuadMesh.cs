@@ -11,14 +11,14 @@ namespace RenderingEngine.Meshes
 {
     internal class QuadMesh : Mesh
     {
-        public QuadMesh(GL gl)
-            : base(gl,
-                vertices: new Vertex[]
+        public QuadMesh()
+            : base(
+                vertices: new float[]
                 {
-                    new Vertex(new Vector3D<float>( 0.5f, -0.5f, 0.0f), new Vector3D<float>(0.8f, 0.0f, 0.9f), new Vector2D<float>(0f,0f)),
-                    new Vertex(new Vector3D<float>(-0.5f, -0.5f, 0.0f), new Vector3D<float>(0.1f, 0.7f, 0.9f), new Vector2D<float>(0f,0f)),
-                    new Vertex(new Vector3D<float>(-0.5f,  0.5f, 0.0f), new Vector3D<float>(1.0f, 0.7f, 0.0f), new Vector2D<float>(0f,0f)),
-                    new Vertex(new Vector3D<float>( 0.5f,  0.5f, 0.0f), new Vector3D<float>(0.1f, 0.1f, 0.9f), new Vector2D<float>(0f,0f))
+                     0.5f, -0.5f, 0.0f,     0.8f, 0.0f, 0.9f,   0f,0f,
+                    -0.5f, -0.5f, 0.0f,     0.1f, 0.7f, 0.9f,   0f,0f,
+                    -0.5f,  0.5f, 0.0f,     1.0f, 0.7f, 0.0f,   0f,0f,
+                     0.5f,  0.5f, 0.0f,     0.1f, 0.1f, 0.9f,   0f,0f
                 },
                 indices: new uint[]
                 {

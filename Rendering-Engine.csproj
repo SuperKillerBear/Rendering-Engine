@@ -26,6 +26,7 @@
   <ItemGroup>
     <Folder Include="bin\Debug\net8.0\" />
     <Folder Include="LevelData\" />
+    <Folder Include="MeshData\" />
   </ItemGroup>
 
   <ItemGroup>

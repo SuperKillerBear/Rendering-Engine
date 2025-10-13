@@ -69,7 +69,7 @@ namespace RenderingEngine.Rendering
 
         public void Draw()
         {
-            var meshGroups = RenderingObjects.GroupBy(obj => obj.Mesh);
+            var meshGroups = RenderingObjects.GroupBy(obj => obj.MeshID);
 
             // Orthographic projection example
             //Matrix4X4<float> projection = Matrix4X4.CreateOrthographic(2f, 2f, 0.1f, 10f);
@@ -96,7 +96,7 @@ namespace RenderingEngine.Rendering
 
             foreach (var group in meshGroups)
             {
-                var mesh = group.Key;
+                Mesh mesh = MeshHandler.GetMesh(group.Key);
                 if (mesh == null) continue;
 
                 gl.BindVertexArray(mesh.VAO);
