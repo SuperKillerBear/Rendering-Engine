@@ -28,6 +28,7 @@ namespace RenderingEngine.Components
             uint? meshID = MeshHandler.LoadMeshFile(filename);
             if (meshID != null)
             {
+                meshAddress = filename;
                 AssignedMesh = true;
                 MeshID = meshID.Value;
             }

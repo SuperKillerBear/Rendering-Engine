@@ -141,12 +141,8 @@ namespace RenderingEngine
             
             var floor = new GameObject();
             floor.name = "Floor";
-            floor.AddComponent<RendererComponent>().SetMesh("Cube");
+            floor.AddComponent<RendererComponent>().SetMesh("RobinHoodBay");
 
-            var rot = new Vector3D<float>((float)Math.PI / 2, 0, 0);
-            floor.Transform.Rotation = rot;
-
-            floor.Transform.Scale = new Vector3D<float>(5);
 
             floor.Transform.Position.Y = 0.5f;
 

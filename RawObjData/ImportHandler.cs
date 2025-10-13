@@ -148,7 +148,11 @@ namespace RenderingEngine.RawObjData
                     // choose color from material map (fallback to Pink)
                     Vector3D<float> col = materialMap.TryGetValue(mat, out var mc) ? mc : new Vector3D<float>(1f, 0f, 1f);
 
-                    // append interleaved vertex: x,y,z, r,g,b
+                    Vector2D<float> uv = (tIdx >= 0 && tIdx < uvs.Count)
+                        ? uvs[tIdx]
+                        : new Vector2D<float>(0f, 0f);
+
+                    // append interleaved vertex: x,y,z, r,g,b, u,v
                     outFloats.Add(pos.X);
                     outFloats.Add(pos.Y);
                     outFloats.Add(pos.Z);
@@ -157,7 +161,10 @@ namespace RenderingEngine.RawObjData
                     outFloats.Add(col.Y);
                     outFloats.Add(col.Z);
 
-                    index = (uint)(outFloats.Count / 6 - 1);
+                    outFloats.Add(uv.X);
+                    outFloats.Add(uv.Y);
+
+                    index = (uint)(outFloats.Count / 8 - 1);
                     indexMap[key] = index;
                 }
                 outIndices.Add(index);
