@@ -4,8 +4,9 @@
 in vec3 vColor;
 in vec2 vUV;
 
-uniform sampler2D uTexture;     // bindless texture handle (set with glUniformHandleui64ARB)
+layout(bindless_sampler) uniform sampler2D uTexture;     // bindless texture handle (set with glUniformHandleui64ARB)
 uniform vec3 uBaseColor;        // used if texture not applied
+
 
 out vec4 FragColor;
 
@@ -13,4 +14,5 @@ void main()
 {
     vec4 texColor = texture(uTexture, vUV);
     FragColor = texColor * vec4(uBaseColor, 1.0);
+    
 }

@@ -139,12 +139,15 @@ namespace RenderingEngine
             else Console.WriteLine("Bindless Textures ARE Supported...");
 
             
+            Material mat1 = MaterialHandler.CreateMaterial("test", new Vector3D<float>(1));
+            Material mat2 = MaterialHandler.CreateMaterial("debug", new Vector3D<float>(1));
+
             var floor = new GameObject();
             floor.name = "Floor";
             floor.AddComponent<RendererComponent>().SetMesh("RobinHoodBay");
 
-            floor.GetComponent<RendererComponent>().material
-                = MaterialHandler.CreateMaterial("test", new Vector3D<float>(1));
+            var ren = floor.GetComponent<RendererComponent>();
+            ren.material = mat1;
 
 
             floor.Transform.Position.Y = 0.5f;
@@ -158,8 +161,8 @@ namespace RenderingEngine
             
             cube.AddComponent<RendererComponent>().SetMesh("Cube");
 
-            cube.GetComponent<RendererComponent>().material
-                = MaterialHandler.CreateMaterial("debug", new Vector3D<float>(1));
+            ren = cube.GetComponent<RendererComponent>();
+            ren.material = mat2;
 
             frameStopwatch.Start();
         }

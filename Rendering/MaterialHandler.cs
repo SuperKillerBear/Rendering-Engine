@@ -65,9 +65,10 @@ namespace RenderingEngine.Rendering
             }
 
             defaultMaterial = new Material("DEFAULT", new Vector3D<float>(1f), defaultHandle, defaultTextureID);
+
         }
 
-        
+
         public static Material CreateMaterial(string filename, Vector3D<float> defaultColour)
         {
             var data = GetTexture(filename);
