@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using RenderingEngine.GameObjects;
 using RenderingEngine.Rendering;
+using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace RenderingEngine.Components
 
 
         public Material? material = null;
+
+        private string inputTextureName = "";
 
         public override void Init(GameObject Owner)
         {
@@ -48,16 +51,27 @@ namespace RenderingEngine.Components
             ImGui.Text($"Mesh ID: {MeshID.ToString()}");
             ImGui.Text($"Assigned Mesh: {AssignedMesh.ToString()}");
 
-            if (AssignedMesh)
+            ImGui.InputText("Load Texture", ref inputTextureName, 64);
+            if (ImGui.Button("Load Material"))
             {
-                ImGuiNET.ImGui.Text("Mesh is Assigned");
+                if (inputTextureName != "")
+                {
+                    material = MaterialHandler.CreateMaterial(inputTextureName, new Vector3D<float>(1));
+                }
+            }
+
+            if (material != null)
+            {
+                ImGui.Text($"Material: {material.Filename}");
+                ImGui.Text($"Colour: {material.Colour.ToString()}");
+                ImGui.Text($"Handle: {material.BindlessHandle.ToString()}");
+                ImGui.Text($"Texture ID: {material.TextureID.ToString()}");
             }
             else
             {
-                ImGuiNET.ImGui.Text("No Mesh Assigned");
+                ImGui.Text("Material: NONE");
             }
         }
-
 
         public void Serialize(BinaryWriter writer)
         {

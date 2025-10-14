@@ -143,6 +143,9 @@ namespace RenderingEngine
             floor.name = "Floor";
             floor.AddComponent<RendererComponent>().SetMesh("RobinHoodBay");
 
+            floor.GetComponent<RendererComponent>().material
+                = MaterialHandler.CreateMaterial("test", new Vector3D<float>(1));
+
 
             floor.Transform.Position.Y = 0.5f;
 
@@ -156,7 +159,7 @@ namespace RenderingEngine
             cube.AddComponent<RendererComponent>().SetMesh("Cube");
 
             cube.GetComponent<RendererComponent>().material
-                = MaterialHandler.CreateMaterial("cubeTexture", new Vector3D<float>(255, 0, 0));
+                = MaterialHandler.CreateMaterial("debug", new Vector3D<float>(1));
 
             frameStopwatch.Start();
         }
@@ -219,7 +222,9 @@ namespace RenderingEngine
             Renderer.RenderingObjects.Clear();
             PhysicsObjectsHandler.ClearAll();
 
+            MaterialHandler.UnloadTextures();
             MeshHandler.UnloadAll();
+
 
             //TODO: Clear Textures from Handler
 

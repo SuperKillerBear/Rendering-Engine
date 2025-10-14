@@ -9,6 +9,8 @@ using static Silk.NET.Core.Native.WinString;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using ImGuiNET;
 using RenderingEngine.Components;
+using Silk.NET.OpenGL.Extensions.ARB;
+using System.Text.Json;
 
 
 namespace RenderingEngine.Rendering
@@ -41,34 +43,20 @@ namespace RenderingEngine.Rendering
             //Enable Shader Program
             gl.UseProgram(shaderProgram);
 
-
-            
-
-            //Try Obj Parser
-
-            //string pasted = @"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\RawObjData\RobinHoodBay";
-            //string fullpath = pasted.Trim();
-
-
-            //var (vertsList, indsList) = ImportHandler.LoadObjFile(fullpath);
-            //float[] verts = vertsList.ToArray();
-            //uint[] inds = indsList.ToArray();
-            //var mesh = new Mesh(gl, verts, inds);
-            //var loaded = new LoadedDynamicObject(gl, mesh, new Vector3D<float>(1.5f));
-
-            
         }
 
         public void Clear()
         {
             gl.Clear((uint)ClearBufferMask.ColorBufferBit | (uint) ClearBufferMask.DepthBufferBit);
-            
         }
 
         
 
         public void Draw()
         {
+            //Ensure shader program is being used
+            gl.UseProgram(shaderProgram);
+
             var meshGroups = RenderingObjects.GroupBy(obj => obj.MeshID);
 
             // Orthographic projection example
@@ -90,17 +78,19 @@ namespace RenderingEngine.Rendering
 
             int uViewLocation = gl.GetUniformLocation(shaderProgram, "uView");
             int uProjectionLocation = gl.GetUniformLocation(shaderProgram, "uProjection");
+            int uTextureLocation = gl.GetUniformLocation(shaderProgram, "uTexture"); //not -1
+            int colorLocation = gl.GetUniformLocation(shaderProgram, "uBaseColor");
 
+            if (uTextureLocation == -1)
+            {
+                Console.WriteLine("WARN: uTexture uniform location is -1 (not found)");
+            }
             
-
 
             foreach (var group in meshGroups)
             {
                 Mesh mesh = MeshHandler.GetMesh(group.Key);
                 if (mesh == null) continue;
-
-                
-
 
                 gl.BindVertexArray(mesh.VAO);
                 
@@ -110,14 +100,21 @@ namespace RenderingEngine.Rendering
 
                     Matrix4X4<float> model = rendrComp.owner.Transform.ModelMatrix;
 
-                    Material mat = rendrComp.material;
-                    if (mat == null)
-                        mat = MaterialHandler.defaultMaterial;
+                    //Set Material
+                    Material mat = rendrComp.material ?? MaterialHandler.defaultMaterial;
 
                     // Set material properties
-                    int colorLocation = gl.GetUniformLocation(shaderProgram, "uBaseColor");
                     gl.Uniform3(colorLocation, mat.Colour.X, mat.Colour.Y, mat.Colour.Z);
 
+                    // Upload the bindless texture handle
+                    if (mat.BindlessHandle != 0)
+                    {
+                        //Are Different Handles
+                        MaterialHandler.bindless.ProgramUniformHandle(shaderProgram, uTextureLocation, mat.BindlessHandle);
+
+                    }
+                    else
+                        MaterialHandler.bindless.ProgramUniformHandle(shaderProgram, uTextureLocation, MaterialHandler.defaultHandle);
 
                     unsafe
                     {

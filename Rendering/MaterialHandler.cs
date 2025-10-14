@@ -1,8 +1,9 @@
 ﻿using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using StbImageSharp;
 using Silk.NET.OpenGL.Extensions.ARB;
+using StbImageSharp;
 using System.IO.Enumeration;
+using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 
 namespace RenderingEngine.Rendering
@@ -11,31 +12,36 @@ namespace RenderingEngine.Rendering
     {
         public string Filename;
         public ulong BindlessHandle;
+        public uint TextureID;
         public Vector3D<float> Colour;
 
-        public Material(string filename, Vector3D<float> colour, ulong Handle)
+        public Material(string filename, Vector3D<float> colour, ulong Handle, uint textureID)
         {
             this.Filename = filename;
             this.Colour = colour;
             this.BindlessHandle = Handle;
+            this.TextureID = textureID;
         }
     }
 
 
     public static class MaterialHandler
     {
-        private static Dictionary<string, ulong> textureHandles = new();
+        private static Dictionary<string, (uint textureID, ulong handle)> textureHandles = new();
+
+        public static ArbBindlessTexture bindless;
 
         public static ulong defaultHandle;
         public static Material defaultMaterial;
+        private static uint defaultTextureID;
 
         public static void Init()
         {
             // 1x1 white pixel
             byte[] whitePixel = { 255, 255, 255, 255 };
 
-            uint defaultTexture = Program.gl.GenTexture();
-            Program.gl.BindTexture(GLEnum.Texture2D, defaultTexture);
+            defaultTextureID = Program.gl.GenTexture();
+            Program.gl.BindTexture(GLEnum.Texture2D, defaultTextureID);
             unsafe
             {
                 fixed (byte* p = &whitePixel[0])
@@ -46,24 +52,36 @@ namespace RenderingEngine.Rendering
             }
 
             // Make it bindless
-            ArbBindlessTexture bindless = new ArbBindlessTexture((Silk.NET.Core.Contexts.INativeContext)Program.gl);
-            defaultHandle = bindless.GetTextureHandle(defaultTexture);
-            bindless.MakeImageHandleResident(defaultHandle, (ARB)GLEnum.ReadOnly);
+            if (Program.gl.TryGetExtension<ArbBindlessTexture>(out bindless))
+            {
+                defaultHandle = bindless.GetTextureHandle(defaultTextureID);
+                bindless.MakeTextureHandleResident(defaultHandle);
+            }
+            else
+            {
+                //Wont happen as checked in Program
+                Console.WriteLine("ERR: Bindless Textures Not Supported");
+                Program.Cleanup();
+            }
 
-            defaultMaterial = new Material("DEFAULT", new Vector3D<float>(255), defaultHandle);
+            defaultMaterial = new Material("DEFAULT", new Vector3D<float>(1f), defaultHandle, defaultTextureID);
         }
 
         
         public static Material CreateMaterial(string filename, Vector3D<float> defaultColour)
         {
-            ulong handle = GetTextureHandle(filename);
-            Material mat = new Material(filename, defaultColour, handle);
+            var data = GetTexture(filename);
+            Material mat = new Material(filename, defaultColour, data.handle, data.TextureID);
             return mat;
         }
 
-        public static ulong GetTextureHandle(string filename)
+        public static (ulong handle, uint TextureID) GetTexture(string filename)
         {
-            if (textureHandles.ContainsKey(filename)) { return textureHandles[filename]; }
+            if (textureHandles.ContainsKey(filename)) 
+            { 
+                var data = textureHandles[filename];
+                return (data.handle, data.textureID);
+            }
             try
             {
                 string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\TextureData\{filename}.png";
@@ -105,20 +123,35 @@ namespace RenderingEngine.Rendering
                 Program.gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)GLEnum.Repeat);
                 Program.gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)GLEnum.Repeat);
 
-
-                ArbBindlessTexture bindless = new ArbBindlessTexture((Silk.NET.Core.Contexts.INativeContext)Program.gl);
                 ulong handle = bindless.GetTextureHandle(texture);
-                bindless.MakeImageHandleResident(handle, (ARB)GLEnum.ReadOnly);
 
-                textureHandles.Add(filename, handle);
+                bindless.MakeTextureHandleResident(handle);
 
-                return handle;
+                bool resident = bindless.IsTextureHandleResident(handle);
+                Console.WriteLine($"Handle {handle} resident? {resident}");
+
+
+                textureHandles.Add(filename, (texture, handle));
+
+                return (handle, texture);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"ERR: Cannot Load Texture: {ex}");
-                return defaultHandle;
+                return (defaultHandle, defaultTextureID);
             }
         }
+
+
+        public static void UnloadTextures()
+        {
+            foreach (var tex in textureHandles.Values)
+                Program.gl.DeleteTexture(tex.textureID);
+        }
+
+
+
+
+
     }
 }
