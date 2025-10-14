@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RenderingEngine.Utilities;
 
-namespace RenderingEngine.RawObjData
+namespace RenderingEngine
 {
     public static class ImportHandler
     {

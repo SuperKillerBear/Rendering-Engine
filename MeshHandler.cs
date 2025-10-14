@@ -1,5 +1,4 @@
 ﻿using RenderingEngine.Meshes;
-using RenderingEngine.RawObjData;
 using RenderingEngine.Rendering;
 using Silk.NET.Input.Extensions;
 using System;

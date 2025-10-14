@@ -82,6 +82,23 @@ namespace RenderingEngine.Components
 
             writer.Write(addreessLength);
             writer.Write(meshAddressData);
+
+            string data;
+
+            if (material != null)
+                data = material.Filename;
+            else
+                data = "EMPTY";
+
+            byte[] encodedData = Encoding.UTF8.GetBytes(data);
+            ushort dataLength = (ushort)encodedData.Length;
+
+            writer.Write(dataLength);
+            writer.Write(encodedData);
+
+            writer.Write(material.Colour.X);
+            writer.Write(material.Colour.Y);
+            writer.Write(material.Colour.Z);
         }
 
         public void Deserialize(BinaryReader reader)
@@ -93,6 +110,20 @@ namespace RenderingEngine.Components
 
             Console.WriteLine($"Loaded Mesh Address Data: {meshAddress}");
             SetMesh(meshAddress);
+
+            length = reader.ReadUInt16();
+            byte[] materialData = reader.ReadBytes(length);
+            string materialAddress = Encoding.UTF8.GetString(materialData);
+
+            Vector3D<float> colour = new Vector3D<float>(
+                reader.ReadSingle(),
+                reader.ReadSingle(),
+                reader.ReadSingle()
+            );
+
+            this.material = MaterialHandler.CreateMaterial(materialAddress, colour);
+        
+            
         }
     }
 }

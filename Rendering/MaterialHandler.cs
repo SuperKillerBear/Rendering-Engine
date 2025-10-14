@@ -72,7 +72,8 @@ namespace RenderingEngine.Rendering
         public static Material CreateMaterial(string filename, Vector3D<float> defaultColour)
         {
             var data = GetTexture(filename);
-            Material mat = new Material(filename, defaultColour, data.handle, data.TextureID);
+            string name = data.handle == defaultHandle ? "DEFAULT" : filename;
+            Material mat = new Material(name, defaultColour, data.handle, data.TextureID);
             return mat;
         }
 
@@ -148,6 +149,7 @@ namespace RenderingEngine.Rendering
         {
             foreach (var tex in textureHandles.Values)
                 Program.gl.DeleteTexture(tex.textureID);
+            textureHandles.Clear();
         }
 
 
