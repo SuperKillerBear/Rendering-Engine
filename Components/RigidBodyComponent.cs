@@ -59,7 +59,7 @@ namespace RenderingEngine.Components
             if (applyGravity) this.ForceAccum.Y -= g * mass;
 
             //TODO: Collision Checks, etc
-            if (owner.Transform.Position.Y <= 0.5 * owner.Transform.Scale.Y && this.Velocity.Y < 0)
+            if (Owner.Transform.Position.Y <= 0.5 * Owner.Transform.Scale.Y && this.Velocity.Y < 0)
             {
                 this.Velocity.Y *= (float)-restitution;
             }
@@ -70,7 +70,7 @@ namespace RenderingEngine.Components
             Velocity += ForceAccum * 0.1f * dt;
 
             //Update Position Accordingly NOT WORKING
-            owner.Transform.Position += Velocity * dt;
+            Owner.Transform.Position += Velocity * dt;
 
 
             //Clear Forces at the end
@@ -92,7 +92,7 @@ namespace RenderingEngine.Components
             {
                 for (int c = 0; c < chunks.Count; c++)
                 {
-                    var collider = obj.owner.GetComponent<ColliderComponent>();
+                    var collider = obj.Owner.GetComponent<ColliderComponent>();
 
                     if (collider == null) continue;
 

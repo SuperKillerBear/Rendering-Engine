@@ -12,18 +12,18 @@ namespace RenderingEngine.Components
 {
     public abstract class Component : IDisposable
     {
-        public GameObject? owner = null;
+        public GameObject? Owner = null;
         public abstract string ComponentName { get; }
 
 
         public void SetOwner(GameObject Owner)
         {
-            this.owner = Owner;
+            this.Owner = Owner;
         }
 
         public virtual void Init(GameObject Owner)
         {
-            this.owner = Owner;
+            this.Owner = Owner;
             //Base Init
         }
 

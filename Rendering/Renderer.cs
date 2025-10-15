@@ -67,7 +67,7 @@ namespace RenderingEngine.Rendering
                             fieldOfView: Camera.FOV, // 60°
                             aspectRatio: Program.aspectRatio,
                             nearPlaneDistance: 0.1f,
-                            farPlaneDistance: 100f
+                            farPlaneDistance: 1000f
                         );
 
                     //TODO: Make Only Calc on Update
@@ -97,9 +97,9 @@ namespace RenderingEngine.Rendering
 
                         foreach (var rendrComp in group)
                         {
-                            rendrComp.owner.Transform.UpdateModelMatrix();
+                            rendrComp.Owner.Transform.UpdateModelMatrix();
 
-                            Matrix4X4<float> model = rendrComp.owner.Transform.ModelMatrix;
+                            Matrix4X4<float> model = rendrComp.Owner.Transform.ModelMatrix;
 
                             //Set Material
                             Material mat = rendrComp.material ?? MaterialHandler.defaultMaterial;

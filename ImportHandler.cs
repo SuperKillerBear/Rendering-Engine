@@ -6,16 +6,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RenderingEngine.Utilities;
+using System.Runtime.CompilerServices;
+using Silk.NET.Windowing;
+using RenderingEngine.Rendering;
 
 namespace RenderingEngine
 {
     public static class ImportHandler
     {
-        private static Dictionary<string, Vector3D<float>> materialMap = new();
+        private static Dictionary<string, (string filename, Vector3D<float> baseColour)> 
+            materialMap = new();
 
-        public static (List<float> vertices, List<uint> indices) LoadObjFile(string path)
+        public static Dictionary<string, List<List<(string name, string textureName, List<float> vertices, List<uint> indices)>>>
+            loadedObjMap = new();
+
+        public static void LoadObjFile(string filename)
         {
-            //TODO: Add failsafe for 
+            if (loadedObjMap.ContainsKey(filename))
+            { 
+                Console.WriteLine($"Obj already loaded: {filename}"); 
+                return; 
+            }
+
+
+            //TODO: Add failsafe if file doesnt exist
+
+            string path = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\MeshData\{filename}";
 
             // Raw per-file arrays
             var positions = new List<Vector3D<float>>();     // v
@@ -23,16 +39,26 @@ namespace RenderingEngine
             var normals = new List<Vector3D<float>>();       // vn
 
             // Final interleaved data and indices
-            var outFloats = new List<float>(); // x,y,z, r,g,b
+            var outFloats = new List<float>(); // x,y,z, r,g,b, u,v
+            
             var outIndices = new List<uint>();
 
             // Map to deduplicate (pos,uv,norm,material) -> index
             var indexMap = new Dictionary<(int p, int t, int n, string mat), uint>();
 
             // Material color map (string -> rgb)
-            LoadMaterials(path);
+            LoadMaterials(path, filename);
 
-            string currentMaterial = "default";
+            string currentMaterialName = "default";
+
+
+            bool firstObject = true;
+            bool firstMaterial = true;
+
+            List<List<(string filename, string textureName, List<float> vertices, List<uint> indices)>> Objects = new();
+            List<(string filename, string textureName, List<float> vertices, List<uint> indices)> SubMeshes = new();
+
+            string currentObjectName = "";
 
             
 
@@ -56,6 +82,19 @@ namespace RenderingEngine
 
                 switch (parts[0])
                 {
+                    case "o":
+                        
+                        if (!firstObject)
+                        {
+                            //Wont be null ADD TO OBJECTS LIST
+                            Objects.Add(SubMeshes);
+                            outFloats.Clear();
+                            outIndices.Clear();
+                        }
+
+                        currentObjectName = parts[1];
+                        firstObject = false;
+                        break;
                     case "v":
                         if (parts.Length < 4) continue;
                         positions.Add(new Vector3D<float>(ParseF(parts[1]), ParseF(parts[2]), ParseF(parts[3])));
@@ -74,15 +113,35 @@ namespace RenderingEngine
                     case "usemtl":
                         if (parts.Length >= 2)
                         {
-                            currentMaterial = parts[1];
-                            // ensure material exists in map (auto-generate if necessary)
-                            if (!materialMap.ContainsKey(currentMaterial))
-                            {
-                                Console.WriteLine($"ColourMap Doesnt Contain Colour for Key: {currentMaterial}");
-                                materialMap[currentMaterial] = new Vector3D<float>(1f, 0f, 1f);
-                            }
-                            else { Console.WriteLine($"Colour Loaded key: {currentMaterial}, RGB: {materialMap[currentMaterial]}"); }
                             
+
+                            // ensure material exists in map (auto-generate if necessary)
+                            if (!firstMaterial && outFloats.Count > 0)
+                            {
+                                SubMeshes.Add((currentObjectName, currentMaterialName, new List<float>(outFloats), new List<uint>(outIndices)));
+                                outFloats.Clear();
+                                outIndices.Clear();
+                                indexMap.Clear();
+                            }
+
+                            string key = $"{filename}/{currentMaterialName}";
+
+                            if (!materialMap.ContainsKey(key))
+                            {
+                                Console.WriteLine($"ColourMap Doesnt Contain Colour for Key: {key}");
+                                materialMap[key] = ($"EMPTY", new Vector3D<float>(1f, 0f, 1f));
+
+                            }
+                            else { Console.WriteLine($"Loaded key: {key}, Data: {materialMap[key]}"); }
+
+                            //Generate Texture such that its stored in the MaterialHandler Dictionary for the filename for later
+                            //TODO: Doesnt support basecolour, im lazy rn
+
+                            //Creating Key for handle and textID
+                            currentMaterialName = parts[1];
+                            firstMaterial = false;
+                            
+                            MaterialHandler.GetTexture(materialMap[key].filename); //Filename is wrong
                         }
                         break;
 
@@ -116,9 +175,9 @@ namespace RenderingEngine
                             // For now we keep order as-is (Blender usually exports correct winding).
 
                             // Add or reuse vertex a,b,c
-                            AddVertex(a.p, a.t, a.n, currentMaterial, positions, uvs, normals, indexMap, outFloats, outIndices);
-                            AddVertex(b.p, b.t, b.n, currentMaterial, positions, uvs, normals, indexMap, outFloats, outIndices);
-                            AddVertex(c.p, c.t, c.n, currentMaterial, positions, uvs, normals, indexMap, outFloats, outIndices);
+                            AddVertex(a.p, a.t, a.n, currentMaterialName, positions, uvs, normals, indexMap, outFloats, outIndices);
+                            AddVertex(b.p, b.t, b.n, currentMaterialName, positions, uvs, normals, indexMap, outFloats, outIndices);
+                            AddVertex(c.p, c.t, c.n, currentMaterialName, positions, uvs, normals, indexMap, outFloats, outIndices);
                         }
                         break;
 
@@ -126,9 +185,16 @@ namespace RenderingEngine
                         // ignore other directives
                         break;
                 }
+
+
             }
 
-            return (outFloats, outIndices);
+            //Add Final Object
+            if (outFloats.Count > 0) SubMeshes.Add((currentObjectName, currentMaterialName, new List<float>(outFloats), new List<uint>(outIndices)));
+            
+            Objects.Add(SubMeshes); //Wont Be null
+
+            loadedObjMap.Add(filename, Objects);
 
             // ---------- Local helpers ----------
             static void AddVertex(int pIdx, int tIdx, int nIdx, string mat,
@@ -146,7 +212,7 @@ namespace RenderingEngine
                     Vector3D<float> pos = (pIdx >= 0 && pIdx < positions.Count) ? positions[pIdx] : new Vector3D<float>(0f, 0f, 0f);
 
                     // choose color from material map (fallback to Pink)
-                    Vector3D<float> col = materialMap.TryGetValue(mat, out var mc) ? mc : new Vector3D<float>(1f, 0f, 1f);
+                    Vector3D<float> col = materialMap.TryGetValue(mat, out var mc) ? mc.Item2 : new Vector3D<float>(1f, 0f, 1f);
 
                     Vector2D<float> uv = (tIdx >= 0 && tIdx < uvs.Count)
                         ? uvs[tIdx]
@@ -173,9 +239,11 @@ namespace RenderingEngine
         }
 
 
-        static void LoadMaterials(string path)
+        static void LoadMaterials(string path, string filename)
         {
-            string currentMaterial = "";
+            string currentMaterial = "EMPTY";
+            string currentFilename = "EMPTY";
+            Vector3D<float> currentKd = Vector3D<float>.One;
 
             foreach (var rawLine in   File.ReadLines($"{path}.mtl"))
             {
@@ -187,13 +255,24 @@ namespace RenderingEngine
 
                 if (parts.Length == 0) continue;
 
+                
 
                 switch (parts[0])
                 {
                     case "newmtl":
                         //New Material
                         if (parts.Length < 2) continue;
+
+                        if (currentMaterial != "EMPTY")
+                        {
+                            //Not First => upload
+                            //materialMap KEY = filename/currentMaterial => (filename, baseColour)
+                            materialMap.Add($"{filename}/{currentMaterial}", (currentMaterial, currentKd));
+                        }
+
                         currentMaterial = parts[1];
+                        currentFilename = "EMPTY";
+                        currentKd = Vector3D<float>.One;
                         break;
                     case "Kd":
                         //Ambient Colour of Material
@@ -201,18 +280,27 @@ namespace RenderingEngine
 
                         Console.WriteLine($"1: {parts[1]}, 2: {parts[2]}, 3: {parts[3]}");
 
-                        Vector3D<float> colour = new Vector3D<float>(
+                        currentKd = new Vector3D<float>(
                             ParseF(parts[1]),
                             ParseF(parts[2]),
                             ParseF(parts[3])
                             );
 
-                        materialMap[currentMaterial] = colour;
+                        
+                        
+                        break;
+                    case "map_Kd":
+                        string texPath = @$"{parts[1]}";
+                        string texPathName = Path.GetFileNameWithoutExtension(path);
+                        currentFilename = texPathName;
                         break;
                 }
 
 
             }
+
+            //Add Final Material
+            materialMap.Add($"{filename}/{currentMaterial}", (currentMaterial, currentKd));
         }
 
         // Helper local funcs:

@@ -139,30 +139,25 @@ namespace RenderingEngine
             else Console.WriteLine("Bindless Textures ARE Supported...");
 
             
-            Material mat1 = MaterialHandler.CreateMaterial("test", new Vector3D<float>(1));
-            Material mat2 = MaterialHandler.CreateMaterial("debug", new Vector3D<float>(1));
-
+            
             var floor = new GameObject();
-            floor.name = "Floor";
-            floor.AddComponent<RendererComponent>().SetMesh("RobinHoodBay");
+            floor.name = "Hospital";
+            floor.AddComponent<RendererComponent>().SetMesh("SilentHill");
+            //floor.Transform.Scale = new Vector3D<float>(1f);
 
-            var ren = floor.GetComponent<RendererComponent>();
-            ren.material = mat1;
-
-
-            floor.Transform.Position.Y = 0.5f;
+            //floor.Transform.TranslatePosition(new Vector3D<float>(0, 0.5f, 0));
 
             var cube = new GameObject();
             cube.name = "Physics Cube";
             
             cube.AddComponent<RigidBodyComponent>();
 
-            cube.Transform.Position.Y = 4.5f;
             
-            cube.AddComponent<RendererComponent>().SetMesh("Cube");
+            
+            cube.AddComponent<RendererComponent>(); //.SetMesh("Cube", cube)
 
-            ren = cube.GetComponent<RendererComponent>();
-            ren.material = mat2;
+            //var ren = cube.GetComponent<RendererComponent>();
+            //ren.material = mat2;
 
             frameStopwatch.Start();
         }

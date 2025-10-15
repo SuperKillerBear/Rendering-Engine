@@ -27,23 +27,78 @@ namespace RenderingEngine.Components
         {
             base.Init(Owner); //Init + Set Owner
             Renderer.RenderingObjects.Add(this);
+
         }
 
+        //Multiple Objects can be loaded from one file, thus not a singular mesh can be returned
+        //Bad Name
         public void SetMesh(string filename)
         {
-            uint? meshID = MeshHandler.LoadMeshFile(filename);
-            if (meshID != null)
+            var ObjectList = MeshHandler.LoadMeshsFile(filename);
+
+            (string[] firstNames, uint[] firstMeshIDs) = ObjectList[0];
+            if (ObjectList.Count == 1 && firstMeshIDs.Length == 1)
             {
+                //Apply Mesh
                 meshAddress = filename;
                 AssignedMesh = true;
-                MeshID = meshID.Value;
+                MeshID = firstMeshIDs[0];
+
+                var objData = ImportHandler.loadedObjMap[filename][0][0];
+                //Apply Material
+                this.material = MaterialHandler.CreateMaterial(objData.textureName, Vector3D<float>.One);
             }
             else
             {
-                meshAddress = "EMPTY";
+                int objIndex = 0;
+                foreach ((string[] names, uint[] meshIDs) in ObjectList) 
+                {
+                    //Create Object
+                    GameObject newObject = new GameObject(Parent: Owner, name: "ChangeLater"); //Implement Passing Obj Names
+                    
+                    var idCount = meshIDs.Count();
+
+                    if (idCount == 0) { meshAddress = "EMPTY"; objIndex++; continue; }
+
+                    for (int i = 0; i < idCount; i++)
+                    {
+                        //Create Submesh GameObject
+                        GameObject newSubMesh = new GameObject(Parent: newObject, name: names[i]);
+                        var rend = newSubMesh.AddComponent<RendererComponent>();
+                        newSubMesh.Transform.Scale = new Vector3D<float>(0.2f);
+
+                        //Assign Mesh
+                        rend.SetMeshID(meshIDs[i]);
+
+                        //Mesh Address wont work for loading as scene, etc.
+                        rend.meshAddress = $"{filename}/{newSubMesh.name}";
+
+                        //Apply Material
+                        var objList = ImportHandler.loadedObjMap[filename];
+                        var obj = objList[objIndex];
+                        var submesh = obj[i];
+                        rend.material = MaterialHandler.CreateMaterial(submesh.textureName, Vector3D<float>.One);
+                    }
+
+                    objIndex++;
+                }
+                
+
+                //Finally Remove this Renderer Component
+                Renderer.RenderingObjects.Remove(this);
+                Owner.RemoveComponent(this);
             }
         }
 
+        public void SetMeshID(uint id)
+        {
+            if (MeshHandler.GetMesh(id) != MeshHandler.Meshes[0])
+            {
+                this.MeshID = id;
+                this.AssignedMesh = true;
+            }
+            
+        }
 
         public override void OnInspectorGUI()
         {

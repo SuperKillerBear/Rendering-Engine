@@ -84,10 +84,7 @@ namespace RenderingEngine
                     Camera.enableGUI = !Camera.enableGUI;
                     mouse.Cursor.CursorMode = Camera.enableGUI ? CursorMode.Normal : CursorMode.Raw;
                     break;
-                case Key.Up:
-                    Program.SceneObjects[1].Transform.Position.Y += 0.5f; break;
-                case Key.Down:
-                    Program.SceneObjects[1].Transform.Position.Y -= 0.5f; break;
+                
             }
         }
 

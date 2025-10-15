@@ -1,11 +1,6 @@
-﻿using Silk.NET.Maths;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ImGuiNET;
 using RenderingEngine.GameObjects;
-using ImGuiNET;
+using Silk.NET.Maths;
 
 namespace RenderingEngine.Components
 {
@@ -43,7 +38,7 @@ namespace RenderingEngine.Components
         {
             base.Init(Owner); //Init + Set Owner
 
-            collider = owner?.GetComponent<ColliderComponent>();
+            collider = Owner?.GetComponent<ColliderComponent>();
         }
 
 
@@ -101,3 +96,4 @@ namespace RenderingEngine.Components
         }
     }
 }
+

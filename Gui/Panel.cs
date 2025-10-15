@@ -95,7 +95,12 @@ namespace RenderingEngine.Gui
 
             ImGui.InputText("Name", ref selectedObject.name, 32);
             ImGui.Checkbox("Debug", ref selectedObject.debug);
-
+            var parent = selectedObject.parent;
+            var name = parent == null ? string.Empty : parent.name;
+            ImGui.Text($"Parent: {name}");
+            ImGui.Text($"Child Count: {selectedObject.children.Count}");
+            string result = string.Join(", ", selectedObject.children.Select(c => c.name));
+            ImGui.Text($"Children: {result}");
             foreach (var comp in selectedObject.Components)
             {
                 if (ImGui.CollapsingHeader(comp.ComponentName))

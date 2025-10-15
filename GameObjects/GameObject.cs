@@ -14,16 +14,23 @@ namespace RenderingEngine.GameObjects
 
         public TransformComponent Transform { get; private set; }
 
-        private GameObject? parent;
-        private List<GameObject> children = new List<GameObject>();
+        public GameObject? parent { get; private set; } = null;
+        public List<GameObject> children { get; private set; } = new List<GameObject>(); 
 
         public List<Component> Components = new List<Component>();
 
-        public GameObject(GameObject? Parent = null, bool autoAddTransform = true)
+        public GameObject(GameObject? Parent = null, bool autoAddTransform = true, string name = "Empty Object")
         {
-            this.parent = Parent;
+            this.name = name;
+            if (Parent != null) Parent.AssignChild(this);
             Program.SceneObjects.Add(this);
             if (autoAddTransform) Transform = this.AddComponent<TransformComponent>();
+        }
+
+        public void AssignChild(GameObject child)
+        {
+            this.children.Add(child);
+            child.parent = this;
         }
 
         public bool RemoveComponent(Component component)

@@ -14,7 +14,7 @@ namespace RenderingEngine
     {
         public static readonly List<Mesh> Meshes = new List<Mesh>();
 
-        private static readonly Dictionary<string, uint> loadedMeshes = new();
+        public static readonly Dictionary<string, uint> loadedMeshes = new();
 
         public static void Init()
         {
@@ -40,32 +40,66 @@ namespace RenderingEngine
             
         }
 
-        public static uint? LoadMeshFile(string filename)
+        public static List<(string[], uint[])> LoadMeshsFile(string filename)
         {
-            if (loadedMeshes.ContainsKey(filename)) return loadedMeshes[filename];
+            List<(string[], uint[])> outObjects = new();
+            if (loadedMeshes.ContainsKey(filename))
+            {
+                outObjects.Add(([filename], [loadedMeshes[filename]]));
+                return outObjects;
+            }
 
             //Dont include file type
             string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\MeshData\{filename}";
             
             try
             {
-                var (vertsList, indsList) = ImportHandler.LoadObjFile(localPath);
-                float[] verts = vertsList.ToArray();
-                uint[] inds = indsList.ToArray();
+                ImportHandler.LoadObjFile(filename);
+                var objs = ImportHandler.loadedObjMap[filename];
 
-                Mesh loadedMesh = new Mesh(verts, inds);
+                List<uint> ids = new List<uint>();
+                List<string> names = new List<string>();
 
-                uint id = (uint)Meshes.Count;
-                Meshes.Add(loadedMesh);
+                int objIndex = 0;
+                foreach (var obj in objs)
+                {
+                    int meshIndex = 0;
+                    foreach (var subMesh in obj)
+                    {
+                        float[] verts = subMesh.vertices.ToArray();
+                        uint[] inds = subMesh.indices.ToArray();
 
-                loadedMeshes.Add(filename, id);
+                        Mesh loadedMesh = new Mesh(verts, inds);
 
-                return id;
+                        uint id = (uint)Meshes.Count;
+
+                        Console.WriteLine($"ID: {id}");
+
+                        Meshes.Add(loadedMesh);
+
+                        Console.WriteLine($"New Mesh Count: {Meshes.Count}");
+                        string key = $"New Key: {filename}/{objIndex}/{meshIndex}/{subMesh.name}";
+                        Console.WriteLine(key);
+                        loadedMeshes.Add(key, id);
+
+                        ids.Add(id);
+                        names.Add(subMesh.name);
+                        Console.WriteLine($"New IDs Values: {string.Join(", ", ids)}");
+
+                        meshIndex++;
+                    }
+                    outObjects.Add((names.ToArray(), ids.ToArray()));
+                    objIndex++;
+                }
+                
+                return outObjects;
+
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ERR: Could not load mesh: {ex}");
-                return null;
+                Console.WriteLine($"ERR: Mesh Handler => Could not load mesh: {ex}"); //Throw Error
+                outObjects.Add(([], []));
+                return outObjects;
             }
             
         }

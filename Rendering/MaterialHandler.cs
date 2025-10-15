@@ -27,6 +27,7 @@ namespace RenderingEngine.Rendering
 
     public static class MaterialHandler
     {
+        //Filename => TextID, Handle
         private static Dictionary<string, (uint textureID, ulong handle)> textureHandles = new();
 
         public static ArbBindlessTexture bindless;
@@ -69,16 +70,20 @@ namespace RenderingEngine.Rendering
         }
 
 
-        public static Material CreateMaterial(string filename, Vector3D<float> defaultColour)
+        public static Material CreateMaterial(string filename, Vector3D<float> baseColour)
         {
             var data = GetTexture(filename);
             string name = data.handle == defaultHandle ? "DEFAULT" : filename;
-            Material mat = new Material(name, defaultColour, data.handle, data.TextureID);
+            Material mat = new Material(name, baseColour, data.handle, data.TextureID);
             return mat;
         }
 
+        
+
         public static (ulong handle, uint TextureID) GetTexture(string filename)
         {
+            if (filename == "EMPTY") { Console.WriteLine("Loading DefaultMaterial for EMPTY"); return (defaultHandle, defaultTextureID); }
+
             if (textureHandles.ContainsKey(filename)) 
             { 
                 var data = textureHandles[filename];
