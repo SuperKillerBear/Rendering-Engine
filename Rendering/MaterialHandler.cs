@@ -78,7 +78,7 @@ namespace RenderingEngine.Rendering
             return mat;
         }
 
-        
+ 
 
         public static (ulong handle, uint TextureID) GetTexture(string filename)
         {

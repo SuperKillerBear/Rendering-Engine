@@ -36,58 +36,45 @@ namespace RenderingEngine.Components
         {
             var ObjectList = MeshHandler.LoadMeshsFile(filename);
 
-            (string[] firstNames, uint[] firstMeshIDs) = ObjectList[0];
-            if (ObjectList.Count == 1 && firstMeshIDs.Length == 1)
+            int objIndex = 0;
+            foreach ((string[] names, uint[] meshIDs) in ObjectList) 
             {
-                //Apply Mesh
-                meshAddress = filename;
-                AssignedMesh = true;
-                MeshID = firstMeshIDs[0];
-
-                var objData = ImportHandler.loadedObjMap[filename][0][0];
-                //Apply Material
-                this.material = MaterialHandler.CreateMaterial(objData.textureName, Vector3D<float>.One);
-            }
-            else
-            {
-                int objIndex = 0;
-                foreach ((string[] names, uint[] meshIDs) in ObjectList) 
-                {
-                    //Create Object
-                    GameObject newObject = new GameObject(Parent: Owner, name: "ChangeLater"); //Implement Passing Obj Names
+                //Create Object
+                GameObject newObject = new GameObject(Parent: Owner, name: "ChangeLater"); //Implement Passing Obj Names
                     
-                    var idCount = meshIDs.Count();
+                var idCount = meshIDs.Count();
 
-                    if (idCount == 0) { meshAddress = "EMPTY"; objIndex++; continue; }
+                if (idCount == 0) { meshAddress = "EMPTY"; objIndex++; continue; }
 
-                    for (int i = 0; i < idCount; i++)
-                    {
-                        //Create Submesh GameObject
-                        GameObject newSubMesh = new GameObject(Parent: newObject, name: names[i]);
-                        var rend = newSubMesh.AddComponent<RendererComponent>();
-                        newSubMesh.Transform.Scale = new Vector3D<float>(0.2f);
+                for (int i = 0; i < idCount; i++)
+                {
+                    //Create Submesh GameObject
+                    GameObject newSubMesh = new GameObject(Parent: newObject, name: names[i]);
+                    var rend = newSubMesh.AddComponent<RendererComponent>();
+                    newSubMesh.Transform.Scale = new Vector3D<float>(0.2f);
 
-                        //Assign Mesh
-                        rend.SetMeshID(meshIDs[i]);
+                    //Assign Mesh
+                    rend.SetMeshID(meshIDs[i]);
 
-                        //Mesh Address wont work for loading as scene, etc.
-                        rend.meshAddress = $"{filename}/{newSubMesh.name}";
+                    //Mesh Address wont work for loading as scene, etc.
+                    rend.meshAddress = $"{filename}/{newSubMesh.name}";
 
-                        //Apply Material
-                        var objList = ImportHandler.loadedObjMap[filename];
-                        var obj = objList[objIndex];
-                        var submesh = obj[i];
-                        rend.material = MaterialHandler.CreateMaterial(submesh.textureName, Vector3D<float>.One);
-                    }
-
-                    objIndex++;
+                    //Apply Material
+                    var objList = ImportHandler.loadedObjMap[filename];
+                    var obj = objList[objIndex];
+                    Console.WriteLine($"THIS IS CAUSING THE ERROR: ID: {i}");
+                    var submesh = obj[i]; //OUT OF RANGE ERROR WHEN i IS 1
+                    rend.material = MaterialHandler.CreateMaterial(submesh.textureName, Vector3D<float>.One);
                 }
+
+                objIndex++;
+            }
                 
 
-                //Finally Remove this Renderer Component
-                Renderer.RenderingObjects.Remove(this);
-                Owner.RemoveComponent(this);
-            }
+            //Finally Remove this Renderer Component
+            Renderer.RenderingObjects.Remove(this);
+            Owner.RemoveComponent(this);
+            
         }
 
         public void SetMeshID(uint id)

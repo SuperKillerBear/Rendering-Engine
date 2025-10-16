@@ -29,9 +29,7 @@ namespace RenderingEngine.Gui
     class HierarchyPanel : Panel
     {
         private GameObject selectedObject;
-        
-
-        private InspectorPanel inspectorPanel;
+        private readonly InspectorPanel inspectorPanel;
 
         public HierarchyPanel(InspectorPanel insPanel)
         {
@@ -44,44 +42,76 @@ namespace RenderingEngine.Gui
 
             bool clickedItem = false;
             int idx = 0;
+
+            // Draw only ROOT objects (those without a parent)
             foreach (var obj in Program.SceneObjects)
             {
+                if (obj.parent != null)
+                    continue; // skip children — they'll be drawn under parents
+
                 ImGui.PushID(idx);
-                if (ImGuiNET.ImGui.Selectable(obj.name, obj == selectedObject))
-                {
-                    selectedObject = obj;
-                    clickedItem = true;
-                    
-                }
+                DrawObjectNode(obj, ref clickedItem);
                 ImGui.PopID();
                 idx++;
             }
-            
 
+            // Right-click context menu when no item is clicked
             if (ImGui.IsWindowHovered() && !clickedItem)
             {
-                //Make Better Logic + Code Here
-                if (ImGui.IsMouseClicked(ImGuiMouseButton.Right)) {
+                if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                {
                     selectedObject = null;
                     ImGui.OpenPopup("HierarchyContextMenu");
                 }
-
             }
+
             if (ImGui.BeginPopup("HierarchyContextMenu"))
             {
                 if (ImGui.MenuItem("Add Object"))
                 {
-                    //Logic
-
+                    // TODO: Add logic to create a new object
                 }
                 ImGui.EndPopup();
             }
-            
-            inspectorPanel.SetSelected(selectedObject); 
-            
+
+            inspectorPanel.SetSelected(selectedObject);
             ImGuiNET.ImGui.End();
         }
+
+        private void DrawObjectNode(GameObject obj, ref bool clickedItem)
+        {
+            bool hasChildren = obj.children != null && obj.children.Count > 0;
+
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.SpanAvailWidth;
+            if (!hasChildren)
+                flags |= ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+            if (obj == selectedObject)
+                flags |= ImGuiTreeNodeFlags.Selected;
+
+            // Give each object a unique ID using its pointer or hash
+            string label = $"{obj.name}##{obj.GetHashCode()}";
+
+            bool open = ImGui.TreeNodeEx(label, flags);
+
+            if (ImGui.IsItemClicked())
+            {
+                selectedObject = obj;
+                clickedItem = true;
+            }
+
+            // Recursively draw children if expanded
+            if (hasChildren && open)
+            {
+                foreach (var child in obj.children)
+                    DrawObjectNode(child, ref clickedItem);
+
+                ImGui.TreePop();
+            }
+        }
+
     }
+
+
 
     class InspectorPanel : Panel
     {

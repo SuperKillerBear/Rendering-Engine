@@ -49,20 +49,19 @@ namespace RenderingEngine
                 return outObjects;
             }
 
-            //Dont include file type
             string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\MeshData\{filename}";
-            
+
             try
             {
                 ImportHandler.LoadObjFile(filename);
                 var objs = ImportHandler.loadedObjMap[filename];
 
-                List<uint> ids = new List<uint>();
-                List<string> names = new List<string>();
-
                 int objIndex = 0;
                 foreach (var obj in objs)
                 {
+                    List<uint> ids = new List<uint>();     // <-- moved here
+                    List<string> names = new List<string>(); // <-- moved here
+
                     int meshIndex = 0;
                     foreach (var subMesh in obj)
                     {
@@ -70,7 +69,6 @@ namespace RenderingEngine
                         uint[] inds = subMesh.indices.ToArray();
 
                         Mesh loadedMesh = new Mesh(verts, inds);
-
                         uint id = (uint)Meshes.Count;
 
                         Console.WriteLine($"ID: {id}");
@@ -88,21 +86,21 @@ namespace RenderingEngine
 
                         meshIndex++;
                     }
+
                     outObjects.Add((names.ToArray(), ids.ToArray()));
                     objIndex++;
                 }
-                
-                return outObjects;
 
+                return outObjects;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ERR: Mesh Handler => Could not load mesh: {ex}"); //Throw Error
+                Console.WriteLine($"ERR: Mesh Handler => Could not load mesh: {ex}");
                 outObjects.Add(([], []));
                 return outObjects;
             }
-            
         }
+
 
         public static void UnloadAll()
         {

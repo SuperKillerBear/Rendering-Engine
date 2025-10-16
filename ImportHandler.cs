@@ -90,7 +90,12 @@ namespace RenderingEngine
                             Objects.Add(SubMeshes);
                             outFloats.Clear();
                             outIndices.Clear();
+                            indexMap.Clear();
+                            SubMeshes = new();
                         }
+
+                        // Create a new submesh list for the new object
+                        SubMeshes = new List<(string filename, string textureName, List<float> vertices, List<uint> indices)>();
 
                         currentObjectName = parts[1];
                         firstObject = false;
