@@ -71,10 +71,12 @@ namespace RenderingEngine
                 // negative index: relative to end
                 return listCount + idx;
             }
-
+            int RECOGNISEDOBJECTS = 0;
+            int lineNum = 0;
             // Read OBJ
             foreach (var rawLine in File.ReadLines($"{path}.obj"))
             {
+                lineNum++;
                 var line = rawLine.Trim();
                 if (line.Length == 0 || line[0] == '#') continue;
                 var parts = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
@@ -83,9 +85,14 @@ namespace RenderingEngine
                 switch (parts[0])
                 {
                     case "o":
-                        
+                        RECOGNISEDOBJECTS++;
+                        Console.WriteLine($"Recognised Objects: {RECOGNISEDOBJECTS} on Line: {lineNum}");
                         if (!firstObject)
                         {
+                            if (!firstMaterial && outFloats.Count > 0)
+                            {
+                                SubMeshes.Add((currentObjectName, currentMaterialName, new List<float>(outFloats), new List<uint>(outIndices)));
+                            }
                             //Wont be null ADD TO OBJECTS LIST
                             Objects.Add(SubMeshes);
                             outFloats.Clear();
@@ -200,6 +207,8 @@ namespace RenderingEngine
             Objects.Add(SubMeshes); //Wont Be null
 
             loadedObjMap.Add(filename, Objects);
+
+            
 
             // ---------- Local helpers ----------
             static void AddVertex(int pIdx, int tIdx, int nIdx, string mat,

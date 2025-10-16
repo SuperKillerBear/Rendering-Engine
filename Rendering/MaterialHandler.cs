@@ -98,6 +98,9 @@ namespace RenderingEngine.Rendering
                     image = ImageResult.FromStream(fs, ColorComponents.RedGreenBlueAlpha);
                 }
 
+                FlipImageVertically(image.Data, image.Width, image.Height, 4);
+
+
                 int width = image.Width;
                 int height = image.Height;
                 byte[] pixels = image.Data;
@@ -148,6 +151,24 @@ namespace RenderingEngine.Rendering
                 return (defaultHandle, defaultTextureID);
             }
         }
+
+        
+        private static void FlipImageVertically(byte[] data, int width, int height, int channels)
+        {
+            for (int y = 0; y < height / 2; y++)
+            {
+                int top = y * width * channels;
+                int bottom = (height - y - 1) * width * channels;
+
+                for (int x = 0; x < width * channels; x++)
+                {
+                    byte temp = data[top + x];
+                    data[top + x] = data[bottom + x];
+                    data[bottom + x] = temp;
+                }
+            }
+        }
+
 
 
         public static void UnloadTextures()

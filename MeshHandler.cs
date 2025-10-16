@@ -40,29 +40,29 @@ namespace RenderingEngine
             
         }
 
-        public static List<(string[], uint[])> LoadMeshsFile(string filename)
+        public static List<(string[] names, uint[] ids, int objectIndex)> LoadMeshsFile(string filename)
         {
-            List<(string[], uint[])> outObjects = new();
+            List<(string[], uint[], int)> outObjects = new();
+
             if (loadedMeshes.ContainsKey(filename))
             {
-                outObjects.Add(([filename], [loadedMeshes[filename]]));
+                // Return cached - need to reconstruct from keys
+                outObjects.Add(([filename], [loadedMeshes[filename]], 0));
                 return outObjects;
             }
-
-            string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\MeshData\{filename}";
 
             try
             {
                 ImportHandler.LoadObjFile(filename);
                 var objs = ImportHandler.loadedObjMap[filename];
-
                 int objIndex = 0;
+
                 foreach (var obj in objs)
                 {
-                    List<uint> ids = new List<uint>();     // <-- moved here
-                    List<string> names = new List<string>(); // <-- moved here
-
+                    List<uint> ids = new List<uint>();
+                    List<string> names = new List<string>();
                     int meshIndex = 0;
+
                     foreach (var subMesh in obj)
                     {
                         float[] verts = subMesh.vertices.ToArray();
@@ -71,23 +71,28 @@ namespace RenderingEngine
                         Mesh loadedMesh = new Mesh(verts, inds);
                         uint id = (uint)Meshes.Count;
 
-                        Console.WriteLine($"ID: {id}");
-
                         Meshes.Add(loadedMesh);
 
-                        Console.WriteLine($"New Mesh Count: {Meshes.Count}");
-                        string key = $"New Key: {filename}/{objIndex}/{meshIndex}/{subMesh.name}";
-                        Console.WriteLine(key);
+                        string key = $"{filename}/{objIndex}/{meshIndex}";
+                        Console.WriteLine($"Creating mesh - Key: {key}, ID: {id}, Name: {subMesh.name}");
+
                         loadedMeshes.Add(key, id);
 
                         ids.Add(id);
                         names.Add(subMesh.name);
-                        Console.WriteLine($"New IDs Values: {string.Join(", ", ids)}");
-
                         meshIndex++;
                     }
 
-                    outObjects.Add((names.ToArray(), ids.ToArray()));
+                    // Only add if we actually created meshes
+                    if (ids.Count > 0)
+                    {
+                        outObjects.Add((names.ToArray(), ids.ToArray(), objIndex));
+                    }
+                    else
+                    {
+                        Console.WriteLine($"WARNING: Object {objIndex} in {filename} has no submeshes!");
+                    }
+
                     objIndex++;
                 }
 
@@ -96,7 +101,7 @@ namespace RenderingEngine
             catch (Exception ex)
             {
                 Console.WriteLine($"ERR: Mesh Handler => Could not load mesh: {ex}");
-                outObjects.Add(([], []));
+                outObjects.Add(([], [], -1));
                 return outObjects;
             }
         }

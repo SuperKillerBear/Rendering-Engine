@@ -36,46 +36,66 @@ namespace RenderingEngine.Components
         {
             var ObjectList = MeshHandler.LoadMeshsFile(filename);
 
-            int objIndex = 0;
-            foreach ((string[] names, uint[] meshIDs) in ObjectList) 
+            foreach ((string[] names, uint[] meshIDs, int sourceObjIndex) in ObjectList)
             {
-                //Create Object
-                GameObject newObject = new GameObject(Parent: Owner, name: "ChangeLater"); //Implement Passing Obj Names
-                    
-                var idCount = meshIDs.Count();
+                var idCount = meshIDs.Length;
+                if (idCount == 0)
+                {
+                    Console.WriteLine($"Skipping empty object in {filename}");
+                    continue;
+                }
 
-                if (idCount == 0) { meshAddress = "EMPTY"; objIndex++; continue; }
+                // Create parent object for this OBJ
+                string objName = $"{filename}_obj_{sourceObjIndex}";
+                GameObject newObject = new GameObject(Parent: Owner, name: objName);
+
+                // Get the source object data
+                var objList = ImportHandler.loadedObjMap[filename];
+
+                // Validate object index
+                if (sourceObjIndex < 0 || sourceObjIndex >= objList.Count)
+                {
+                    Console.WriteLine($"ERROR: Invalid object index {sourceObjIndex} for {filename}");
+                    continue;
+                }
+
+                var sourceObj = objList[sourceObjIndex];
 
                 for (int i = 0; i < idCount; i++)
                 {
-                    //Create Submesh GameObject
+                    // Validate submesh index
+                    if (i >= sourceObj.Count)
+                    {
+                        Console.WriteLine($"ERROR: Submesh index {i} out of range for object {sourceObjIndex} (has {sourceObj.Count} submeshes)");
+                        break;
+                    }
+
+                    // Create Submesh GameObject
                     GameObject newSubMesh = new GameObject(Parent: newObject, name: names[i]);
                     var rend = newSubMesh.AddComponent<RendererComponent>();
                     newSubMesh.Transform.Scale = new Vector3D<float>(0.2f);
 
-                    //Assign Mesh
+                    // Assign Mesh
                     rend.SetMeshID(meshIDs[i]);
+                    rend.meshAddress = $"{filename}/{sourceObjIndex}/{i}";
 
-                    //Mesh Address wont work for loading as scene, etc.
-                    rend.meshAddress = $"{filename}/{newSubMesh.name}";
+                    // Apply Material - Now safely access submesh
+                    var submesh = sourceObj[i];
 
-                    //Apply Material
-                    var objList = ImportHandler.loadedObjMap[filename];
-                    var obj = objList[objIndex];
-                    Console.WriteLine($"THIS IS CAUSING THE ERROR: ID: {i}");
-                    var submesh = obj[i]; //OUT OF RANGE ERROR WHEN i IS 1
-                    rend.material = MaterialHandler.CreateMaterial(submesh.textureName, Vector3D<float>.One);
+                    // Create material with texture if available
+                    string textureName = string.IsNullOrEmpty(submesh.textureName) ? "EMPTY" : submesh.textureName;
+                    rend.material = MaterialHandler.CreateMaterial(textureName, Vector3D<float>.One);
+
+                    Console.WriteLine($"Created submesh: {names[i]} with texture: {textureName}");
                 }
-
-                objIndex++;
             }
-                
 
-            //Finally Remove this Renderer Component
+            // Finally Remove this Renderer Component
             Renderer.RenderingObjects.Remove(this);
             Owner.RemoveComponent(this);
-            
         }
+
+
 
         public void SetMeshID(uint id)
         {
