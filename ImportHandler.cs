@@ -31,7 +31,7 @@ namespace RenderingEngine
 
             //TODO: Add failsafe if file doesnt exist
 
-            string path = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\MeshData\{filename}";
+            string path = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\MeshData\{filename}\{filename}";
 
             // Raw per-file arrays
             var positions = new List<Vector3D<float>>();     // v
@@ -153,7 +153,7 @@ namespace RenderingEngine
                             currentMaterialName = parts[1];
                             firstMaterial = false;
                             
-                            MaterialHandler.GetTexture(materialMap[key].filename); //Filename is wrong
+                            MaterialHandler.GetTexture(filename, materialMap[key].filename); //Filename is wrong
                         }
                         break;
 

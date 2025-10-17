@@ -70,28 +70,28 @@ namespace RenderingEngine.Rendering
         }
 
 
-        public static Material CreateMaterial(string filename, Vector3D<float> baseColour)
+        public static Material CreateMaterial(string filename, string textureName, Vector3D<float> baseColour)
         {
-            var data = GetTexture(filename);
-            string name = data.handle == defaultHandle ? "DEFAULT" : filename;
+            var data = GetTexture(filename, textureName);
+            string name = data.handle == defaultHandle ? "DEFAULT" : textureName;
             Material mat = new Material(name, baseColour, data.handle, data.TextureID);
             return mat;
         }
 
  
 
-        public static (ulong handle, uint TextureID) GetTexture(string filename)
+        public static (ulong handle, uint TextureID) GetTexture(string filename, string textureName)
         {
-            if (filename == "EMPTY") { Console.WriteLine("Loading DefaultMaterial for EMPTY"); return (defaultHandle, defaultTextureID); }
+            if (textureName == "EMPTY") { Console.WriteLine("Loading DefaultMaterial for EMPTY"); return (defaultHandle, defaultTextureID); }
 
-            if (textureHandles.ContainsKey(filename)) 
+            if (textureHandles.ContainsKey(textureName)) 
             { 
-                var data = textureHandles[filename];
+                var data = textureHandles[textureName];
                 return (data.handle, data.textureID);
             }
             try
             {
-                string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\TextureData\{filename}.png";
+                string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\TextureData\{filename}\{textureName}.png";
                 ImageResult image;
                 using (FileStream fs = File.OpenRead(localPath))
                 {
@@ -141,7 +141,7 @@ namespace RenderingEngine.Rendering
                 Console.WriteLine($"Handle {handle} resident? {resident}");
 
 
-                textureHandles.Add(filename, (texture, handle));
+                textureHandles.Add(textureName, (texture, handle));
 
                 return (handle, texture);
             }

@@ -84,7 +84,7 @@ namespace RenderingEngine.Components
 
                     // Create material with texture if available
                     string textureName = string.IsNullOrEmpty(submesh.textureName) ? "EMPTY" : submesh.textureName;
-                    rend.material = MaterialHandler.CreateMaterial(textureName, Vector3D<float>.One);
+                    rend.material = MaterialHandler.CreateMaterial(filename, textureName, Vector3D<float>.One);
 
                     Console.WriteLine($"Created submesh: {names[i]} with texture: {textureName}");
                 }
@@ -92,7 +92,7 @@ namespace RenderingEngine.Components
 
             // Finally Remove this Renderer Component
             Renderer.RenderingObjects.Remove(this);
-            Owner.RemoveComponent(this);
+            if (Owner != null) Owner.RemoveComponent(this);
         }
 
 
@@ -118,7 +118,7 @@ namespace RenderingEngine.Components
             {
                 if (inputTextureName != "")
                 {
-                    material = MaterialHandler.CreateMaterial(inputTextureName, new Vector3D<float>(1));
+                    material = MaterialHandler.CreateMaterial("", inputTextureName, new Vector3D<float>(1));
                 }
             }
 
@@ -145,12 +145,10 @@ namespace RenderingEngine.Components
             writer.Write(addreessLength);
             writer.Write(meshAddressData);
 
+            bool hasMaterial = material != null;
             string data;
 
-            if (material != null)
-                data = material.Filename;
-            else
-                data = "EMPTY";
+            data = hasMaterial ? material.Filename : "EMPTY";
 
             byte[] encodedData = Encoding.UTF8.GetBytes(data);
             ushort dataLength = (ushort)encodedData.Length;
@@ -158,9 +156,22 @@ namespace RenderingEngine.Components
             writer.Write(dataLength);
             writer.Write(encodedData);
 
-            writer.Write(material.Colour.X);
-            writer.Write(material.Colour.Y);
-            writer.Write(material.Colour.Z);
+            if (hasMaterial)
+            {
+                writer.Write(material.Colour.X);
+                writer.Write(material.Colour.Y);
+                writer.Write(material.Colour.Z);
+            }
+            else
+            {
+                
+                writer.Write(1f);
+                writer.Write(1f);
+                writer.Write(1f);
+            }
+                
+
+            
         }
 
         public void Deserialize(BinaryReader reader)
@@ -183,7 +194,8 @@ namespace RenderingEngine.Components
                 reader.ReadSingle()
             );
 
-            this.material = MaterialHandler.CreateMaterial(materialAddress, colour);
+            //Fix Later
+            this.material = MaterialHandler.CreateMaterial("", materialAddress, colour);
         
             
         }
