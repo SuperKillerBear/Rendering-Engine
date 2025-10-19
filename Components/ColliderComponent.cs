@@ -33,7 +33,7 @@ namespace RenderingEngine.Components
 
         public void CalcAABBMaxMins()
         {
-            if (Owner.Transform.Rotation == Vector3D<float>.Zero)
+            if (Owner.Transform.rotation == Vector3D<float>.Zero)
             {
 
                 FlatAABB();
@@ -55,7 +55,7 @@ namespace RenderingEngine.Components
                 var max = new Vector3D<float>(xMax, yMax, zMax);
 
                 Vector3D<float> newMin, newMax;
-                UMath.RotateAABB(min, max, Owner.Transform.Rotation, out newMin, out newMax);
+                UMath.RotateAABB(min, max, Owner.Transform.rotation, out newMin, out newMax);
 
                 xMin = newMin.X;
                 yMin = newMin.Y;
@@ -67,24 +67,24 @@ namespace RenderingEngine.Components
 
                 if (Owner.debug)
                 {
-                    Console.WriteLine($"{Owner.name}, Rotated AABB Calc, LastRot: {lastRotation.ToString()}, newRot: {Owner.Transform.Rotation.ToString()}");
+                    Console.WriteLine($"{Owner.name}, Rotated AABB Calc, LastRot: {lastRotation.ToString()}, newRot: {Owner.Transform.rotation.ToString()}");
                     Console.WriteLine($"OldMin: {min.ToString()}, OldMax: {max.ToString()}");
                     Console.WriteLine($"NewMin: {newMin.ToString()}, NewMax: {newMax.ToString()}");
                 }
             }
-            lastRotation = Owner.Transform.Rotation;
+            lastRotation = Owner.Transform.rotation;
         }
 
         private void FlatAABB()
         {
             if (Owner.Transform == null) return;
             //Update to allow for parent / child continous transform scalers, etc
-            xMin = Owner.Transform.Position.X - (Owner.Transform.Scale.X / 2);
-            xMax = Owner.Transform.Position.X + (Owner.Transform.Scale.X / 2);
-            yMin = Owner.Transform.Position.Y - (Owner.Transform.Scale.Y / 2);
-            yMax = Owner.Transform.Position.Y + (Owner.Transform.Scale.Y / 2);
-            zMin = Owner.Transform.Position.Z - (Owner.Transform.Scale.Z / 2);
-            zMax = Owner.Transform.Position.Z + (Owner.Transform.Scale.Z / 2);
+            xMin = Owner.Transform.position.X - (Owner.Transform.scale.X / 2);
+            xMax = Owner.Transform.position.X + (Owner.Transform.scale.X / 2);
+            yMin = Owner.Transform.position.Y - (Owner.Transform.scale.Y / 2);
+            yMax = Owner.Transform.position.Y + (Owner.Transform.scale.Y / 2);
+            zMin = Owner.Transform.position.Z - (Owner.Transform.scale.Z / 2);
+            zMax = Owner.Transform.position.Z + (Owner.Transform.scale.Z / 2);
         }
 
         public void CalcChunks()
@@ -116,7 +116,7 @@ namespace RenderingEngine.Components
             Vector3D<float> resultant = Vector3D<float>.Zero;
 
             //Do AABB Collision Checks Here
-            var dPos = obj2.Owner.Transform.Position - Owner.Transform.Position;
+            var dPos = obj2.Owner.Transform.position - Owner.Transform.position;
 
             var px = (this.xMax / 2 + obj2.xMax / 2) - MathF.Abs(dPos.X);
             var py = (this.yMax / 2 + obj2.yMax / 2) - MathF.Abs(dPos.Y);

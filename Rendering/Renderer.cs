@@ -25,6 +25,12 @@ namespace RenderingEngine.Rendering
         //public static DynamicObject[] dynObjs; 
         public static List<RendererComponent> RenderingObjects = new List<RendererComponent>();
 
+
+        int uViewLocation;
+        int uProjectionLocation;
+        int uTextureLocation;
+        int colorLocation;
+
         public Renderer(GL gl, uint shaderProgram)
         {
             this.gl = gl;
@@ -43,6 +49,11 @@ namespace RenderingEngine.Rendering
             gl.UseProgram(shaderProgram);
 
 
+            uViewLocation = gl.GetUniformLocation(shaderProgram, "uView");
+            uProjectionLocation = gl.GetUniformLocation(shaderProgram, "uProjection");
+            uTextureLocation = gl.GetUniformLocation(shaderProgram, "uTexture"); //not -1
+            colorLocation = gl.GetUniformLocation(shaderProgram, "uBaseColor");
+
         }
 
         public void Clear()
@@ -50,102 +61,97 @@ namespace RenderingEngine.Rendering
             gl.Clear((uint)ClearBufferMask.ColorBufferBit | (uint) ClearBufferMask.DepthBufferBit);
         }
 
+        public void Draw()
+        {
+            var meshGroups = RenderingObjects.GroupBy(obj => obj.MeshID);
+
+            // Orthographic projection example
+            //Matrix4X4<float> projection = Matrix4X4.CreateOrthographic(2f, 2f, 0.1f, 10f);
+            Matrix4X4<float> projection =
+                Matrix4X4.CreatePerspectiveFieldOfView(
+                    fieldOfView: Camera.FOV, // 60°
+                    aspectRatio: Program.aspectRatio,
+                    nearPlaneDistance: 0.1f,
+                    farPlaneDistance: 1000f
+                );
+
+            //TODO: Make Only Calc on Update
+            Matrix4X4<float> view =
+                Matrix4X4.CreateLookAt(Camera.Position,
+                Camera.Position + Camera.Forward,
+                Camera.Up);
 
 
-        
-                public void Draw()
+                    
+
+            if (uTextureLocation == -1)
+            {
+                Console.WriteLine("WARN: uTexture uniform location is -1 (not found)");
+            }
+
+            unsafe
+            {
+                gl.UniformMatrix4(uViewLocation, 1, false, (float*)&view);
+                gl.UniformMatrix4(uProjectionLocation, 1, false, (float*)&projection);
+
+            }
+
+
+            foreach (var group in meshGroups)
+            {
+                Mesh mesh = MeshHandler.GetMesh(group.Key);
+                if (mesh == null) continue;
+
+                gl.BindVertexArray(mesh.VAO);
+
+                foreach (var rendrComp in group)
                 {
-                    //Ensure shader program is being used
-                    gl.UseProgram(shaderProgram);
+                    //Implememt GPU more efficent method suc that data upload only new data
+                    //Not same data each frame
+                    Matrix4X4<float> model = rendrComp.Owner.Transform.GetModelMatrix();
 
-                    var meshGroups = RenderingObjects.GroupBy(obj => obj.MeshID);
+                    //Set Material
+                    Material mat = rendrComp.material ?? MaterialHandler.defaultMaterial;
 
-                    // Orthographic projection example
-                    //Matrix4X4<float> projection = Matrix4X4.CreateOrthographic(2f, 2f, 0.1f, 10f);
-                    Matrix4X4<float> projection =
-                        Matrix4X4.CreatePerspectiveFieldOfView(
-                            fieldOfView: Camera.FOV, // 60°
-                            aspectRatio: Program.aspectRatio,
-                            nearPlaneDistance: 0.1f,
-                            farPlaneDistance: 1000f
-                        );
+                    // Set material properties
+                    gl.Uniform3(colorLocation, mat.Colour.X, mat.Colour.Y, mat.Colour.Z);
 
-                    //TODO: Make Only Calc on Update
-                    Matrix4X4<float> view =
-                        Matrix4X4.CreateLookAt(Camera.Position,
-                        Camera.Position + Camera.Forward,
-                        Camera.Up);
-
-
-                    int uViewLocation = gl.GetUniformLocation(shaderProgram, "uView");
-                    int uProjectionLocation = gl.GetUniformLocation(shaderProgram, "uProjection");
-                    int uTextureLocation = gl.GetUniformLocation(shaderProgram, "uTexture"); //not -1
-                    int colorLocation = gl.GetUniformLocation(shaderProgram, "uBaseColor");
-
-                    if (uTextureLocation == -1)
+                    // Upload the bindless texture handle
+                    if (mat.BindlessHandle != 0)
                     {
-                        Console.WriteLine("WARN: uTexture uniform location is -1 (not found)");
+                        //Are Different Handles
+                        MaterialHandler.bindless.ProgramUniformHandle(shaderProgram, uTextureLocation, mat.BindlessHandle);
+
                     }
+                    else
+                        MaterialHandler.bindless.ProgramUniformHandle(shaderProgram, uTextureLocation, MaterialHandler.defaultHandle);
 
 
-                    foreach (var group in meshGroups)
+
+                    unsafe
                     {
-                        Mesh mesh = MeshHandler.GetMesh(group.Key);
-                        if (mesh == null) continue;
+                        gl.UniformMatrix4(uModelLocation, 1, false, (float*)&model);
 
-                        gl.BindVertexArray(mesh.VAO);
-
-                        foreach (var rendrComp in group)
+                        if (mesh.IndexCount > 0)
                         {
-                            rendrComp.Owner.Transform.UpdateModelMatrix();
-
-                            Matrix4X4<float> model = rendrComp.Owner.Transform.ModelMatrix;
-
-                            //Set Material
-                            Material mat = rendrComp.material ?? MaterialHandler.defaultMaterial;
-
-                            // Set material properties
-                            gl.Uniform3(colorLocation, mat.Colour.X, mat.Colour.Y, mat.Colour.Z);
-
-                            // Upload the bindless texture handle
-                            if (mat.BindlessHandle != 0)
-                            {
-                                //Are Different Handles
-                                MaterialHandler.bindless.ProgramUniformHandle(shaderProgram, uTextureLocation, mat.BindlessHandle);
-
-                            }
-                            else
-                                MaterialHandler.bindless.ProgramUniformHandle(shaderProgram, uTextureLocation, MaterialHandler.defaultHandle);
-
-
-
-                            unsafe
-                            {
-                                gl.UniformMatrix4(uModelLocation, 1, false, (float*)&model);
-                                gl.UniformMatrix4(uViewLocation, 1, false, (float*)&view);
-                                gl.UniformMatrix4(uProjectionLocation, 1, false, (float*)&projection);
-
-
-                                if (mesh.IndexCount > 0)
-                                {
-                                    //Sharing Vertices so more Efficient
-                                    gl.DrawElements(PrimitiveType.Triangles, (uint)mesh.IndexCount, DrawElementsType.UnsignedInt, null);
-                                }
-                                else
-                                {
-                                    // Draw the mesh
-                                    gl.DrawArrays(PrimitiveType.Triangles, 0, (uint)mesh.VertexCount);
-                                }
-
-
-                            }
-
-
+                            //Sharing Vertices so more Efficient
+                            gl.DrawElements(PrimitiveType.Triangles, (uint)mesh.IndexCount, DrawElementsType.UnsignedInt, null);
+                        }
+                        else
+                        {
+                            // Draw the mesh
+                            gl.DrawArrays(PrimitiveType.Triangles, 0, (uint)mesh.VertexCount);
                         }
 
+
                     }
 
+
                 }
+
+            }
+
+        }
             
 
     }

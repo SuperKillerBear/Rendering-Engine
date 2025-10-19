@@ -69,7 +69,7 @@ namespace RenderingEngine.Gui
             {
                 if (ImGui.MenuItem("Add Object"))
                 {
-                    // TODO: Add logic to create a new object
+                    new GameObject();
                 }
                 ImGui.EndPopup();
             }
@@ -131,13 +131,41 @@ namespace RenderingEngine.Gui
             ImGui.Text($"Child Count: {selectedObject.children.Count}");
             string result = string.Join(", ", selectedObject.children.Select(c => c.name));
             ImGui.Text($"Children: {result}");
-            foreach (var comp in selectedObject.Components)
+
+            foreach (var comp in selectedObject.Components) //Error: System.InvalidOperationException: 'Collection was modified; enumeration operation may not execute.'
             {
                 if (ImGui.CollapsingHeader(comp.ComponentName))
                 {
                     comp.OnInspectorGUI();
                 }
             }
+
+            if (ImGui.IsWindowHovered())
+            {
+                if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                {
+                    selectedObject = null;
+                    ImGui.OpenPopup("InspectorContextMenu");
+                }
+            }
+
+            if (ImGui.BeginPopup("InspectorContextMenu"))
+            {
+                if (ImGui.MenuItem("Add Renderer Component"))
+                {
+                    selectedObject.AddComponent<RendererComponent>();
+                }
+                if (ImGui.MenuItem("Add RigidBody Component"))
+                {
+                    selectedObject.AddComponent<RigidBodyComponent>();
+                }
+                if (ImGui.MenuItem("Add Box Collider Component"))
+                {
+                    selectedObject.AddComponent<BoxColliderComponent>();
+                }
+                ImGui.EndPopup();
+            }
+
 
             ImGui.End();
         }

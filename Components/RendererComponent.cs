@@ -22,6 +22,7 @@ namespace RenderingEngine.Components
         public Material? material = null;
 
         private string inputTextureName = "";
+        private string inputMeshName = "";
 
         public override void Init(GameObject Owner)
         {
@@ -46,7 +47,8 @@ namespace RenderingEngine.Components
                 }
 
                 // Create parent object for this OBJ
-                string objName = $"{filename}_obj_{sourceObjIndex}";
+                //string objName = $"{filename}_obj_{sourceObjIndex}";
+                string objName = $"{names[0]}";
                 GameObject newObject = new GameObject(Parent: Owner, name: objName);
 
                 // Get the source object data
@@ -71,9 +73,9 @@ namespace RenderingEngine.Components
                     }
 
                     // Create Submesh GameObject
-                    GameObject newSubMesh = new GameObject(Parent: newObject, name: names[i]);
+                    GameObject newSubMesh = new GameObject(Parent: newObject, name: $"Submesh {i}");
                     var rend = newSubMesh.AddComponent<RendererComponent>();
-                    newSubMesh.Transform.Scale = new Vector3D<float>(0.2f);
+                    newSubMesh.Transform.Scale(new Vector3D<float>(0.2f));
 
                     // Assign Mesh
                     rend.SetMeshID(meshIDs[i]);
@@ -112,6 +114,12 @@ namespace RenderingEngine.Components
             ImGui.Text($"Mesh Address: {meshAddress}");
             ImGui.Text($"Mesh ID: {MeshID.ToString()}");
             ImGui.Text($"Assigned Mesh: {AssignedMesh.ToString()}");
+
+            ImGui.InputText("Load Mesh", ref inputMeshName, 64);
+            if (ImGui.Button("Set Mesh"))
+            {
+                SetMesh(inputMeshName);
+            }
 
             ImGui.InputText("Load Texture", ref inputTextureName, 64);
             if (ImGui.Button("Load Material"))

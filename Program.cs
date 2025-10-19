@@ -140,22 +140,17 @@ namespace RenderingEngine
 
             
             
-            var floor = new GameObject();
-            floor.name = "Hospital";
-            floor.AddComponent<RendererComponent>().SetMesh("SilentHill");
-            //floor.Transform.Scale = new Vector3D<float>(1f);
-
-            //floor.Transform.TranslatePosition(new Vector3D<float>(0, 0.5f, 0));
-
-            var cube = new GameObject();
-            cube.name = "Physics Cube";
-            
-            cube.AddComponent<RigidBodyComponent>();
-
+            var Hospital = new GameObject();
+            Hospital.name = "Hospital";
+            Hospital.AddComponent<RendererComponent>().SetMesh("SilentHill");
             
             
-            cube.AddComponent<RendererComponent>(); //.SetMesh("Cube", cube)
-
+            
+            /*
+            var KelleyRoad = new GameObject();
+            KelleyRoad.name = "Kelley Road";
+            KelleyRoad.AddComponent<RendererComponent>().SetMesh("kelley-road");
+            */
             //var ren = cube.GetComponent<RendererComponent>();
             //ren.material = mat2;
 

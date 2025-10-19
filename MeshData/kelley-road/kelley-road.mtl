@@ -1,0 +1,362 @@
+# Blender 4.5.3 LTS MTL File: 'kelley-road.blend'
+# www.blender.org
+
+newmtl accessories
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/accessories.tga
+map_d C:/Users/pixel/Google Drive/PSX horror/accessories.tga
+
+newmtl accessories2
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/accessories2.tga
+map_d C:/Users/pixel/Google Drive/PSX horror/accessories2.tga
+
+newmtl bare_wall
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/bare_wall.tga
+
+newmtl bath
+Ns 13.725493
+Ka 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/bath.tga
+
+newmtl bookshelf
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/bookshelf.tga
+
+newmtl carpet
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/carpet.tga
+
+newmtl ceiling
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/ceiling.tga
+
+newmtl ceiling2
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/pixel/Google Drive/PSX horror/ceiling2.tga
+
+newmtl ceiling3
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/ceiling3.tga
+
+newmtl concerete_wall2
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/concrete_wall2.tga
+
+newmtl concrete_floor
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/pixel/Google Drive/PSX horror/concrete_floor.tga
+
+newmtl concrete_wall
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/concrete_wall.tga
+
+newmtl concrete_wall3
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/concrete_wall3.tga
+
+newmtl formica
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/formica.tga
+
+newmtl fridge
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/fridge.tga
+
+newmtl handprints
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/handprints.tga
+map_d C:/Users/pixel/Google Drive/PSX horror/handprints.tga
+
+newmtl laundry
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/laundry.tga
+
+newmtl leaks
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/leaks.tga
+map_d C:/Users/pixel/Google Drive/PSX horror/leaks.tga
+
+newmtl monster
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Kd 0.063721 0.042269 0.034877
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl oven
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.078947 0.078947 0.078947
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/oven.tga
+
+newmtl sheet
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/sheet.tga
+
+newmtl shower
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/3D projects/Prowler unity project/GameloftArttest/Assets/textures/shower.tga
+
+newmtl sink
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/sink.tga
+
+newmtl sink2
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/sink.tga
+
+newmtl sludge
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/sludge.tga
+
+newmtl sofa
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/pixel/Google Drive/PSX horror/sofa.tga
+
+newmtl stairs
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/pixel/Google Drive/PSX horror/stairs.tga
+
+newmtl television
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/television.tga
+map_d C:/Users/pixel/Google Drive/PSX horror/television.tga
+
+newmtl tile_floor
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/pixel/Google Drive/PSX horror/tile_floor.tga
+
+newmtl tile_floor2
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/pixel/Google Drive/PSX horror/tile_floor2.tga
+
+newmtl toilet
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/toilet.tga
+map_d C:/Users/pixel/Google Drive/PSX horror/toilet.tga
+
+newmtl wallpaper
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/wallpaper.tga
+
+newmtl wallpaper2
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/wallpaper2.tga
+
+newmtl wallpaper3
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/wallpaper3.psd
+
+newmtl wood_panels
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/pixel/Google Drive/PSX horror/wood_panels.tga
+
+newmtl wood_planks
+Ns 96.078415
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/pixel/Google Drive/PSX horror/wood_planks.tga

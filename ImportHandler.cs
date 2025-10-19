@@ -125,11 +125,15 @@ namespace RenderingEngine
                     case "usemtl":
                         if (parts.Length >= 2)
                         {
-                            
+                            if (!firstMaterial && outFloats.Count == 0)
+                            {
+                                Console.WriteLine($"EMPTY SUBMESH DETECTED: {SubMeshes.Count}, SKIPPING");
+                            }
 
                             // ensure material exists in map (auto-generate if necessary)
                             if (!firstMaterial && outFloats.Count > 0)
                             {
+                                Console.WriteLine("");
                                 SubMeshes.Add((currentObjectName, currentMaterialName, new List<float>(outFloats), new List<uint>(outIndices)));
                                 outFloats.Clear();
                                 outIndices.Clear();

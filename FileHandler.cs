@@ -199,7 +199,7 @@ namespace RenderingEngine
 
                 
 
-                newObj.Transform.UpdateModelMatrix(); //Transform is null
+                newObj.Transform.CalcModelMatrix(); //Transform is null
 
             }
             
