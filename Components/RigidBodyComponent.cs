@@ -14,7 +14,7 @@ using static System.Formats.Asn1.AsnWriter;
 
 namespace RenderingEngine.Components
 {
-    public class RigidBodyComponent : ColliderComponent, ISerializable
+    public class RigidBodyComponent : Component, ISerializable
     {
         public override string ComponentName => "RigidBody Component";
 
@@ -38,15 +38,25 @@ namespace RenderingEngine.Components
         public bool applyGravity = true;
         public bool tickPhysics = false;
 
+
         public Vector3D<float> ForceAccum = Vector3D<float>.Zero;
         public Vector3D<float> Acceleration = Vector3D<float>.Zero;
         public Vector3D<float> Velocity = Vector3D<float>.Zero;
+
+        private ColliderComponent? collider;
+
+
+        private Vector3D<float> Resultant = Vector3D<float>.Zero;
 
         public override void Init(GameObject Owner)
         {
             base.Init(Owner); //Init + Set Owner
 
             PhysicsObjectsHandler.AddObj(this);
+
+            collider = Owner.GetComponent<ColliderComponent>();
+            if (collider == null)
+                collider = Owner.AddComponent<BoxColliderComponent>();
         }
 
         public void TickPhysics(double deltaTime)
@@ -83,28 +93,30 @@ namespace RenderingEngine.Components
         
         public void CheckCollisions()
         {
-            this.CalcChunks();
+            collider.CalcChunks();
 
             //Check Collisions with other Physics Objects in same chunks
 
             //Flawed Logic as they may not have calced now physics chuncks
             foreach (RendererComponent obj in Renderer.RenderingObjects)
             {
-                for (int c = 0; c < chunks.Count; c++)
+                for (int c = 0; c < collider.chunks.Count; c++)
                 {
-                    var collider = obj.Owner.GetComponent<ColliderComponent>();
+                    var collider2 = obj.Owner.GetComponent<ColliderComponent>() as BoxColliderComponent;
 
-                    if (collider == null) continue;
+                    if (collider2 == null) continue;
 
-                    if (collider.chunks.Contains(chunks[c]) && collider as RigidBodyComponent != this)
+                    if (collider.chunks.Contains(collider.chunks[c]) && collider2 != collider)
                     {
-                        var resultant = this.CalcCollisions(collider);
+                        Resultant = (collider as BoxColliderComponent).CollideAABBs(collider2); //Wont Be Null
 
-                        if (resultant != Vector3D<float>.Zero && (UMath.Dot(new Vector3D<float>(0, 1, 0), Velocity) < 0))
-                        {
+                        //if (Resultant != Vector3D<float>.Zero && (UMath.Dot(new Vector3D<float>(0, 1, 0), Velocity) < 0))
+                        //{
                             //Simple Collision Response
-                            Velocity *= -restitution;
-                        }
+                        //    Velocity *= -restitution;
+                        //}
+
+
                     }
                 }
             }
@@ -126,7 +138,9 @@ namespace RenderingEngine.Components
             ImGui.DragFloat("Restitution", ref restitution, 0.01f, 0f, 1f);
             ImGui.DragFloat("Gravity", ref g, 0.1f, 0f, 100f);
             
-            ImGui.Text($"Chunks: {string.Join(", ", chunks.Select(c => $"({c.X}, {c.Y})"))}");
+            ImGui.Text($"Resultant: {Resultant}");
+
+            ImGui.Text($"Chunks: {string.Join(", ", collider.chunks.Select(c => $"({c.X}, {c.Y})"))}");
 
             ImGui.Checkbox("Apply Gravity", ref applyGravity);
             ImGui.Checkbox("Tick Physics", ref tickPhysics);

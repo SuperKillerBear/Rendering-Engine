@@ -56,8 +56,8 @@ namespace RenderingEngine
         public static bool RenderingEnabled = true;
         public static bool PhysicsEnabled = true;
 
+        public static float ResolutionScale = 1.0f;
 
-        
 
         static void Main(string[] args)
         {
@@ -95,16 +95,24 @@ namespace RenderingEngine
 
         private void OnResize(Vector2D<int> size)
         {
-            gl.Viewport(0, 0, (uint)size.X, (uint) size.Y);
-            aspectRatio = (float)size.X / size.Y;
+            gl.Viewport(0, 0, (uint)(size.X), (uint)(size.Y));
+            aspectRatio = (float)((size.X * ResolutionScale) / (size.Y * ResolutionScale));
             ImGui.GetIO().DisplaySize = new Vector2(size.X, size.Y);
+        }
+
+        public static void UpdateResolution()
+        {
+            var size = window.FramebufferSize;
+            int width = size.X;
+            int height = size.Y;
+            aspectRatio = (float)(width * ResolutionScale) / (height * ResolutionScale);
         }
 
         private void OnLoad()
         {
             gl = GL.GetApi(window);
             
-            gl.Viewport(0, 0, (uint)ScreenWidth, (uint)ScreenHeight);
+            gl.Viewport(0, 0, (uint)(ScreenWidth), (uint)(ScreenHeight));
             gl.ClearColor(0.1f, 0.2f, 0.3f, 1.0f);
 
             Console.WriteLine($"OpenGL Version: {gl.GetStringS(GLEnum.Version)}");
@@ -143,9 +151,17 @@ namespace RenderingEngine
             var Hospital = new GameObject();
             Hospital.name = "Hospital";
             Hospital.AddComponent<RendererComponent>().SetMesh("SilentHill");
+            //Hospital.AddComponent<RendererComponent>().SetMeshID(0);
+            Hospital.AddComponent<BoxColliderComponent>();
             
-            
-            
+            /*
+            var PhysicsCube = new GameObject();
+            PhysicsCube.name = "Physics Cube";
+            PhysicsCube.Transform.Translate(new Vector3D<float>(0, 5, 0));
+            PhysicsCube.AddComponent<RendererComponent>().SetMeshID(0);
+            PhysicsCube.AddComponent<RigidBodyComponent>();
+            */
+
             /*
             var KelleyRoad = new GameObject();
             KelleyRoad.name = "Kelley Road";

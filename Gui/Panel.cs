@@ -181,6 +181,7 @@ namespace RenderingEngine.Gui
 
             ImGui.Text($"FPS: {Program.lastFPS}");
             ImGui.Text($"Screen: {Program.ScreenWidth}x{Program.ScreenHeight}");
+            if (ImGui.SliderFloat("Resolution Scale", ref Program.ResolutionScale, 0.1f, 1f)) {Program.UpdateResolution(); }
             ImGui.Text($"Camera Position: {Camera.Position.X}, {Camera.Position.Y}, {Camera.Position.Z}");
             if (ImGui.Button("Reset Camera Position")) { Camera.Position = Vector3D<float>.Zero; }
             ImGui.Text($"Accumulated Mouse Positon: ({InputHandler.accumMouseRelX}, {InputHandler.accumMouseRelY})");

@@ -27,7 +27,7 @@ namespace RenderingEngine.Components
             {
                 _rotation = value;
                 if (collider != null)
-                    collider.CalcAABBMaxMins();
+                    (collider as BoxColliderComponent).CalculateAABB();
             }
         }
 
@@ -133,6 +133,8 @@ namespace RenderingEngine.Components
         public void Translate(Vector3D<float> mag)
         {
             this.position += mag;
+            if (collider != null) (collider as BoxColliderComponent).CalculateAABB();
+            //(collider as BoxColliderComponent).TranslateCorners(mag);
             isDirty = true;
         }
 
