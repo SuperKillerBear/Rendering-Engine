@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <!-- Change this Target Framwork to net8.0 or net9.0 depending on system! -->
+    <TargetFramework>net9.0</TargetFramework> 
     <RootNamespace>RenderingEngine</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -28,7 +29,19 @@
   <ItemGroup>
     <Folder Include="bin\Debug\net8.0\" />
     <Folder Include="LevelData\" />
-    <Folder Include="MeshData\" />
+    <Folder Include="MeshData\"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="MeshData\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="LevelData\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TextureData\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

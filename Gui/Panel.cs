@@ -186,7 +186,7 @@ namespace RenderingEngine.Gui
             if (ImGui.Button("Reset Camera Position")) { Camera.Position = Vector3D<float>.Zero; }
             ImGui.Text($"Accumulated Mouse Positon: ({InputHandler.accumMouseRelX}, {InputHandler.accumMouseRelY})");
             ImGui.InputFloat("Sensitivity", ref Camera.Sensitivity);
-            ImGui.InputInt("FOV", ref Camera.FOV, (int)Math.PI / 180);
+            ImGui.SliderInt("FOV", ref Camera.FOV, 30, 110);
             ImGui.InputInt("Chunk Size", ref Program.chunkSize, 1, 2);
             ImGui.SliderFloat("Tick Rate", ref Program.tickRate, 0.01f, 10f);
             ImGui.Text($"Scene Objects Count: {Program.SceneObjects.Count}");

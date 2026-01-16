@@ -30,8 +30,11 @@ namespace RenderingEngine
 
 
             //TODO: Add failsafe if file doesnt exist
-
-            string path = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\MeshData\{filename}\{filename}";
+            string baseDir = AppContext.BaseDirectory;
+            string meshDir = Path.Combine(baseDir, "MeshData", filename);
+            string mtlPath = Path.Combine(meshDir, $"{filename}.mtl");
+            string objPath = Path.Combine(meshDir, $"{filename}.obj");
+            //string path = @$"MeshData\{filename}\{filename}"; //Doesnt Work on Linux
 
             // Raw per-file arrays
             var positions = new List<Vector3D<float>>();     // v
@@ -47,7 +50,7 @@ namespace RenderingEngine
             var indexMap = new Dictionary<(int p, int t, int n, string mat), uint>();
 
             // Material color map (string -> rgb)
-            LoadMaterials(path, filename);
+            LoadMaterials(mtlPath, filename);
 
             string currentMaterialName = "default";
 
@@ -74,7 +77,7 @@ namespace RenderingEngine
             int RECOGNISEDOBJECTS = 0;
             int lineNum = 0;
             // Read OBJ
-            foreach (var rawLine in File.ReadLines($"{path}.obj"))
+            foreach (var rawLine in File.ReadLines(objPath))
             {
                 lineNum++;
                 var line = rawLine.Trim();
@@ -263,7 +266,7 @@ namespace RenderingEngine
             string currentFilename = "EMPTY";
             Vector3D<float> currentKd = Vector3D<float>.One;
 
-            foreach (var rawLine in   File.ReadLines($"{path}.mtl"))
+            foreach (var rawLine in   File.ReadLines(path))
             {
                 var line = rawLine.Trim();
 

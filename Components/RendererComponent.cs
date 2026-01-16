@@ -37,10 +37,34 @@ namespace RenderingEngine.Components
         {
             var ObjectList = MeshHandler.LoadMeshsFile(filename);
 
+            //Note* Source
+
             foreach ((string[] names, uint[] meshIDs, int sourceObjIndex) in ObjectList)
             {
+                //Cant Handle when no meshID, but all source ObjIndex = -1
                 var idCount = meshIDs.Length;
-                if (idCount == 0)
+                if (sourceObjIndex == -1)
+                {
+                    // Create Submesh GameObject
+                    GameObject newObj = new GameObject(name: $"UnknownMeshObject");
+                    var rend = newObj.AddComponent<RendererComponent>();
+                    newObj.Transform.Scale(new Vector3D<float>(0.2f));
+
+                    // Assign Mesh
+                    rend.SetMeshID(0);
+                    rend.meshAddress = $"{filename}/{sourceObjIndex}";
+
+                    // Create material with texture if available
+                    string textureName = "EMPTY";
+
+                    //Note* If Texture name is passed to be "EMPTY" => Debug Texture is loaded automatically
+                    rend.material = MaterialHandler.CreateMaterial(filename, textureName, Vector3D<float>.One); 
+                    
+                    
+                    Console.WriteLine("Rendered Empty Object");
+                    continue;
+                }
+                else if (idCount == 0)
                 {
                     Console.WriteLine($"Skipping empty object in {filename}");
                     continue;
@@ -86,7 +110,9 @@ namespace RenderingEngine.Components
 
                     // Create material with texture if available
                     string textureName = string.IsNullOrEmpty(submesh.textureName) ? "EMPTY" : submesh.textureName;
-                    rend.material = MaterialHandler.CreateMaterial(filename, textureName, Vector3D<float>.One);
+
+                    //Note* If Texture name is passed to be "EMPTY" => Debug Texture is loaded automatically
+                    rend.material = MaterialHandler.CreateMaterial(filename, textureName, Vector3D<float>.One); 
 
                     Console.WriteLine($"Created submesh: {names[i]} with texture: {textureName}");
                 }
@@ -101,10 +127,16 @@ namespace RenderingEngine.Components
 
         public void SetMeshID(uint id)
         {
-            if (MeshHandler.GetMesh(id) != MeshHandler.Meshes[0])
+            //Checking if != Cube Mesh
+            if (MeshHandler.GetMesh(id) != MeshHandler.Meshes[0]) 
             {
                 this.MeshID = id;
                 this.AssignedMesh = true;
+            }
+            else
+            {
+                this.MeshID = 0;
+                this.AssignedMesh = false;
             }
             
         }

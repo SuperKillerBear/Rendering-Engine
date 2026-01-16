@@ -10,7 +10,7 @@ namespace RenderingEngine
 {
     public static class Camera
     {
-        public static int FOV = (int)(Math.PI / 180 * 80);        
+        public static int FOV = 80;        
         public static Vector3D<float> MoveDirection = Vector3D<float>.Zero;
         
         public static Vector3D<float> Position = new Vector3D<float>(0f, 0f, 3f);

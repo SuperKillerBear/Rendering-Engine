@@ -67,9 +67,12 @@ namespace RenderingEngine.Rendering
 
             // Orthographic projection example
             //Matrix4X4<float> projection = Matrix4X4.CreateOrthographic(2f, 2f, 0.1f, 10f);
+
+            float fov = Camera.FOV == 0 ? (int) Math.PI / 2 : Camera.FOV * (MathF.PI / 180f); //Disallow 0 FOV
+
             Matrix4X4<float> projection =
                 Matrix4X4.CreatePerspectiveFieldOfView(
-                    fieldOfView: Camera.FOV, // 60°
+                    fieldOfView: fov, // 60°
                     aspectRatio: Program.aspectRatio,
                     nearPlaneDistance: 0.1f,
                     farPlaneDistance: 1000f

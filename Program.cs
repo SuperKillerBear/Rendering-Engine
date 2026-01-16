@@ -29,8 +29,8 @@ namespace RenderingEngine
         
         public static GL gl;
 
-        public static int ScreenWidth = 1200, ScreenHeight = 1200;
-        public static bool fullscreen = false;
+        public static int ScreenWidth = 1200, ScreenHeight = 3000;
+        public static bool fullscreen = true;
         public static float aspectRatio;
 
         // Create Shader Program
@@ -89,7 +89,7 @@ namespace RenderingEngine
             window.Load += OnLoad;
             window.Update += OnUpdate;
             window.Render += OnRender;            
-            window.Resize += OnResize;
+            //window.Resize += OnResize;
             
         }
 
@@ -111,13 +111,16 @@ namespace RenderingEngine
         private void OnLoad()
         {
             gl = GL.GetApi(window);
-            
-            gl.Viewport(0, 0, (uint)(ScreenWidth), (uint)(ScreenHeight));
+            var fbSize = window.FramebufferSize;
+
+            // Set OpenGL viewport to match framebuffer
+            gl.Viewport(0, 0, (uint)fbSize.X, (uint)fbSize.Y);
             gl.ClearColor(0.1f, 0.2f, 0.3f, 1.0f);
 
             Console.WriteLine($"OpenGL Version: {gl.GetStringS(GLEnum.Version)}");
             Console.WriteLine($"Vendor: {gl.GetStringS(GLEnum.Vendor)}");
             Console.WriteLine($"Renderer: {gl.GetStringS(GLEnum.Renderer)}");
+
             // Create Shader Program
             shader = new RenderingEngine.Rendering.Shader(gl, "Shaders/simple.vert", "Shaders/simple.frag");
             // Create Renderer
@@ -127,6 +130,13 @@ namespace RenderingEngine
             input = window.CreateInput();
 
             _imgui = new ImGuiController(gl, window, input);
+            
+            
+            Console.WriteLine("ImGui Name: ", _imgui.GetType().AssemblyQualifiedName);
+            Console.WriteLine("ImGui Location:", _imgui.GetType().Assembly.Location);
+
+            // Update ImGui display size
+            //ImGui.GetIO().DisplaySize = new Vector2(fbSize.X, fbSize.Y);
 
             InputHandler.RegisterDevices(input, window);
 
@@ -191,7 +201,8 @@ namespace RenderingEngine
         }
 
         private void SetupGui()
-        {            
+        {           
+            ImGui.LoadIniSettingsFromMemory(""); 
             inspectorPanel = new InspectorPanel();
             hierarchyPanel = new HierarchyPanel(inspectorPanel);
             settingsPanel = new SettingsPanel();
@@ -199,18 +210,20 @@ namespace RenderingEngine
 
         private void OnRender(double deltaTime)
         {
-            _imgui.Update((float)deltaTime);
-
+            // Clear Colour and Depth Buffer for Next Frame
             gl.Clear((uint)(GLEnum.ColorBufferBit | GLEnum.DepthBufferBit));
+
+            // Call ImGui next Frame code
+            _imgui.Update((float)deltaTime);
             
             //DO RENDERING
             renderer.Clear();
             if (RenderingEnabled) renderer.Draw();
 
-            //Show Functions of ImGUI
+            // Build UI here
             if (Camera.enableGUI)
             {
-                
+
                 hierarchyPanel.Draw();
 
                 inspectorPanel.Draw();
@@ -219,6 +232,23 @@ namespace RenderingEngine
                 
             }
             
+
+            // Force Fixing of ImGui 
+            gl.BindFramebuffer(GLEnum.Framebuffer, 0);
+            var fb = window.FramebufferSize;
+            gl.Viewport(0, 0, (uint)fb.X, (uint)fb.Y);
+            
+            //gl.Disable(GLEnum.ScissorTest);
+            
+            // Force correct scale for this frame
+            var io = ImGui.GetIO();
+            io.DisplayFramebufferScale = new Vector2(
+                window.FramebufferSize.X / (float)window.Size.X,
+                window.FramebufferSize.Y / (float)window.Size.Y
+            );
+            
+            // Console Debug for ImGui scaling issues, (used integer division before)
+            //Console.WriteLine($"view.Size={window.Size} fb={window.FramebufferSize} scale={io.DisplayFramebufferScale} display={io.DisplaySize}");
 
             _imgui.Render();
         }

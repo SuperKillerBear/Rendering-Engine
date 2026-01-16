@@ -51,7 +51,7 @@ namespace RenderingEngine
                 return outObjects;
             }
 
-            try
+            try //Flawed Code, If cannot load Obj File, all children will not be attempted to render => Add Individual Try Catch
             {
                 ImportHandler.LoadObjFile(filename);
                 var objs = ImportHandler.loadedObjMap[filename];

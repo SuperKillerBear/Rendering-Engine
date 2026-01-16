@@ -91,9 +91,13 @@ namespace RenderingEngine.Rendering
             }
             try
             {
-                string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\TextureData\{filename}\{textureName}.png";
+                string baseDir = AppContext.BaseDirectory;
+                string texDir = Path.Combine(baseDir, "TextureData", filename);
+                string imgDir = Path.Combine(texDir, $"{textureName}.png");
+                //string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\TextureData\{filename}\{textureName}.png";
+                
                 ImageResult image;
-                using (FileStream fs = File.OpenRead(localPath))
+                using (FileStream fs = File.OpenRead(imgDir))
                 {
                     image = ImageResult.FromStream(fs, ColorComponents.RedGreenBlueAlpha);
                 }
