@@ -14,7 +14,7 @@ namespace RenderingEngine.Rendering
 
         public Mesh(float[] vertices, uint[] indices = null)
         {
-            VertexCount = vertices.Length / 8; // 3 pos + 3 colour + 2 uv = 8
+            VertexCount = vertices.Length / 8; // 3 pos + 3 normals + 2 uv = 8
 
             VAO = Program.gl.GenVertexArray();
             Program.gl.BindVertexArray(VAO);
@@ -41,7 +41,7 @@ namespace RenderingEngine.Rendering
                 Program.gl.VertexAttribPointer(0, 3, GLEnum.Float, false, stride, (void*) 0);
                 Program.gl.EnableVertexAttribArray(0);
 
-                // Color
+                // Normals
                 Program.gl.VertexAttribPointer(1, 3, GLEnum.Float, false, stride, (void*)(3 * sizeof(float)));
                 Program.gl.EnableVertexAttribArray(1);
 

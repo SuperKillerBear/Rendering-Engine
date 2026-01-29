@@ -23,6 +23,11 @@ namespace RenderingEngine
     class Program
     {
         public static bool running = true;
+
+        public static bool CapFPS = false;
+        private static int UpdateCap = 240;
+        private static int FpsCap = 240;
+
         private static int FPSFrameCount = 0;
         public static int lastFPS = 0;
         private static Stopwatch frameStopwatch = new Stopwatch();
@@ -58,6 +63,7 @@ namespace RenderingEngine
 
         public static float ResolutionScale = 1.0f;
 
+        public static bool ShowBoundingBoxes;
 
         static void Main(string[] args)
         {
@@ -88,24 +94,52 @@ namespace RenderingEngine
 
             window.Load += OnLoad;
             window.Update += OnUpdate;
-            window.Render += OnRender;            
-            //window.Resize += OnResize;
-            
+            window.Render += OnRender;
+            window.Resize += OnResize;
+            window.FramebufferResize += OnFramebufferResize;
+
+            if (CapFPS)
+            {
+                window.UpdatesPerSecond = UpdateCap;
+                window.FramesPerSecond = FpsCap;
+            }
         }
+
 
         private void OnResize(Vector2D<int> size)
         {
-            gl.Viewport(0, 0, (uint)(size.X), (uint)(size.Y));
-            aspectRatio = (float)((size.X * ResolutionScale) / (size.Y * ResolutionScale));
             ImGui.GetIO().DisplaySize = new Vector2(size.X, size.Y);
+        }
+        
+        private void OnFramebufferResize(Vector2D<int> size)
+        {
+            // OpenGL cares about framebuffer (real pixel) size
+            gl.Viewport(0, 0, (uint)size.X, (uint)size.Y);
+
+            aspectRatio = size.X / (float)size.Y;
+        }
+
+        public static void UpdateFPSCap(int FPSCap = 240, int UpdateCap = 240)
+        {
+            if (CapFPS)
+            {
+                window.UpdatesPerSecond = UpdateCap;
+                window.FramesPerSecond = FPSCap;
+            }
+            else
+            {
+                window.UpdatesPerSecond = 0;
+                window.FramesPerSecond = 0;
+            }
         }
 
         public static void UpdateResolution()
         {
+            // TODO: Removed Resolution Scale being used => add back in later
             var size = window.FramebufferSize;
             int width = size.X;
             int height = size.Y;
-            aspectRatio = (float)(width * ResolutionScale) / (height * ResolutionScale);
+            aspectRatio = (float) width / height;
         }
 
         private void OnLoad()
@@ -116,6 +150,7 @@ namespace RenderingEngine
             // Set OpenGL viewport to match framebuffer
             gl.Viewport(0, 0, (uint)fbSize.X, (uint)fbSize.Y);
             gl.ClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+
 
             Console.WriteLine($"OpenGL Version: {gl.GetStringS(GLEnum.Version)}");
             Console.WriteLine($"Vendor: {gl.GetStringS(GLEnum.Vendor)}");
@@ -147,7 +182,7 @@ namespace RenderingEngine
             FileHandler.Init(); //Load Default Game Settings
 
 
-            aspectRatio = (float)ScreenWidth / ScreenHeight;
+            
 
             if (!hasExtension(gl, "GL_ARB_bindless_texture"))
             {
@@ -164,6 +199,12 @@ namespace RenderingEngine
             //Hospital.AddComponent<RendererComponent>().SetMeshID(0);
             Hospital.AddComponent<BoxColliderComponent>();
             
+            var ps6 = new GameObject();
+            ps6.name = "Ps6";
+            ps6.AddComponent<RendererComponent>().SetMesh("ps6");
+            ps6.AddComponent<BoxColliderComponent>();
+            ps6.AddComponent<RigidBodyComponent>();
+
             /*
             var PhysicsCube = new GameObject();
             PhysicsCube.name = "Physics Cube";
@@ -188,6 +229,7 @@ namespace RenderingEngine
             InputHandler.UpdateCamera(deltaTime);
 
             if (PhysicsEnabled) PhysicsObjectsHandler.TickObjs(deltaTime);
+            BoxColliderHandler.CalcColisions();
 
             FPSFrameCount++;
             if (frameStopwatch.ElapsedMilliseconds >= 1000)

@@ -15,6 +15,8 @@ namespace RenderingEngine.Rendering
         public uint TextureID;
         public Vector3D<float> Colour;
 
+        
+
         public Material(string filename, Vector3D<float> colour, ulong Handle, uint textureID)
         {
             this.Filename = filename;
@@ -35,6 +37,9 @@ namespace RenderingEngine.Rendering
         public static ulong defaultHandle;
         public static Material defaultMaterial;
         private static uint defaultTextureID;
+
+    
+        private static readonly bool debugMaterials = false;
 
         public static void Init()
         {
@@ -61,7 +66,7 @@ namespace RenderingEngine.Rendering
             else
             {
                 //Wont happen as checked in Program
-                Console.WriteLine("ERR: Bindless Textures Not Supported");
+                if (debugMaterials) Console.WriteLine("ERR: Bindless Textures Not Supported");
                 Program.Cleanup();
             }
 
@@ -82,7 +87,7 @@ namespace RenderingEngine.Rendering
 
         public static (ulong handle, uint TextureID) GetTexture(string filename, string textureName)
         {
-            if (textureName == "EMPTY") { Console.WriteLine("Loading DefaultMaterial for EMPTY"); return (defaultHandle, defaultTextureID); }
+            if (textureName == "EMPTY") { if (debugMaterials) Console.WriteLine("Loading DefaultMaterial for EMPTY"); return (defaultHandle, defaultTextureID); }
 
             if (textureHandles.ContainsKey(textureName)) 
             { 
@@ -142,7 +147,7 @@ namespace RenderingEngine.Rendering
                 bindless.MakeTextureHandleResident(handle);
 
                 bool resident = bindless.IsTextureHandleResident(handle);
-                Console.WriteLine($"Handle {handle} resident? {resident}");
+                if (debugMaterials) Console.WriteLine($"Handle {handle} resident? {resident}");
 
 
                 textureHandles.Add(textureName, (texture, handle));

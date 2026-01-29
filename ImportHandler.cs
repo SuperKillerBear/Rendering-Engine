@@ -14,6 +14,8 @@ namespace RenderingEngine
 {
     public static class ImportHandler
     {
+        private static readonly bool debugImport = false;
+
         private static Dictionary<string, (string filename, Vector3D<float> baseColour)> 
             materialMap = new();
 
@@ -24,8 +26,8 @@ namespace RenderingEngine
         {
             if (loadedObjMap.ContainsKey(filename))
             { 
-                Console.WriteLine($"Obj already loaded: {filename}"); 
-                return; 
+                if (debugImport) Console.WriteLine($"Obj already loaded: {filename}"); 
+                return;
             }
 
 
@@ -89,7 +91,7 @@ namespace RenderingEngine
                 {
                     case "o":
                         RECOGNISEDOBJECTS++;
-                        Console.WriteLine($"Recognised Objects: {RECOGNISEDOBJECTS} on Line: {lineNum}");
+                        if (debugImport) Console.WriteLine($"Recognised Objects: {RECOGNISEDOBJECTS} on Line: {lineNum}");
                         if (!firstObject)
                         {
                             if (!firstMaterial && outFloats.Count > 0)
@@ -130,13 +132,12 @@ namespace RenderingEngine
                         {
                             if (!firstMaterial && outFloats.Count == 0)
                             {
-                                Console.WriteLine($"EMPTY SUBMESH DETECTED: {SubMeshes.Count}, SKIPPING");
+                                if (debugImport) Console.WriteLine($"EMPTY SUBMESH DETECTED: {SubMeshes.Count}, SKIPPING");
                             }
 
                             // ensure material exists in map (auto-generate if necessary)
                             if (!firstMaterial && outFloats.Count > 0)
                             {
-                                Console.WriteLine("");
                                 SubMeshes.Add((currentObjectName, currentMaterialName, new List<float>(outFloats), new List<uint>(outIndices)));
                                 outFloats.Clear();
                                 outIndices.Clear();
@@ -147,11 +148,11 @@ namespace RenderingEngine
 
                             if (!materialMap.ContainsKey(key))
                             {
-                                Console.WriteLine($"ColourMap Doesnt Contain Colour for Key: {key}");
+                                if (debugImport) Console.WriteLine($"ColourMap Doesnt Contain Colour for Key: {key}");
                                 materialMap[key] = ($"EMPTY", new Vector3D<float>(1f, 0f, 1f));
 
                             }
-                            else { Console.WriteLine($"Loaded key: {key}, Data: {materialMap[key]}"); }
+                            else { if (debugImport) Console.WriteLine($"Loaded key: {key}, Data: {materialMap[key]}"); }
 
                             //Generate Texture such that its stored in the MaterialHandler Dictionary for the filename for later
                             //TODO: Doesnt support basecolour, im lazy rn
@@ -232,6 +233,8 @@ namespace RenderingEngine
                     // position
                     Vector3D<float> pos = (pIdx >= 0 && pIdx < positions.Count) ? positions[pIdx] : new Vector3D<float>(0f, 0f, 0f);
 
+                    Vector3D<float> nml = (nIdx >=0 && nIdx < normals.Count) ? normals[nIdx] : new Vector3D<float>(0f, 1f, 0f);
+
                     // choose color from material map (fallback to Pink)
                     Vector3D<float> col = materialMap.TryGetValue(mat, out var mc) ? mc.Item2 : new Vector3D<float>(1f, 0f, 1f);
 
@@ -244,9 +247,9 @@ namespace RenderingEngine
                     outFloats.Add(pos.Y);
                     outFloats.Add(pos.Z);
 
-                    outFloats.Add(col.X);
-                    outFloats.Add(col.Y);
-                    outFloats.Add(col.Z);
+                    outFloats.Add(nml.X);
+                    outFloats.Add(nml.Y);
+                    outFloats.Add(nml.Z);
 
                     outFloats.Add(uv.X);
                     outFloats.Add(uv.Y);
@@ -299,7 +302,7 @@ namespace RenderingEngine
                         //Ambient Colour of Material
                         if (currentMaterial == "" || parts.Length < 4) continue;
 
-                        Console.WriteLine($"1: {parts[1]}, 2: {parts[2]}, 3: {parts[3]}");
+                        if (debugImport) Console.WriteLine($"1: {parts[1]}, 2: {parts[2]}, 3: {parts[3]}");
 
                         currentKd = new Vector3D<float>(
                             ParseF(parts[1]),

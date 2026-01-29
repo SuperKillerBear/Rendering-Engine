@@ -2,6 +2,7 @@
 using RenderingEngine.GameObjects;
 using Silk.NET.Maths;
 using System.ComponentModel;
+using System.Numerics;
 
 namespace RenderingEngine.Components
 {
@@ -13,10 +14,8 @@ namespace RenderingEngine.Components
         private bool isDirty = true;
         private bool dirtyScale = true;
         
-        public Vector3D<float> worldScale = Vector3D<float>.One;
-
+        
         public Vector3D<float> position { get; private set; }
-
         public Vector3D<float> scale { get; private set; } = Vector3D<float>.One;
 
         private Vector3D<float> _rotation;
@@ -26,23 +25,32 @@ namespace RenderingEngine.Components
             private set
             {
                 _rotation = value;
-                if (collider != null)
-                    (collider as BoxColliderComponent).CalculateAABB();
+                //if (collider != null)
+                 //   (collider as BoxColliderComponent).CalculateAABB();
             }
         }
 
-
-        private Vector3D<float> lastRotation;
-
-
+        public Vector3D<float> worldScale = Vector3D<float>.One;
         public Matrix4X4<float> ModelMatrix { get; set; }
+        
 
 
         public override void Init(GameObject Owner)
         {
             base.Init(Owner); //Init + Set Owner
-
             collider = Owner?.GetComponent<ColliderComponent>();
+            MarkDirtyRecursive();
+        }
+        
+        private void MarkDirtyRecursive()
+        {
+            isDirty = true;
+            dirtyScale = true;
+
+            foreach (var child in Owner.children)
+            {
+                child.Transform.MarkDirtyRecursive();
+            }
         }
 
         public void DirtyScale()
@@ -78,7 +86,6 @@ namespace RenderingEngine.Components
         }
 
 
-
         public Matrix4X4<float> GetModelMatrix()
         {
             if (isDirty) CalcModelMatrix();                        
@@ -87,64 +94,100 @@ namespace RenderingEngine.Components
 
         public void CalcModelMatrix()
         {
-            if (!isDirty) return; //Maybe remove this if the FPS drain is too much
-
-            this.ModelMatrix =
-                Matrix4X4.CreateScale(GetWorldScale()) *
+            if (!isDirty) return;
+            
+            
+            Matrix4X4<float> local =
+                Matrix4X4.CreateScale(scale) *
                 Matrix4X4.CreateRotationX(rotation.X) *
                 Matrix4X4.CreateRotationY(rotation.Y) *
                 Matrix4X4.CreateRotationZ(rotation.Z) *
                 Matrix4X4.CreateTranslation(position);
+            
+            if (Owner.parent != null)
+            {
+                Matrix4X4<float> parentWorld = Owner.parent.Transform.GetModelMatrix();
+                ModelMatrix = parentWorld * local;
+            }
+            else
+            {
+                ModelMatrix = local;
+            }
+            
+            
+            Console.WriteLine($"pos={position}  M14/M24/M34={ModelMatrix.M14},{ModelMatrix.M24},{ModelMatrix.M34}  M41/M42/M43={ModelMatrix.M41},{ModelMatrix.M42},{ModelMatrix.M43}");
+
+            
             isDirty = false;
         }
 
         public void SetScale(Vector3D<float> mag)
         {
-            this.scale = mag;
-            isDirty = true;
-            DirtyScale();
+            scale = mag;
+            MarkDirtyRecursive();
         }
 
         public void SetRotation(Vector3D<float> mag)
         {
-            this.rotation = mag;
-            isDirty = true;
+            rotation = mag;
+            MarkDirtyRecursive();
         }
 
         public void SetPositon(Vector3D<float> mag)
         {
             this.position = mag;
-            isDirty = true;
+            MarkDirtyRecursive();
         }
 
         public void Scale(Vector3D<float> mag)
         {
             this.scale *= mag;
-            isDirty = true;
-            DirtyScale();            
+            MarkDirtyRecursive();
         }
 
         public void Rotate(Vector3D<float> mag)
         {
             this.rotation += mag;
-            isDirty = true;
+            MarkDirtyRecursive();
         }
 
         public void Translate(Vector3D<float> mag)
         {
             this.position += mag;
-            if (collider != null) (collider as BoxColliderComponent).CalculateAABB();
-            //(collider as BoxColliderComponent).TranslateCorners(mag);
-            isDirty = true;
+            MarkDirtyRecursive();
         }
 
         public override void OnInspectorGUI()
         {
             ImGuiNET.ImGui.Text("Transform Component");
             
-            ImGui.Text($"Position: {position}");
-            ImGui.Text($"Rotation: {_rotation}");
-            ImGui.Text($"Scale: {scale}");
+            Vector3 pos = new(position.X, position.Y, position.Z);
+            Vector3 rot = new(rotation.X, rotation.Y, rotation.Z);
+            Vector3 scl = new(scale.X, scale.Y, scale.Z);
+            
+            var wm = GetModelMatrix();
+            var worldPos = new Vector3D<float>(wm.M41, wm.M42, wm.M43);
+            ImGui.Text($"World Position: {worldPos}");
+            
+            if (ImGui.InputFloat3("Position", ref pos))
+            {
+                SetPositon(new Vector3D<float>(pos.X, pos.Y, pos.Z));
+            }
+            if (ImGui.InputFloat3("Rotation", ref rot))
+            {
+                SetRotation(new Vector3D<float>(rot.X, rot.Y, rot.Z));
+            }
+            if (ImGui.InputFloat3("Scale", ref scl))
+            {
+                SetScale(new Vector3D<float>(scl.X, scl.Y, scl.Z));
+            }
+            if (ImGui.Button("Up 2y"))
+            {
+                Translate(new Vector3D<float>(0f, 2f, 0f));
+            }
+            //ImGui.Text($"Position: {position}");
+            //ImGui.Text($"Rotation: {_rotation}");
+            //ImGui.Text($"Scale: {scale}");
             if (ImGui.Button("Scale*1.1")) { Scale(new Vector3D<float>(1.1f)); }
             if (ImGui.Button("Pos?")) { Console.WriteLine($"Position: {position.ToString()}"); }
 
@@ -171,19 +214,19 @@ namespace RenderingEngine.Components
             loadedPos.X = reader.ReadSingle();
             loadedPos.Y = reader.ReadSingle();
             loadedPos.Z = reader.ReadSingle();
-
-            Translate(loadedPos);
-
-            _rotation.X = reader.ReadSingle();
-            _rotation.Y = reader.ReadSingle();
-            _rotation.Z = reader.ReadSingle();
+            SetPositon(loadedPos);
+            
+            var loadedRot = new Vector3D<float>();
+            loadedRot.X = reader.ReadSingle();
+            loadedRot.Y = reader.ReadSingle();
+            loadedRot.Z = reader.ReadSingle();
+            SetRotation(loadedRot);
 
             var loadedScale = new Vector3D<float>();
             loadedScale.X = reader.ReadSingle();
             loadedScale.Y = reader.ReadSingle();
             loadedScale.Z = reader.ReadSingle();
-
-            Scale(loadedScale);
+            SetScale(loadedScale);
         }
     }
 }

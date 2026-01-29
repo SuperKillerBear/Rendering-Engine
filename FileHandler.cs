@@ -18,6 +18,10 @@ namespace RenderingEngine
     {
         public static string currentLevel;
 
+        public static string baseDir;
+        public static string GameSettingsDir;
+        public static string LevelDataDir;
+
         public static void Init()
         {
             //Register Components Here
@@ -29,13 +33,18 @@ namespace RenderingEngine
             //TODO: Change Box Collider to Serializable Later when Implemented
             ComponentRegistry.RegisterNonSerializable<BoxColliderComponent>(4);
             
+            baseDir = AppContext.BaseDirectory;
+            //GameSettingsDir = Path.Combine(baseDir, "MeshData", filename);
+            GameSettingsDir = Path.Combine(baseDir, "GameSettings.dat");
+            LevelDataDir = Path.Combine(baseDir, "LevelData");
+
             LoadGameSettings();
         }
 
         public static void SaveGameSettings()
         {
-            string localPath = @"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\GameSettings.dat";
-            using var stream = File.Open(localPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            //string localPath = @"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\GameSettings.dat";
+            using var stream = File.Open(GameSettingsDir, FileMode.Create, FileAccess.Write, FileShare.None);
             using var writer = new BinaryWriter(stream);
 
             writer.Write(0x474D4454); //GMDT
@@ -46,16 +55,20 @@ namespace RenderingEngine
             writer.Write((ushort)selectedSceneNameData.Length);
             writer.Write(selectedSceneNameData);
 
+            writer.Write((double)Renderer.SunIntensity);
+            writer.Write((double)Renderer.AmbientIntensity);
+
+            writer.Write(Program.ShowBoundingBoxes);
+            writer.Write(Program.CapFPS);
+
             Console.WriteLine("INFO: Game Settings Saved");
         }
 
         public static void LoadGameSettings()
         {
-            string localPath = @"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\GameSettings.dat";
-
             try
             {
-                using var stream = File.Open(localPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var stream = File.Open(GameSettingsDir, FileMode.Open, FileAccess.Read, FileShare.Read);
                 // Minimum length: 4 bytes (magic) + 12 bytes (position) + 12 bytes (rotation) = 28 bytes
                 if (stream.Length < 28)
                 {
@@ -71,7 +84,7 @@ namespace RenderingEngine
                     Console.WriteLine("WARN: Invalid Game Settings File");
                     return;
                 }
-
+                
                 Camera.Position = ReadVector3D(reader); //Set Cam Pos
                 Camera.Rotation = ReadVector3D(reader); //Set Cam Rot
 
@@ -79,6 +92,13 @@ namespace RenderingEngine
                 byte[] selectedSceneNameData = reader.ReadBytes(selectedSceneNameLength);
                 string selectedSceneName = Encoding.UTF8.GetString(selectedSceneNameData);
 
+                Renderer.SunIntensity = (float) reader.ReadDouble();
+                Renderer.AmbientIntensity = (float) reader.ReadDouble();
+
+                Program.ShowBoundingBoxes = (bool) reader.ReadBoolean();
+                
+                Program.CapFPS = (bool) reader.ReadBoolean();
+                Program.UpdateFPSCap();
 
                 Console.WriteLine("INFO: Game Settings Loaded");
             }
@@ -91,7 +111,9 @@ namespace RenderingEngine
 
         public static void SaveScene(string name)
         {
-            string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\LevelData\{name}.dat";
+            //string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\LevelData\{name}.dat";
+            string localPath = Path.Combine(LevelDataDir, $"{name}.dat");
+
             Console.WriteLine($"Writing Level: {localPath}");
             var writer = new BinaryWriter(File.Open(localPath, FileMode.OpenOrCreate));
             byte[] nameData = Encoding.UTF8.GetBytes(name);
@@ -138,7 +160,8 @@ namespace RenderingEngine
 
         public static void LoadScene(string name)
         {
-            string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\LevelData\{name}.dat";
+            //string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\LevelData\{name}.dat";
+            string localPath = Path.Combine(LevelDataDir, $"{name}.dat");
             Console.WriteLine($"Trying to Read Level: {name}");
 
             if (!File.Exists(localPath))

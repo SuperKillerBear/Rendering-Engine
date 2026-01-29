@@ -180,14 +180,18 @@ namespace RenderingEngine.Gui
             ImGui.Begin("Settings");
 
             ImGui.Text($"FPS: {Program.lastFPS}");
-            ImGui.Text($"Screen: {Program.ScreenWidth}x{Program.ScreenHeight}");
+            ImGui.Text($"Screen: {Program.ScreenWidth}x{Program.ScreenHeight}, Ratio: {Program.aspectRatio}");
             if (ImGui.SliderFloat("Resolution Scale", ref Program.ResolutionScale, 0.1f, 1f)) {Program.UpdateResolution(); }
+            if (ImGui.Checkbox("CapFPS", ref Program.CapFPS)) { Program.UpdateFPSCap(); }
             ImGui.Text($"Camera Position: {Camera.Position.X}, {Camera.Position.Y}, {Camera.Position.Z}");
             if (ImGui.Button("Reset Camera Position")) { Camera.Position = Vector3D<float>.Zero; }
             ImGui.Text($"Accumulated Mouse Positon: ({InputHandler.accumMouseRelX}, {InputHandler.accumMouseRelY})");
             ImGui.InputFloat("Sensitivity", ref Camera.Sensitivity);
             ImGui.SliderInt("FOV", ref Camera.FOV, 30, 110);
+            ImGui.SliderFloat("Sun Intensity", ref Renderer.SunIntensity, 0.0001f, 5);
+            ImGui.SliderFloat("Ambient Intensity", ref Renderer.AmbientIntensity, 0.0001f, 10);
             ImGui.InputInt("Chunk Size", ref Program.chunkSize, 1, 2);
+            ImGui.Checkbox("Show Bounding Boxes", ref Program.ShowBoundingBoxes);
             ImGui.SliderFloat("Tick Rate", ref Program.tickRate, 0.01f, 10f);
             ImGui.Text($"Scene Objects Count: {Program.SceneObjects.Count}");
             ImGui.Text($"Current Level Name: {FileHandler.currentLevel}");

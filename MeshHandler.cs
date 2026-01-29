@@ -12,6 +12,9 @@ namespace RenderingEngine
 {
     public static class MeshHandler
     {
+
+        private static readonly bool debugMesh = false;
+
         public static readonly List<Mesh> Meshes = new List<Mesh>();
 
         public static readonly Dictionary<string, uint> loadedMeshes = new();
@@ -74,7 +77,7 @@ namespace RenderingEngine
                         Meshes.Add(loadedMesh);
 
                         string key = $"{filename}/{objIndex}/{meshIndex}";
-                        Console.WriteLine($"Creating mesh - Key: {key}, ID: {id}, Name: {subMesh.name}");
+                        if (debugMesh) Console.WriteLine($"Creating mesh - Key: {key}, ID: {id}, Name: {subMesh.name}");
 
                         loadedMeshes.Add(key, id);
 
@@ -90,7 +93,7 @@ namespace RenderingEngine
                     }
                     else
                     {
-                        Console.WriteLine($"WARNING: Object {objIndex} in {filename} has no submeshes!");
+                        if (debugMesh) Console.WriteLine($"WARNING: Object {objIndex} in {filename} has no submeshes!");
                     }
 
                     objIndex++;

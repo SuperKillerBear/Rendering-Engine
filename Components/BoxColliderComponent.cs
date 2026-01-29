@@ -10,157 +10,147 @@ using System.Threading.Tasks;
 namespace RenderingEngine.Components
 {
     public class BoxColliderComponent : ColliderComponent
-    {
+    {//TODO => WRITE CODE FOR THIS COMPONENET
         public override string ComponentName => "Box Collider Component";
 
-        //TODO => WRITE CODE FOR THIS COMPONENET
+        public Vector3D<float> Size = new Vector3D<float>(1f, 1f, 1f);
+        public Vector3D<float> Centre = new Vector3D<float>(0f, 0f, 0f);
 
+        public Vector3D<float> WorldMin { get; private set; }
+		public Vector3D<float> WorldMax { get; private set; }
+		public Vector3D<float> WorldCenter { get; private set; }
+		public Vector3D<float> WorldHalfExtents { get; private set; }
 
-        public Vector3D<float> size = new Vector3D<float>(1, 1, 1);
-        public Vector3D<float> centre= new Vector3D<float>(0, 0, 0);
+        private readonly Vector3D<float>[] _localCorners = new Vector3D<float>[8];
+		private readonly Vector3D<float>[] _worldCorners = new Vector3D<float>[8];
 
-        Vector3D<float> halfSize;
-        Vector3D<float> Max;
-        Vector3D<float> Min;
-        Vector3D<float> boxCentre;
-        Vector3D<float>[] unRotatedCorners = new Vector3D<float>[8];
-        Vector3D<float>[] rotatedCorners = new Vector3D<float>[8];
+		private bool _dirty = true;
+		private Matrix4X4<float> _lastModel;
 
+        public bool IsColliding = false;
 
 
         public override void Init(GameObject Owner)
         {
-                base.Init(Owner); //Init + Set Owner
-                PopulateCorner();
-                CalculateAABB();
+            base.Init(Owner); //Init + Set Owner
+            RebuildLocalCorners();
+            RecalculateWorldAabb();
+            _lastModel = Owner.Transform.GetModelMatrix();
+
+            BoxColliderHandler.AddObj(this);
+            // Temp while testing all colliders, this makes all Box Colliders be checked ticked every frame
+            // which is redundent if they are not moving!
         }
 
-        public void PopulateCorner()
-        {
-            float halfSizeX = (float)(size.X / 2);
-            float halfSizeY = (float)(size.Y / 2);
-            float halfSizeZ = (float)(size.Z / 2);
+        public void TickCollider()
+		{
+            IsColliding = false;
 
-            halfSize = new Vector3D<float>(halfSizeX, halfSizeY, halfSizeZ);
+			var model = Owner.Transform.GetModelMatrix();
 
-            float minX = (float)(centre.X - halfSizeX);
-            float minY = (float)(centre.Y - halfSizeY);
-            float minZ = (float)(centre.Z - halfSizeZ);
+			if (_dirty || !MatrixEqualsApprox(model, _lastModel))
+			{
+				RecalculateWorldAabb();
+				_lastModel = model;
+				_dirty = false;
+			}
+		}
 
-            float maxX = (float)(centre.X + halfSizeX);
-            float maxY = (float)(centre.Y + halfSizeY);
-            float maxZ = (float)(centre.Z + halfSizeZ);
+        private void RebuildLocalCorners()
+		{
+			var half = Size * 0.5f;
 
+			float minX = Centre.X - half.X;
+			float minY = Centre.Y - half.Y;
+			float minZ = Centre.Z - half.Z;
 
-            unRotatedCorners[0] = new Vector3D<float>(minX, minY, minZ);
-            unRotatedCorners[1] = new Vector3D<float>(minX, minY, maxZ);
-            unRotatedCorners[2] = new Vector3D<float>(minX, maxY, minZ);
-            unRotatedCorners[3] = new Vector3D<float>(maxX, minY, minZ);
-            unRotatedCorners[4] = new Vector3D<float>(minX, maxY, maxZ);
-            unRotatedCorners[5] = new Vector3D<float>(maxX, minY, maxZ);
-            unRotatedCorners[6] = new Vector3D<float>(maxX, maxY, minZ);
-            unRotatedCorners[7] = new Vector3D<float>(maxX, maxY, maxZ);
-        }
+			float maxX = Centre.X + half.X;
+			float maxY = Centre.Y + half.Y;
+			float maxZ = Centre.Z + half.Z;
 
-        public void CalculateAABB()
-        {
-           
-            for (int i = 0; i < unRotatedCorners.Length; i++)
-                rotatedCorners[i] = Vector3D.Transform(unRotatedCorners[i], Owner.Transform.GetModelMatrix());
+			_localCorners[0] = new(minX, minY, minZ);
+			_localCorners[1] = new(maxX, minY, minZ);
+			_localCorners[2] = new(maxX, maxY, minZ);
+			_localCorners[3] = new(minX, maxY, minZ);
 
-            float minX = rotatedCorners.Min(c => c.X);
-            float minY = rotatedCorners.Min(c => c.Y);
-            float minZ = rotatedCorners.Min(c => c.Z);
+			_localCorners[4] = new(minX, minY, maxZ);
+			_localCorners[5] = new(maxX, minY, maxZ);
+			_localCorners[6] = new(maxX, maxY, maxZ);
+			_localCorners[7] = new(minX, maxY, maxZ);
+		}
 
-            float maxX = rotatedCorners.Max(c => c.X);
-            float maxY = rotatedCorners.Max(c => c.Y);
-            float maxZ = rotatedCorners.Max(c => c.Z);
+        private void RecalculateWorldAabb()
+		{
+			var model = Owner.Transform.GetModelMatrix();
 
-            Min = new Vector3D<float>(minX, minY, minZ);
-            Max = new Vector3D<float>(maxX, maxY, maxZ);
+			for (int i = 0; i < 8; i++)
+				_worldCorners[i] = Vector3D.Transform(_localCorners[i], model);
 
-            boxCentre = (Min + Max) * 0.5f;
-        }
+			float minX = _worldCorners.Min(c => c.X);
+			float minY = _worldCorners.Min(c => c.Y);
+			float minZ = _worldCorners.Min(c => c.Z);
 
+			float maxX = _worldCorners.Max(c => c.X);
+			float maxY = _worldCorners.Max(c => c.Y);
+			float maxZ = _worldCorners.Max(c => c.Z);
 
-        //Saves Computation Time by not recalculating corners every time
-        //Uses this if only position is dirty
-        public void TranslateCorners(Vector3D<float> translation)
-        {
-            for (int i = 0; i < rotatedCorners.Length; i++)
-            {
-                rotatedCorners[i] += translation;
-            }
-        }
+			WorldMin = new(minX, minY, minZ);
+			WorldMax = new(maxX, maxY, maxZ);
 
+			WorldCenter = (WorldMin + WorldMax) * 0.5f;
+			WorldHalfExtents = (WorldMax - WorldMin) * 0.5f;
+		}
 
-        public Vector3D<float> CollideAABBs(BoxColliderComponent obj2)
-        {
-            Vector3D<float> resultant = Vector3D<float>.Zero;
+        private bool MatrixEqualsApprox(in Matrix4X4<float> a, in Matrix4X4<float> b)
+		{
+			// Cheap approx check. Good enough to detect movement/rotation/scale changes.
+			const float eps = 0.00001f;
 
-            
-            Vector3D<float> delta = obj2.boxCentre - boxCentre;
-            Vector3D<float> overlap = (halfSize + obj2.halfSize) - new Vector3D<float>(
-                MathF.Abs(delta.X),
-                MathF.Abs(delta.Y),
-                MathF.Abs(delta.Z)
-                );
-
-
-            if (overlap.X < 0 || overlap.Y < 0 || overlap.Z < 0)
-            {
-                return resultant; //No Collision
-            }
-
-            //Find Axis of Minimum Penetration
-            if (overlap.X < overlap.Y && overlap.X < overlap.Z)
-            {
-                resultant.X = (delta.X < 0) ? -overlap.X : overlap.X;
-            }
-            else if (overlap.Y < overlap.X && overlap.Y < overlap.Z)
-            {
-                resultant.Y = (delta.Y < 0) ? -overlap.Y : overlap.Y;
-            }
-            else
-            {
-                resultant.Z = (delta.Z < 0) ? -overlap.Z : overlap.Z;
-            }
-
-
-            return resultant;
-        }
+			return
+				MathF.Abs(a.M11 - b.M11) < eps && MathF.Abs(a.M12 - b.M12) < eps && MathF.Abs(a.M13 - b.M13) < eps && MathF.Abs(a.M14 - b.M14) < eps &&
+				MathF.Abs(a.M21 - b.M21) < eps && MathF.Abs(a.M22 - b.M22) < eps && MathF.Abs(a.M23 - b.M23) < eps && MathF.Abs(a.M24 - b.M24) < eps &&
+				MathF.Abs(a.M31 - b.M31) < eps && MathF.Abs(a.M32 - b.M32) < eps && MathF.Abs(a.M33 - b.M33) < eps && MathF.Abs(a.M34 - b.M34) < eps &&
+				MathF.Abs(a.M41 - b.M41) < eps && MathF.Abs(a.M42 - b.M42) < eps && MathF.Abs(a.M43 - b.M43) < eps && MathF.Abs(a.M44 - b.M44) < eps;
+		}
 
 
         public override void OnInspectorGUI()
-        {
-            InputVector3D("Size", ref size);
-            InputVector3D("Centre", ref centre);
-            ImGui.Text($"Min: {Min.ToString()}");
-            ImGui.Text($"Max: {Max.ToString()}");
-            ImGui.Text($"Chunks: {string.Join(", ", chunks.Select(c => $"({c.X}, {c.Y})"))}");
-
-            debugVar("Half Size", halfSize.ToString());
-            debugVar("Box Centre", boxCentre.ToString());
-            debugVar("UnRotated Corners", string.Join(", ", unRotatedCorners.Select(c => c.ToString())));
-            debugVar("Rotated Corners", string.Join(", ", rotatedCorners.Select(c => c.ToString())));
+		{
+			if (InputVector3D("Size", ref Size))
+            {
+                _dirty = true;
+				RebuildLocalCorners();
+				RecalculateWorldAabb();
+				_lastModel = Owner.Transform.GetModelMatrix();
+				_dirty = false;
+            }
+			if (InputVector3D("Centre", ref Centre))
+            {
+                _dirty = true;
+				RebuildLocalCorners();
+				RecalculateWorldAabb();
+				_lastModel = Owner.Transform.GetModelMatrix();
+				_dirty = false;
+            }
             
 
+			if (ImGui.Button("Recalculate AABB"))
+			{
+				_dirty = true;
+				RebuildLocalCorners();
+				RecalculateWorldAabb();
+				_lastModel = Owner.Transform.GetModelMatrix();
+				_dirty = false;
+			}
 
-            if (ImGui.Button("Update Calcs"))
-            {
-                CalcChunks();
-            }
-        }
+			ImGui.Text($"WorldMin: {WorldMin}");
+			ImGui.Text($"WorldMax: {WorldMax}");
+			ImGui.Text($"WorldCenter: {WorldCenter}");
+			ImGui.Text($"WorldHalfExtents: {WorldHalfExtents}");
+
+		}
 
 
-        private void debugVar(string name, string value)
-        {
-            ImGui.Text($"{name}: {value}");
-        }
-        
-
-
-        
 
     }
 }

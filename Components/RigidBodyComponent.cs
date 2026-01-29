@@ -4,6 +4,7 @@ using RenderingEngine.Rendering;
 using RenderingEngine.Utilities;
 using Silk.NET.Input;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,20 +44,22 @@ namespace RenderingEngine.Components
         public Vector3D<float> Acceleration = Vector3D<float>.Zero;
         public Vector3D<float> Velocity = Vector3D<float>.Zero;
 
-        private ColliderComponent? collider;
+        public ColliderComponent? Collider {get; private set; }
 
 
         private Vector3D<float> Resultant = Vector3D<float>.Zero;
+
+        private int physObjListIndex = -1;
 
         public override void Init(GameObject Owner)
         {
             base.Init(Owner); //Init + Set Owner
 
-            PhysicsObjectsHandler.AddObj(this);
+            physObjListIndex = PhysicsObjectsHandler.AddObj(this);
 
-            collider = Owner.GetComponent<ColliderComponent>();
-            if (collider == null)
-                collider = Owner.AddComponent<BoxColliderComponent>();
+            Collider = Owner.GetComponent<ColliderComponent>();
+            if (Collider == null)
+                Collider = Owner.AddComponent<BoxColliderComponent>();
         }
 
         public void TickPhysics(double deltaTime)
@@ -93,22 +96,23 @@ namespace RenderingEngine.Components
         
         public void CheckCollisions()
         {
-            collider.CalcChunks();
+            return; //Fix Later
+            Collider.CalcChunks();
 
             //Check Collisions with other Physics Objects in same chunks
 
             //Flawed Logic as they may not have calced now physics chuncks
             foreach (RendererComponent obj in Renderer.RenderingObjects)
             {
-                for (int c = 0; c < collider.chunks.Count; c++)
+                for (int c = 0; c < Collider.chunks.Count; c++)
                 {
                     var collider2 = obj.Owner.GetComponent<ColliderComponent>() as BoxColliderComponent;
 
                     if (collider2 == null) continue;
 
-                    if (collider.chunks.Contains(collider.chunks[c]) && collider2 != collider)
+                    if (Collider.chunks.Contains(Collider.chunks[c]) && collider2 != Collider)
                     {
-                        Resultant = (collider as BoxColliderComponent).CollideAABBs(collider2); //Wont Be Null
+                        //Resultant = (collider as BoxColliderComponent).CollideAABBs(collider2); //Wont Be Null
 
                         //if (Resultant != Vector3D<float>.Zero && (UMath.Dot(new Vector3D<float>(0, 1, 0), Velocity) < 0))
                         //{
@@ -140,7 +144,7 @@ namespace RenderingEngine.Components
             
             ImGui.Text($"Resultant: {Resultant}");
 
-            ImGui.Text($"Chunks: {string.Join(", ", collider.chunks.Select(c => $"({c.X}, {c.Y})"))}");
+            ImGui.Text($"Chunks: {string.Join(", ", Collider.chunks.Select(c => $"({c.X}, {c.Y})"))}");
 
             ImGui.Checkbox("Apply Gravity", ref applyGravity);
             ImGui.Checkbox("Tick Physics", ref tickPhysics);
@@ -171,7 +175,10 @@ namespace RenderingEngine.Components
             tickPhysics = reader.ReadBoolean();
         }
 
-        
+        public override void Dispose()
+        {
+            PhysicsObjectsHandler.RemoveObj(this, physObjListIndex);
+        }
 
     }
 }

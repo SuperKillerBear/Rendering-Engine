@@ -74,6 +74,7 @@ namespace RenderingEngine.Components
                 //string objName = $"{filename}_obj_{sourceObjIndex}";
                 string objName = $"{names[0]}";
                 GameObject newObject = new GameObject(Parent: Owner, name: objName);
+                
 
                 // Get the source object data
                 var objList = ImportHandler.loadedObjMap[filename];
@@ -99,7 +100,7 @@ namespace RenderingEngine.Components
                     // Create Submesh GameObject
                     GameObject newSubMesh = new GameObject(Parent: newObject, name: $"Submesh {i}");
                     var rend = newSubMesh.AddComponent<RendererComponent>();
-                    newSubMesh.Transform.Scale(new Vector3D<float>(0.2f));
+                    
 
                     // Assign Mesh
                     rend.SetMeshID(meshIDs[i]);
@@ -120,7 +121,10 @@ namespace RenderingEngine.Components
 
             // Finally Remove this Renderer Component
             Renderer.RenderingObjects.Remove(this);
-            if (Owner != null) Owner.RemoveComponent(this);
+            if (Owner != null) {
+                Owner.RemoveComponent(this);
+                Owner.Transform.Scale(new Vector3D<float>(0.2f));
+            }
         }
 
 

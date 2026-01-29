@@ -10,13 +10,16 @@ using ImGuiNET;
 using RenderingEngine.Components;
 using Silk.NET.OpenGL.Extensions.ARB;
 using System.Text.Json;
+using RenderingEngine.Utilities;
 
 
 namespace RenderingEngine.Rendering
 {
     public class Renderer
     {
-        private GL gl;        
+        private GL gl;
+        private DebugLines debugLines;
+        
 
         private uint shaderProgram;
         private int uModelLocation;
@@ -26,10 +29,11 @@ namespace RenderingEngine.Rendering
         public static List<RendererComponent> RenderingObjects = new List<RendererComponent>();
 
 
-        int uViewLocation;
-        int uProjectionLocation;
-        int uTextureLocation;
-        int colorLocation;
+        int uViewLocation, uProjectionLocation, uColorLocation;
+        int uTextureLocation, uLightDirLocation, uLightColourLocation, uAmbientColorLocation;
+        
+        
+        public static float SunIntensity = 1.5f, AmbientIntensity = 4f;
 
         public Renderer(GL gl, uint shaderProgram)
         {
@@ -51,8 +55,15 @@ namespace RenderingEngine.Rendering
 
             uViewLocation = gl.GetUniformLocation(shaderProgram, "uView");
             uProjectionLocation = gl.GetUniformLocation(shaderProgram, "uProjection");
+            uColorLocation = gl.GetUniformLocation(shaderProgram, "uBaseColor");
+
             uTextureLocation = gl.GetUniformLocation(shaderProgram, "uTexture"); //not -1
-            colorLocation = gl.GetUniformLocation(shaderProgram, "uBaseColor");
+
+            uLightDirLocation = gl.GetUniformLocation(shaderProgram, "uLightDir");
+            uLightColourLocation = gl.GetUniformLocation(shaderProgram, "uLightColor");
+            uAmbientColorLocation = gl.GetUniformLocation(shaderProgram, "uAmbientColor");
+
+            debugLines = new DebugLines(gl, "Shaders/debug_lines.vert", "Shaders/debug_lines.frag");
 
         }
 
@@ -63,6 +74,8 @@ namespace RenderingEngine.Rendering
 
         public void Draw()
         {
+            gl.UseProgram(shaderProgram);
+
             var meshGroups = RenderingObjects.GroupBy(obj => obj.MeshID);
 
             // Orthographic projection example
@@ -94,8 +107,14 @@ namespace RenderingEngine.Rendering
 
             unsafe
             {
+                
                 gl.UniformMatrix4(uViewLocation, 1, false, (float*)&view);
                 gl.UniformMatrix4(uProjectionLocation, 1, false, (float*)&projection);
+
+                Vector3D<float> calcLightDir = UMath.Normalize(new Vector3D<float>(0, 1, 0));
+                gl.Uniform3(uLightDirLocation, calcLightDir.X, calcLightDir.Y, calcLightDir.Z); //Normalise Value
+                gl.Uniform3(uLightColourLocation, 1.0f * SunIntensity, 1.0f * SunIntensity, 1.0f * SunIntensity);
+                gl.Uniform3(uAmbientColorLocation, 0.2f * AmbientIntensity, 0.2f * AmbientIntensity, 0.2f * AmbientIntensity);
 
             }
 
@@ -109,7 +128,7 @@ namespace RenderingEngine.Rendering
 
                 foreach (var rendrComp in group)
                 {
-                    //Implememt GPU more efficent method suc that data upload only new data
+                    //Implememt GPU more efficent method such that data upload only new data
                     //Not same data each frame
                     Matrix4X4<float> model = rendrComp.Owner.Transform.GetModelMatrix();
 
@@ -117,7 +136,9 @@ namespace RenderingEngine.Rendering
                     Material mat = rendrComp.material ?? MaterialHandler.defaultMaterial;
 
                     // Set material properties
-                    gl.Uniform3(colorLocation, mat.Colour.X, mat.Colour.Y, mat.Colour.Z);
+                    gl.Uniform3(uColorLocation, mat.Colour.X, mat.Colour.Y, mat.Colour.Z);
+                    
+        
 
                     // Upload the bindless texture handle
                     if (mat.BindlessHandle != 0)
@@ -133,7 +154,15 @@ namespace RenderingEngine.Rendering
 
                     unsafe
                     {
+                        gl.GetInteger(GLEnum.CurrentProgram, out int curProg);
+                        if ((uint)curProg != shaderProgram)
+                        {
+                            Console.WriteLine($"WRONG PROGRAM before uModel: cur={curProg} expected={shaderProgram}");
+                        }
+                        
+                        //UploadMat4(uModelLocation, model);
                         gl.UniformMatrix4(uModelLocation, 1, false, (float*)&model);
+
 
                         if (mesh.IndexCount > 0)
                         {
@@ -154,7 +183,42 @@ namespace RenderingEngine.Rendering
 
             }
 
+            if (Program.ShowBoundingBoxes)
+            {
+                debugLines.Begin();
+
+                // You need to loop over your colliders here.
+                // Example assumes: Owner has ColliderComponent with WORLD AABB min/max.
+
+                bool collision = false;
+
+                foreach (var gameObject in Program.SceneObjects) //Issue is that the parent objects are not renderingObjects
+                {
+                    
+                    BoxColliderComponent? col = gameObject.GetComponent<BoxColliderComponent>();
+
+                    if (col != null)
+                    {                        
+                        debugLines.AddAabb(col.WorldMin, col.WorldMax);
+                        if (col.IsColliding) collision = true;
+                    }
+                    
+                }
+                
+                Vector3D<float> colour = collision ? new Vector3D<float>(1f, 0f, 0f) : new Vector3D<float>(0f, 1f, 0f);
+
+                debugLines.Flush(view, projection, colour, alwaysOnTop: true);
+
+                // Restore main program because DebugLines switched programs
+                gl.UseProgram(shaderProgram);
+            }
+
+
         }
+
+
+        
+
             
 
     }
