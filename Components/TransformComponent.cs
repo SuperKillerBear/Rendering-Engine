@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using RenderingEngine.GameObjects;
+using RenderingEngine.Utilities;
 using Silk.NET.Maths;
 using System.ComponentModel;
 using System.Numerics;
@@ -33,7 +34,7 @@ namespace RenderingEngine.Components
         public Vector3D<float> worldScale = Vector3D<float>.One;
         public Matrix4X4<float> ModelMatrix { get; set; }
         
-
+        
 
         public override void Init(GameObject Owner)
         {
@@ -47,16 +48,21 @@ namespace RenderingEngine.Components
             isDirty = true;
             dirtyScale = true;
 
-            foreach (var child in Owner.children)
+            foreach (var child in Owner.Children)
             {
                 child.Transform.MarkDirtyRecursive();
             }
+        }
+        
+        public void MarkDirtySingle()
+        {
+            isDirty = true;
         }
 
         public void DirtyScale()
         {
             dirtyScale = true;
-            foreach (var child in Owner.children)
+            foreach (var child in Owner.Children)
             {
                 child.Transform.DirtyScale();
             }
@@ -67,7 +73,7 @@ namespace RenderingEngine.Components
             // Always recalculate if dirty
             if (dirtyScale)
             {
-                var parent = Owner.parent;
+                var parent = Owner.Parent;
                 if (parent != null)
                 {
                     // Make sure parent's worldScale is up to date before using it
@@ -84,7 +90,6 @@ namespace RenderingEngine.Components
 
             return worldScale;
         }
-
 
         public Matrix4X4<float> GetModelMatrix()
         {
@@ -104,9 +109,9 @@ namespace RenderingEngine.Components
                 Matrix4X4.CreateRotationZ(rotation.Z) *
                 Matrix4X4.CreateTranslation(position);
             
-            if (Owner.parent != null)
+            if (Owner.Parent != null)
             {
-                Matrix4X4<float> parentWorld = Owner.parent.Transform.GetModelMatrix();
+                Matrix4X4<float> parentWorld = Owner.Parent.Transform.GetModelMatrix();
                 ModelMatrix = parentWorld * local;
             }
             else
@@ -114,9 +119,6 @@ namespace RenderingEngine.Components
                 ModelMatrix = local;
             }
             
-            
-            Console.WriteLine($"pos={position}  M14/M24/M34={ModelMatrix.M14},{ModelMatrix.M24},{ModelMatrix.M34}  M41/M42/M43={ModelMatrix.M41},{ModelMatrix.M42},{ModelMatrix.M43}");
-
             
             isDirty = false;
         }
@@ -195,39 +197,19 @@ namespace RenderingEngine.Components
 
         public void Serialize(BinaryWriter writer)
         {
-            writer.Write(position.X);
-            writer.Write(position.Y);
-            writer.Write(position.Z);
-
-            writer.Write(rotation.X);
-            writer.Write(rotation.Y);
-            writer.Write(rotation.Z);
-
-            writer.Write(scale.X);
-            writer.Write(scale.Y);
-            writer.Write(scale.Z);
+            UMath.WriteSilkVec3(writer, position);
+            UMath.WriteSilkVec3(writer, rotation);
+            UMath.WriteSilkVec3(writer, scale);
         }
 
         public void Deserialize(BinaryReader reader)
         {
-            var loadedPos = new Vector3D<float>();
-            loadedPos.X = reader.ReadSingle();
-            loadedPos.Y = reader.ReadSingle();
-            loadedPos.Z = reader.ReadSingle();
-            SetPositon(loadedPos);
-            
-            var loadedRot = new Vector3D<float>();
-            loadedRot.X = reader.ReadSingle();
-            loadedRot.Y = reader.ReadSingle();
-            loadedRot.Z = reader.ReadSingle();
-            SetRotation(loadedRot);
-
-            var loadedScale = new Vector3D<float>();
-            loadedScale.X = reader.ReadSingle();
-            loadedScale.Y = reader.ReadSingle();
-            loadedScale.Z = reader.ReadSingle();
-            SetScale(loadedScale);
+        
+            SetPositon(UMath.ReadSilkVec3(reader));
+            SetRotation(UMath.ReadSilkVec3(reader));
+            SetScale(UMath.ReadSilkVec3(reader));
         }
+        
     }
 }
 

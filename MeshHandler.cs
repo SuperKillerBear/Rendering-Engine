@@ -47,14 +47,14 @@ namespace RenderingEngine
         {
             List<(string[], uint[], int)> outObjects = new();
 
-            if (loadedMeshes.ContainsKey(filename))
+            if (loadedMeshes.ContainsKey(filename)) //Not Catching same key??
             {
                 // Return cached - need to reconstruct from keys
                 outObjects.Add(([filename], [loadedMeshes[filename]], 0));
                 return outObjects;
             }
 
-            try //Flawed Code, If cannot load Obj File, all children will not be attempted to render => Add Individual Try Catch
+            try
             {
                 ImportHandler.LoadObjFile(filename);
                 var objs = ImportHandler.loadedObjMap[filename];

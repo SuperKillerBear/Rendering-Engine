@@ -194,13 +194,13 @@ namespace RenderingEngine
             
             
             var Hospital = new GameObject();
-            Hospital.name = "Hospital";
+            Hospital.Name = "Hospital";
             Hospital.AddComponent<RendererComponent>().SetMesh("SilentHill");
             //Hospital.AddComponent<RendererComponent>().SetMeshID(0);
             Hospital.AddComponent<BoxColliderComponent>();
             
             var ps6 = new GameObject();
-            ps6.name = "Ps6";
+            ps6.Name = "Ps6";
             ps6.AddComponent<RendererComponent>().SetMesh("ps6");
             ps6.AddComponent<BoxColliderComponent>();
             ps6.AddComponent<RigidBodyComponent>();
@@ -301,17 +301,18 @@ namespace RenderingEngine
             RenderingEnabled = false;
 
             Renderer.RenderingObjects.Clear();
+            BoxColliderHandler.ClearAll();
             PhysicsObjectsHandler.ClearAll();
 
             MaterialHandler.UnloadTextures();
             MeshHandler.UnloadAll();
 
-
-            //TODO: Clear Textures from Handler
-
-            foreach (GameObject obj in SceneObjects)
-                obj.Dispose();
-            SceneObjects.Clear();
+            while (SceneObjects.Count > 0)
+            {
+                SceneObjects[SceneObjects.Count - 1].Dispose();
+            }
+            
+            //SceneObjects.Clear();
 
             //Force Memory Cleanup
             GC.Collect();

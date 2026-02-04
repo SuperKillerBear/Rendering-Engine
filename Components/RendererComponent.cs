@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using RenderingEngine.GameObjects;
 using RenderingEngine.Rendering;
+using RenderingEngine.Utilities;
 using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;
@@ -19,10 +20,10 @@ namespace RenderingEngine.Components
         private string meshAddress = "EMPTY";
 
 
-        public Material? material = null;
+        public Material? Material = null;
 
-        private string inputTextureName = "";
-        private string inputMeshName = "";
+        private string GuiInputTextureName = "";
+        private string GuiInputMeshName = "";
 
         public override void Init(GameObject Owner)
         {
@@ -31,7 +32,6 @@ namespace RenderingEngine.Components
 
         }
 
-        //Multiple Objects can be loaded from one file, thus not a singular mesh can be returned
         //Bad Name
         public void SetMesh(string filename)
         {
@@ -58,7 +58,7 @@ namespace RenderingEngine.Components
                     string textureName = "EMPTY";
 
                     //Note* If Texture name is passed to be "EMPTY" => Debug Texture is loaded automatically
-                    rend.material = MaterialHandler.CreateMaterial(filename, textureName, Vector3D<float>.One); 
+                    rend.Material = MaterialHandler.CreateMaterial(filename, textureName, Vector3D<float>.One); 
                     
                     
                     Console.WriteLine("Rendered Empty Object");
@@ -105,7 +105,7 @@ namespace RenderingEngine.Components
                     // Assign Mesh
                     rend.SetMeshID(meshIDs[i]);
                     rend.meshAddress = $"{filename}/{sourceObjIndex}/{i}";
-
+                
                     // Apply Material - Now safely access submesh
                     var submesh = sourceObj[i];
 
@@ -113,7 +113,7 @@ namespace RenderingEngine.Components
                     string textureName = string.IsNullOrEmpty(submesh.textureName) ? "EMPTY" : submesh.textureName;
 
                     //Note* If Texture name is passed to be "EMPTY" => Debug Texture is loaded automatically
-                    rend.material = MaterialHandler.CreateMaterial(filename, textureName, Vector3D<float>.One); 
+                    rend.Material = MaterialHandler.CreateMaterial(filename, textureName, Vector3D<float>.One); 
 
                     Console.WriteLine($"Created submesh: {names[i]} with texture: {textureName}");
                 }
@@ -126,8 +126,6 @@ namespace RenderingEngine.Components
                 Owner.Transform.Scale(new Vector3D<float>(0.2f));
             }
         }
-
-
 
         public void SetMeshID(uint id)
         {
@@ -151,27 +149,27 @@ namespace RenderingEngine.Components
             ImGui.Text($"Mesh ID: {MeshID.ToString()}");
             ImGui.Text($"Assigned Mesh: {AssignedMesh.ToString()}");
 
-            ImGui.InputText("Load Mesh", ref inputMeshName, 64);
+            ImGui.InputText("Load Mesh", ref GuiInputMeshName, 64);
             if (ImGui.Button("Set Mesh"))
             {
-                SetMesh(inputMeshName);
+                SetMesh(GuiInputMeshName);
             }
 
-            ImGui.InputText("Load Texture", ref inputTextureName, 64);
+            ImGui.InputText("Load Texture", ref GuiInputTextureName, 64);
             if (ImGui.Button("Load Material"))
             {
-                if (inputTextureName != "")
+                if (GuiInputTextureName != "")
                 {
-                    material = MaterialHandler.CreateMaterial("", inputTextureName, new Vector3D<float>(1));
+                    Material = MaterialHandler.CreateMaterial("", GuiInputTextureName, new Vector3D<float>(1));
                 }
             }
 
-            if (material != null)
+            if (Material != null)
             {
-                ImGui.Text($"Material: {material.Filename}");
-                ImGui.Text($"Colour: {material.Colour.ToString()}");
-                ImGui.Text($"Handle: {material.BindlessHandle.ToString()}");
-                ImGui.Text($"Texture ID: {material.TextureID.ToString()}");
+                ImGui.Text($"Material: {Material.Filename}");
+                ImGui.Text($"Colour: {Material.Colour.ToString()}");
+                ImGui.Text($"Handle: {Material.BindlessHandle.ToString()}");
+                ImGui.Text($"Texture ID: {Material.TextureID.ToString()}");
             }
             else
             {
@@ -181,18 +179,16 @@ namespace RenderingEngine.Components
 
         public void Serialize(BinaryWriter writer)
         {
-            //TODO: Check if string is empty, if so write "EMPTY"
-
             byte[] meshAddressData = Encoding.UTF8.GetBytes(meshAddress);
-            ushort addreessLength = (ushort)meshAddressData.Length;
+            ushort addressLength = (ushort)meshAddressData.Length;
 
-            writer.Write(addreessLength);
+            writer.Write(addressLength);
             writer.Write(meshAddressData);
 
-            bool hasMaterial = material != null;
+            bool hasMaterial = Material != null;
             string data;
 
-            data = hasMaterial ? material.Filename : "EMPTY";
+            data = hasMaterial ? Material.Filename : "EMPTY";
 
             byte[] encodedData = Encoding.UTF8.GetBytes(data);
             ushort dataLength = (ushort)encodedData.Length;
@@ -202,13 +198,10 @@ namespace RenderingEngine.Components
 
             if (hasMaterial)
             {
-                writer.Write(material.Colour.X);
-                writer.Write(material.Colour.Y);
-                writer.Write(material.Colour.Z);
+                UMath.WriteSilkVec3(writer, Material.Colour);
             }
             else
             {
-                
                 writer.Write(1f);
                 writer.Write(1f);
                 writer.Write(1f);
@@ -223,25 +216,39 @@ namespace RenderingEngine.Components
             ushort length = reader.ReadUInt16();
             byte[] meshAddressData = reader.ReadBytes(length);
 
-            string meshAddress = Encoding.UTF8.GetString(meshAddressData);
-
+            meshAddress = Encoding.UTF8.GetString(meshAddressData);
             Console.WriteLine($"Loaded Mesh Address Data: {meshAddress}");
-            SetMesh(meshAddress);
-
+            
+            
             length = reader.ReadUInt16();
             byte[] materialData = reader.ReadBytes(length);
             string materialAddress = Encoding.UTF8.GetString(materialData);
-
-            Vector3D<float> colour = new Vector3D<float>(
-                reader.ReadSingle(),
-                reader.ReadSingle(),
-                reader.ReadSingle()
-            );
-
-            //Fix Later
-            this.material = MaterialHandler.CreateMaterial("", materialAddress, colour);
-        
+            var parts = meshAddress.Split('/', StringSplitOptions.RemoveEmptyEntries);
             
+            var colour = UMath.ReadSilkVec3(reader);
+            
+            if (parts.Length < 1)
+            {
+                SetMesh("EMPTY");
+            }
+            else
+            {
+                string file = parts[0];
+                
+                MeshHandler.LoadMeshsFile(file);
+                if (MeshHandler.loadedMeshes.TryGetValue(meshAddress, out uint id))
+                {
+                    SetMeshID(id);
+                    Material = MaterialHandler.CreateMaterial(file, materialAddress, colour);
+                }
+                else
+                {
+                    Console.WriteLine($"WARN: Mesh Key not found after load: {meshAddress}");
+                    SetMesh(file); //Rebuilds entire object
+                }
+            }
+
+        
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using RenderingEngine.GameObjects;
+using RenderingEngine.Utilities;
 using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace RenderingEngine.Components
 {
-    public class BoxColliderComponent : ColliderComponent
+    public class BoxColliderComponent : ColliderComponent, ISerializable
     {//TODO => WRITE CODE FOR THIS COMPONENET
         public override string ComponentName => "Box Collider Component";
 
@@ -41,7 +42,7 @@ namespace RenderingEngine.Components
             // Temp while testing all colliders, this makes all Box Colliders be checked ticked every frame
             // which is redundent if they are not moving!
         }
-
+        
         public void TickCollider()
 		{
             IsColliding = false;
@@ -113,7 +114,6 @@ namespace RenderingEngine.Components
 				MathF.Abs(a.M41 - b.M41) < eps && MathF.Abs(a.M42 - b.M42) < eps && MathF.Abs(a.M43 - b.M43) < eps && MathF.Abs(a.M44 - b.M44) < eps;
 		}
 
-
         public override void OnInspectorGUI()
 		{
 			if (InputVector3D("Size", ref Size))
@@ -150,7 +150,21 @@ namespace RenderingEngine.Components
 
 		}
 
+        public void Serialize(BinaryWriter writer)
+        {
+            UMath.WriteSilkVec3(writer, Size);
+            UMath.WriteSilkVec3(writer, Centre);
+        }
 
-
+        public void Deserialize(BinaryReader reader)
+        {
+            Size = UMath.ReadSilkVec3(reader);
+            Centre = UMath.ReadSilkVec3(reader);
+            
+            //May be Redundent => Check
+            RebuildLocalCorners();
+            RecalculateWorldAabb();
+            _lastModel = Owner.Transform.GetModelMatrix();
+        }
     }
 }

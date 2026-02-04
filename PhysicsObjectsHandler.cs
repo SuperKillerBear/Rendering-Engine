@@ -33,7 +33,7 @@ namespace RenderingEngine
                 return reusedIndex;
             }
 
-            if (pointer >= bufferSize - 1) 
+            if (pointer >= bufferSize - 1)
             { 
                 Console.WriteLine("WARN: Physics Obj Buffer Full, Cant add new object!");  
                 return -1; 
@@ -67,15 +67,7 @@ namespace RenderingEngine
                 {
                     rb.TickPhysics(deltaTime);
                     
-
-                    //Note that RB also holds reference to box collider
-                    /*
-                    BoxColliderComponent? collider = obj.GetComponent<BoxColliderComponent>(); 
-                    if (collider != null)
-                    {
-                        collider.TickCollider();
-                    }
-                    */
+                    
                 }
                 
                 
@@ -86,6 +78,8 @@ namespace RenderingEngine
         public static void ClearAll()
         {
             PhysObjBuffer = new RigidBodyComponent[bufferSize];
+            unusedIndices.Clear();
+            pointer = 0;
         }
 
 

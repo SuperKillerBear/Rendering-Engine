@@ -31,8 +31,6 @@ namespace RenderingEngine.Components
 
         }
 
-        
-
         public void CalcChunks()
         {
             chunks.Clear();
@@ -53,7 +51,6 @@ namespace RenderingEngine.Components
                 }
             }
         }
-
 
         public override void OnInspectorGUI()
         {

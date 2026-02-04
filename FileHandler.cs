@@ -6,6 +6,7 @@ using RenderingEngine.Rendering;
 using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
@@ -125,33 +126,47 @@ namespace RenderingEngine
             writer.Write((ushort)nameData.Length); //Level Name Length
             writer.Write(nameData); //Level Name
             
-            uint objsCount = (uint)Program.SceneObjects.Count;
+            List<GameObject> ObjsToSave = new();
+            for (int i = 0; i < Program.SceneObjects.Count; i++)
+            {
+                if (Program.SceneObjects[i].Parent == null)
+		            Collect(Program.SceneObjects[i], ObjsToSave);
+            }
+            
+            uint objsCount = (uint)ObjsToSave.Count;
 
             writer.Write(objsCount); //Object Count
 
             for (int i = 0; i < objsCount; i++)
             {
-                //Write Headers
-                writer.Write((ushort)Program.SceneObjects[i].name.Length); //Write Object Name Length
-                writer.Write(Encoding.UTF8.GetBytes(Program.SceneObjects[i].name)); //Write Object Name
+                GameObject obj = ObjsToSave[i];
+                
+                int parentID = obj.Parent != null ? obj.Parent.SceneID : -1;
+                
+                // MyID
+                writer.Write(obj.SceneID); 
+                
+                // Write Parent Scene ID
+                writer.Write(parentID);
+                
+                // Write Headers
+                writer.Write((ushort)obj.Name.Length); //Write Object Name Length
+                writer.Write(Encoding.UTF8.GetBytes(obj.Name)); //Write Object Name
 
                 //writer.Write(Program.SceneObjects[i].name); //Write Object Data
-
-                writer.Write((uint)Program.SceneObjects[i].Components.Count); //Write Component Count
-
-                foreach (var comp in Program.SceneObjects[i].Components)
+                
+                
+                var serializable = obj.Components
+                    .Select(c => (comp: c, id: ComponentRegistry.GetTypeID(c)))
+                    .Where(x => x.id != null)
+                    .ToList();
+                
+                writer.Write((uint)serializable.Count);
+                
+                foreach (var x in serializable)
                 {
-                    ushort? typeID = ComponentRegistry.GetTypeID(comp);
-
-                    if (typeID == null)
-                        continue; //Skip Unregistered Components
-
-                    writer.Write((ushort)typeID); //Write Component Type ID
-
-                    if (comp is ISerializable serializableComp)
-                    {
-                        serializableComp.Serialize(writer); //Serialize Component Data
-                    }
+                    writer.Write((ushort)x.id!);
+                    if (x.comp is ISerializable s) s.Serialize(writer);
                 }
             }
             
@@ -160,7 +175,6 @@ namespace RenderingEngine
 
         public static void LoadScene(string name)
         {
-            //string localPath = @$"C:\Users\ItsDaGrizz\Desktop\Rendering-Engine\LevelData\{name}.dat";
             string localPath = Path.Combine(LevelDataDir, $"{name}.dat");
             Console.WriteLine($"Trying to Read Level: {name}");
 
@@ -169,7 +183,7 @@ namespace RenderingEngine
                 Console.WriteLine("WARN: Level Does Not Exist");
                 return;
             }
-            var reader = new BinaryReader(File.Open(localPath, FileMode.Open));
+            using var reader = new BinaryReader(File.Open(localPath, FileMode.Open));
             uint magic = reader.ReadUInt32();
 
             if (magic != 0x4C564C44) //LVLD
@@ -189,17 +203,30 @@ namespace RenderingEngine
 
             Program.ClearScene();
 
-            for (int i = 0; i < objectCount; i++)
+            var Objs = new List<GameObject>((int)objectCount);
+            var myIDs = new List<int>((int)objectCount);
+            var parentIDs = new List<int>((int)objectCount);
+            
+            for (int i = 0; i < objectCount; i++) // Note => Scene Objects doesnt collect children
             {
                 GameObject newObj = new GameObject(autoAddTransform: false);
 
+                int myId = reader.ReadInt32(); //
+                
+                // Read Parent Scene ID (-1 if none)
+                int parentId = reader.ReadInt32(); 
+                
+                myIDs.Add(myId);
+                parentIDs.Add(parentId);
+                
+                
                 
                 
                 ushort objNameLen = reader.ReadUInt16(); //Read Object Name Length
                 byte[] objNameData = reader.ReadBytes(objNameLen); //Read Object Name Data
                 string objName = Encoding.UTF8.GetString(objNameData); //Decode Object Name
 
-                newObj.name = objName;
+                newObj.Name = objName;
 
                 uint compCount = reader.ReadUInt32(); //Read 
 
@@ -208,34 +235,89 @@ namespace RenderingEngine
                     ushort typeID = reader.ReadUInt16();
 
                     if (!ComponentRegistry.factories.ContainsKey(typeID))
-                    {
-                        Console.WriteLine($"Unknown Component Type ID: {typeID}, skipping object.");
-                        continue;
-                    }
+	                    throw new Exception($"Unknown Component Type ID: {typeID} in file. Loader would desync.");
 
-                    Component newComp = ComponentRegistry.Deserialize(typeID, reader);
 
-                    newObj.AssignComponent(newComp);
+                    Component newComp = ComponentRegistry.Deserialize(typeID, reader, newObj);
 
+                    newObj.AssignComponent(newComp, false);
+
+                }
+                
+                for (int a = 0; a < Objs.Count; a++)
+                {
+                	var obj = Objs[a];
+                
+                	// init Transform first so child-dirty propagation works
+                	for (int c = 0; c < obj.Components.Count; c++)
+                	{
+                		if (obj.Components[c] is TransformComponent t)
+                			t.Init(obj);
+                	}
+                
+                	// then init everything else
+                	for (int c = 0; c < obj.Components.Count; c++)
+                	{
+                		if (obj.Components[c] is not TransformComponent)
+                			obj.Components[c].Init(obj);
+                	}
                 }
 
 
                 
+                if (newObj.Transform != null)
+                	newObj.Transform.CalcModelMatrix();
+                else
+                	Console.WriteLine($"WARN: Object '{newObj.Name}' has no Transform after load.");
+                	
+                	
+                Objs.Add(newObj);
+            }
+            
+            // Build Lookup
+            var idMap = new Dictionary<int, GameObject>(Objs.Count);
+            for (int i = 0; i < Objs.Count; i++)
+            	idMap[myIDs[i]] = Objs[i];
+            
+            foreach (var obj in Objs)
+            {
+            	obj.Children.Clear();
+            	obj.Parent = null;
+            }
 
-                newObj.Transform.CalcModelMatrix(); //Transform is null
-
+            for (int i = 0; i < Objs.Count; i++)
+            {
+            	int pId = parentIDs[i];
+            	if (pId >= 0 && idMap.TryGetValue(pId, out var parent))
+            	{
+            		parent.AssignChild(Objs[i]); // updates both sides
+            	}
+            }
+            
+            for (int i = 0; i < Objs.Count; i++)
+            {
+                Objs[i].Transform.MarkDirtySingle();
             }
             
             Console.WriteLine($"Name: {LevelName}");
             currentLevel = LevelName;
             reader.Close();
 
-            Program.PhysicsEnabled = true; //Will always turn on physics when scene loaded
+            Program.PhysicsEnabled = true; // Will always turn on physics when scene loaded
             Program.RenderingEnabled = true;
 
             
         }
-
+        
+        private static void Collect(GameObject obj, List<GameObject> outList)
+        {
+            outList.Add(obj);
+            foreach (var child in obj.Children)
+            {
+                Collect(child, outList);
+            }
+        }
+        
         private static void WriteVector3D(BinaryWriter writer, Vector3D<float> vec)
         {
             writer.Write(vec.X);
@@ -292,16 +374,17 @@ namespace RenderingEngine
             return typeIDs[type];
         }
 
-        public static Component Deserialize(ushort typeID, BinaryReader reader)
+        public static Component Deserialize(ushort typeID, BinaryReader reader, GameObject Owner)
         {
             if (!factories.ContainsKey(typeID))
             {
                 throw new Exception($"Unknown Component Type: {typeID}");
             }
             Component comp = factories[typeID]();
-
+            
             if (comp is ISerializable serializableComp)
             {
+                comp.SetOwner(Owner);
                 serializableComp.Deserialize(reader);
             }
 

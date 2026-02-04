@@ -46,7 +46,7 @@ namespace RenderingEngine.Gui
             // Draw only ROOT objects (those without a parent)
             foreach (var obj in Program.SceneObjects)
             {
-                if (obj.parent != null)
+                if (obj.Parent != null)
                     continue; // skip children — they'll be drawn under parents
 
                 ImGui.PushID(idx);
@@ -80,7 +80,7 @@ namespace RenderingEngine.Gui
 
         private void DrawObjectNode(GameObject obj, ref bool clickedItem)
         {
-            bool hasChildren = obj.children != null && obj.children.Count > 0;
+            bool hasChildren = obj.Children != null && obj.Children.Count > 0;
 
             ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.SpanAvailWidth;
             if (!hasChildren)
@@ -89,7 +89,7 @@ namespace RenderingEngine.Gui
                 flags |= ImGuiTreeNodeFlags.Selected;
 
             // Give each object a unique ID using its pointer or hash
-            string label = $"{obj.name}##{obj.GetHashCode()}";
+            string label = $"{obj.Name}##{obj.GetHashCode()}";
 
             bool open = ImGui.TreeNodeEx(label, flags);
 
@@ -102,7 +102,7 @@ namespace RenderingEngine.Gui
             // Recursively draw children if expanded
             if (hasChildren && open)
             {
-                foreach (var child in obj.children)
+                foreach (var child in obj.Children)
                     DrawObjectNode(child, ref clickedItem);
 
                 ImGui.TreePop();
@@ -123,13 +123,13 @@ namespace RenderingEngine.Gui
             if (selectedObject == null) return;
             ImGui.Begin("Inspector");
 
-            ImGui.InputText("Name", ref selectedObject.name, 32);
+            ImGui.InputText("Name", ref selectedObject.Name, 32);
             ImGui.Checkbox("Debug", ref selectedObject.debug);
-            var parent = selectedObject.parent;
-            var name = parent == null ? string.Empty : parent.name;
+            var parent = selectedObject.Parent;
+            var name = parent == null ? string.Empty : parent.Name;
             ImGui.Text($"Parent: {name}");
-            ImGui.Text($"Child Count: {selectedObject.children.Count}");
-            string result = string.Join(", ", selectedObject.children.Select(c => c.name));
+            ImGui.Text($"Child Count: {selectedObject.Children.Count}");
+            string result = string.Join(", ", selectedObject.Children.Select(c => c.Name));
             ImGui.Text($"Children: {result}");
 
             foreach (var comp in selectedObject.Components) //Error: System.InvalidOperationException: 'Collection was modified; enumeration operation may not execute.'

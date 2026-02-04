@@ -1,4 +1,6 @@
-﻿using Silk.NET.Maths;
+﻿using RenderingEngine.Components;
+using RenderingEngine.GameObjects;
+using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +11,26 @@ using System.Threading.Tasks;
 namespace RenderingEngine.Utilities
 {
     public static class UMath
-    {
+    {    
+    
+        public static void WriteSilkVec3(BinaryWriter writer, Vector3D<float> vec)
+        {
+            writer.Write(vec.X);
+            writer.Write(vec.Y);
+            writer.Write(vec.Z);
+        }
+        
+        public static Vector3D<float> ReadSilkVec3(BinaryReader reader)
+        {
+            var result = new Vector3D<float>();
+            result.X = reader.ReadSingle();
+            result.Y = reader.ReadSingle();
+            result.Z = reader.ReadSingle();
+            
+            return result;
+        }
+        
+        
         public static float Dot(this Vector3D<float> a, Vector3D<float> b)
         => a.X * b.X + a.Y * b.Y + a.Z * b.Z;
 

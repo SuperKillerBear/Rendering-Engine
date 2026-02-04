@@ -133,7 +133,7 @@ namespace RenderingEngine.Rendering
                     Matrix4X4<float> model = rendrComp.Owner.Transform.GetModelMatrix();
 
                     //Set Material
-                    Material mat = rendrComp.material ?? MaterialHandler.defaultMaterial;
+                    Material mat = rendrComp.Material ?? MaterialHandler.defaultMaterial;
 
                     // Set material properties
                     gl.Uniform3(uColorLocation, mat.Colour.X, mat.Colour.Y, mat.Colour.Z);
@@ -156,6 +156,7 @@ namespace RenderingEngine.Rendering
                     {
                         gl.GetInteger(GLEnum.CurrentProgram, out int curProg);
                         if ((uint)curProg != shaderProgram)
+
                         {
                             Console.WriteLine($"WRONG PROGRAM before uModel: cur={curProg} expected={shaderProgram}");
                         }

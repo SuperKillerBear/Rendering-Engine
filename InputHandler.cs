@@ -59,7 +59,8 @@ namespace RenderingEngine
             //Console.WriteLine($"Mouse Pos: ({vector.X},{vector.Y})");
             //Console.WriteLine($"{io.DisplayFramebufferScale.ToString()}");
             var pos = m.Position;
-            pos.Y = window.Size.Y - pos.Y;
+            //pos.Y = window.Size.Y - pos.Y; //Inverse the Mouse Movement
+            
             //pos.X *= io.DisplayFramebufferScale.X;
             //pos.Y *= io.DisplayFramebufferScale.Y;
             io.AddMousePosEvent(pos.X, pos.Y); //Pass Mouse Movement to ImGui

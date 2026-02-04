@@ -28,8 +28,6 @@ namespace RenderingEngine.Components
         }
 
         public abstract void OnInspectorGUI();
-
-
         public static bool InputVector3D(string label, ref Vector3D<float> vec)
         {
             Vector3 newVec = new Vector3(vec.X, vec.Y, vec.Z);

@@ -44,7 +44,7 @@ namespace RenderingEngine.Components
         public Vector3D<float> Acceleration = Vector3D<float>.Zero;
         public Vector3D<float> Velocity = Vector3D<float>.Zero;
 
-        public ColliderComponent? Collider {get; private set; }
+        public BoxColliderComponent? Collider {get; private set; }
 
 
         private Vector3D<float> Resultant = Vector3D<float>.Zero;
@@ -57,7 +57,7 @@ namespace RenderingEngine.Components
 
             physObjListIndex = PhysicsObjectsHandler.AddObj(this);
 
-            Collider = Owner.GetComponent<ColliderComponent>();
+            Collider = Owner.GetComponent<BoxColliderComponent>();
             if (Collider == null)
                 Collider = Owner.AddComponent<BoxColliderComponent>();
         }
@@ -70,11 +70,15 @@ namespace RenderingEngine.Components
 
             //Apply Gravity
             if (applyGravity) this.ForceAccum.Y -= g * mass;
-
-            //TODO: Collision Checks, etc
-            if (Owner.Transform.position.Y <= 0.5 * Owner.Transform.scale.Y && this.Velocity.Y < 0)
+            
+            TransformComponent transform = Owner.Transform;
+            
+            //Handle Infinitely falling objects
+            if (transform.position.Y - Collider.WorldHalfExtents.Y <= -50 && this.Velocity.Y < 0)
             {
-                this.Velocity.Y *= (float)-restitution;
+                transform.SetPositon(new Vector3D<float>(transform.position.X, 5, transform.position.Z));
+                Velocity.Y = 0;
+                
             }
 
 
@@ -88,45 +92,6 @@ namespace RenderingEngine.Components
 
             //Clear Forces at the end
             ForceAccum = Vector3D<float>.Zero;
-
-            this.CheckCollisions();
-        }
-
-
-        
-        public void CheckCollisions()
-        {
-            return; //Fix Later
-            Collider.CalcChunks();
-
-            //Check Collisions with other Physics Objects in same chunks
-
-            //Flawed Logic as they may not have calced now physics chuncks
-            foreach (RendererComponent obj in Renderer.RenderingObjects)
-            {
-                for (int c = 0; c < Collider.chunks.Count; c++)
-                {
-                    var collider2 = obj.Owner.GetComponent<ColliderComponent>() as BoxColliderComponent;
-
-                    if (collider2 == null) continue;
-
-                    if (Collider.chunks.Contains(Collider.chunks[c]) && collider2 != Collider)
-                    {
-                        //Resultant = (collider as BoxColliderComponent).CollideAABBs(collider2); //Wont Be Null
-
-                        //if (Resultant != Vector3D<float>.Zero && (UMath.Dot(new Vector3D<float>(0, 1, 0), Velocity) < 0))
-                        //{
-                            //Simple Collision Response
-                        //    Velocity *= -restitution;
-                        //}
-
-
-                    }
-                }
-            }
-
-
-
 
         }
 
@@ -148,11 +113,6 @@ namespace RenderingEngine.Components
 
             ImGui.Checkbox("Apply Gravity", ref applyGravity);
             ImGui.Checkbox("Tick Physics", ref tickPhysics);
-
-            if (ImGui.Button("Update Calcs"))
-            {
-                CheckCollisions();
-            }
 
         }
     
@@ -178,6 +138,7 @@ namespace RenderingEngine.Components
         public override void Dispose()
         {
             PhysicsObjectsHandler.RemoveObj(this, physObjListIndex);
+            base.Dispose();
         }
 
     }
